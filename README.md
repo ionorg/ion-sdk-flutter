@@ -4,7 +4,7 @@
 
 ## Usage
 
-### Create example project (for mobile only)
+### Create example project (for mobile/macos/web)
 
 `cd sdk/flutter/example`
 
