@@ -111,13 +111,13 @@ class Client extends EventEmitter {
       screen = false,
       codec = 'vp8',
       bandwidth = 512,
-      quality = 'hd']) async {
+      resolution = 'hd']) async {
     logger.debug('publish');
     Completer completer = new Completer<Stream>();
     RTCPeerConnection pc;
     try {
       var stream = new Stream();
-      await stream.init(true, audio, video, screen, quality);
+      await stream.init(true, audio, video, screen, resolution);
       logger.debug('create sender => $codec');
       pc = await createPeerConnection(_iceServers, _config);
       await pc.addStream(stream.stream);
@@ -132,10 +132,11 @@ class Client extends EventEmitter {
             'video': video,
             'screen': screen,
             'codec': codec,
-            'bandwidth': bandwidth,
+            'bandwidth': int.parse(bandwidth),
+            'resolution': resolution,
           };
           var result = await this._protoo.send('publish',
-              {'rid': this._rid, 'jsep': offer.toMap(), 'options': options});
+              {'rid': this._rid, 'uid': this._uid, 'jsep': offer.toMap(), 'options': options});
           await pc.setRemoteDescription(RTCSessionDescription(
               result['jsep']['sdp'], result['jsep']['type']));
           logger.debug('publish success => ' + _encoder.convert(result));
@@ -200,7 +201,7 @@ class Client extends EventEmitter {
      
     var options = {
       'codec': codec,
-      'bandwidth': bandwidth,
+      'bandwidth': int.parse(bandwidth),
     };
     try {
       logger.debug('create receiver => $mid');
@@ -221,6 +222,7 @@ class Client extends EventEmitter {
           logger.debug('Send offer sdp => ' + jsep.sdp);
           var result = await this._protoo.send('subscribe', {
             'rid': rid,
+            'uid': this._uid,
             'jsep': jsep.toMap(),
             'mid': mid,
             'options': options
