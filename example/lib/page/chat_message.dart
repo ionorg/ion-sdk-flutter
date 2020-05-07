@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:date_format/date_format.dart';
 
 class ChatMessage extends StatelessWidget {
   bool isMe = false;
@@ -11,14 +10,7 @@ class ChatMessage extends StatelessWidget {
   String _session_id;
 
 
-  ChatMessage(
-      @required this._id,
-      @required this._text,
-      @required this._name,
-      @required this._from,
-      @required this._createAt,
-      @required this._session_id,
-     );
+  ChatMessage(this._id, this._text, this._name, this._from, this._createAt, this._session_id,);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +45,6 @@ class ChatMessage extends StatelessWidget {
         ),
       );
     }
-
 
     return Container(
       margin: const EdgeInsets.symmetric(vertical: 10.0),
