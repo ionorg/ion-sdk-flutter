@@ -8,10 +8,4 @@
 			"name": "example"
 		}
 	],
-	"settings": {
-		"files.associations": {
-			"__locale": "cpp"
-		},
-		"git.ignoreLimitWarning": true
-	}
 }
