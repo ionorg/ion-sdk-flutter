@@ -1,6 +1,5 @@
 name: flutter_ion
 version: 0.1.0
-author: pion
 description: Ion SDK for flutter.
 homepage: https://github.com/pion/ion
 environment:
