@@ -28,8 +28,9 @@ class Client extends EventEmitter {
   var _rid;
   var _url;
   Peer _protoo;
+  var _iceServers;
 
-  Map<String, dynamic> _iceServers = {
+  final Map<String, dynamic> defaultIceServers = {
     'iceServers': [
       {'url': 'stun:stun.stunprotocol.org:3478'},
       /*
@@ -50,7 +51,8 @@ class Client extends EventEmitter {
     ],
   };
 
-  Client(url) {
+  Client(url, [iceServers]) {
+    _iceServers = iceServers != null ? iceServers : defaultIceServers;
     _uid = _uuid.v4();
     _url = url + '?peer=' + _uid;
     _protoo = new Peer(_url);
