@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:flutter/foundation.dart';
 import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/webrtc.dart';
 import 'package:protoo_client/protoo_client.dart';

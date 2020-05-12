@@ -1,28 +1,68 @@
 # Flutter sdk for ion
 
+Flutter sdk for the Ion backend.
 
+## Installation
+
+Edit `pubspec.yaml` in your flutter projects.
+
+Add
+```yml
+    flutter_ion: ^0.1.1
+```
 
 ## Usage
 
-### Create example project (for mobile/macos/web)
+```dart
+import 'package:flutter_ion/flutter_ion.dart';
 
-`cd sdk/flutter/example`
+...
+var url = 'https://$host:8443/ws';
+Client client = Client(url);
 
-`./scripts/project_tools.sh create`
+// Setup handlers
+client.on('peer-join', (rid, id, info) async {});
 
-`flutter pub get`
+client.on('peer-leave', (rid, id) async {});
+  
+client.on('transport-open', () {}));
 
+client.on('transport-closed', () {});
 
-### Run app
+client.on('stream-add', (rid, mid, info, tracks) async {
+      // handle stream-add
+  });
 
-`flutter run`
+client.on('stream-remove', (rid, mid) async {
+      // handle stream-remove
+  });
+    
+client.on('broadcast', (rid, uid, info) async {
+      // handle broadcast
+  });
 
+// Connect to ion biz node.
+await client.connect();
 
-### Web
+// Join a room
+await _client.join(rid, {'name': 'Bob'});
 
-`flutter run -d chrome`
+// Leave current room
+await client.leave();
 
+// Publish local stream
+var resolution = 'vga';
+var bandwidth =  '512';
+var codec = 'vp8';
+var localStream = await client.publish(true, true, false, codec, bandwidth, resolution);
 
-### macOS
+// Subscribe to a remote stream
+var bandwidth = '512';
+var remoteStream = await client.subscribe(rid, mid, tracks, bandwidth);
 
-`flutter run -d macos`
+// Broadcast a payload to the room
+client.broadcast(rid, payload);
+
+// Close client connection
+await client.close();
+```
