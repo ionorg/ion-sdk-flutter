@@ -168,7 +168,7 @@ class Client extends EventEmitter {
     this._removePC(mid);
     try {
       var data =
-          await this._protoo.send('unpublish', {'rid': this._rid, 'mid': mid});
+          await this._protoo.send('unpublish', {'rid': this._rid, 'uid': this._uid, 'mid': mid});
       logger.debug('unpublish success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -222,8 +222,8 @@ class Client extends EventEmitter {
           var result = await this._protoo.send('subscribe', {
             'rid': rid,
             'uid': this._uid,
-            'jsep': jsep.toMap(),
             'mid': mid,
+            'jsep': jsep.toMap(),
             'options': options
           });
           sub_mid = result['mid'];
