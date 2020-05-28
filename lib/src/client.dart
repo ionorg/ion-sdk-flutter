@@ -126,12 +126,13 @@ class Client extends EventEmitter {
           sendOffer = true;
           var offer = await pc.getLocalDescription();
           logger.debug('Send offer sdp => ' + offer.sdp);
+          int bw = int.parse(bandwidth);
           var options = {
             'audio': audio,
             'video': video,
             'screen': screen,
             'codec': codec,
-            'bandwidth': bandwidth,
+            'bandwidth': bw,
           };
           var result = await this._protoo.send('publish',
               {'rid': this._rid, 'jsep': offer.toMap(), 'options': options});
