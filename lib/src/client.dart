@@ -126,7 +126,7 @@ class Client extends EventEmitter {
           sendOffer = true;
           var offer = await pc.getLocalDescription();
           logger.debug('Send offer sdp => ' + offer.sdp);
-          int bw = bandwidth;
+          int bw = int.parse(bandwidth);
           var options = {
             'audio': audio,
             'video': video,
