@@ -28,8 +28,9 @@ class Client extends EventEmitter {
   var _rid;
   var _url;
   Peer _protoo;
+  var _iceServers;
 
-  Map<String, dynamic> _iceServers = {
+  final Map<String, dynamic> defaultIceServers = {
     'iceServers': [
       {'url': 'stun:stun.stunprotocol.org:3478'},
       /*
@@ -50,7 +51,8 @@ class Client extends EventEmitter {
     ],
   };
 
-  Client(url) {
+  Client(url, [iceServers]) {
+    _iceServers = iceServers != null ? iceServers : defaultIceServers;
     _uid = _uuid.v4();
     _url = url + '?peer=' + _uid;
     _protoo = new Peer(_url);
@@ -110,13 +112,13 @@ class Client extends EventEmitter {
       screen = false,
       codec = 'vp8',
       bandwidth = 512,
-      quality = 'hd']) async {
+      resolution = 'hd']) async {
     logger.debug('publish');
     Completer completer = new Completer<Stream>();
     RTCPeerConnection pc;
     try {
       var stream = new Stream();
-      await stream.init(true, audio, video, screen, quality);
+      await stream.init(true, audio, video, screen, resolution);
       logger.debug('create sender => $codec');
       pc = await createPeerConnection(_iceServers, _config);
       await pc.addStream(stream.stream);
@@ -126,16 +128,16 @@ class Client extends EventEmitter {
           sendOffer = true;
           var offer = await pc.getLocalDescription();
           logger.debug('Send offer sdp => ' + offer.sdp);
-          int bw = int.parse(bandwidth);
           var options = {
             'audio': audio,
             'video': video,
             'screen': screen,
             'codec': codec,
-            'bandwidth': bw,
+            'bandwidth': int.parse(bandwidth),
+            'resolution': resolution,
           };
           var result = await this._protoo.send('publish',
-              {'rid': this._rid, 'jsep': offer.toMap(), 'options': options});
+              {'rid': this._rid, 'uid': this._uid, 'jsep': offer.toMap(), 'options': options});
           await pc.setRemoteDescription(RTCSessionDescription(
               result['jsep']['sdp'], result['jsep']['type']));
           logger.debug('publish success => ' + _encoder.convert(result));
@@ -168,7 +170,7 @@ class Client extends EventEmitter {
     this._removePC(mid);
     try {
       var data =
-          await this._protoo.send('unpublish', {'rid': this._rid, 'mid': mid});
+          await this._protoo.send('unpublish', {'rid': this._rid, 'uid': this._uid, 'mid': mid});
       logger.debug('unpublish success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -200,7 +202,7 @@ class Client extends EventEmitter {
      
     var options = {
       'codec': codec,
-      'bandwidth': bandwidth,
+      'bandwidth': int.parse(bandwidth),
     };
     try {
       logger.debug('create receiver => $mid');
@@ -221,8 +223,9 @@ class Client extends EventEmitter {
           logger.debug('Send offer sdp => ' + jsep.sdp);
           var result = await this._protoo.send('subscribe', {
             'rid': rid,
-            'jsep': jsep.toMap(),
+            'uid': this._uid,
             'mid': mid,
+            'jsep': jsep.toMap(),
             'options': options
           });
           sub_mid = result['mid'];

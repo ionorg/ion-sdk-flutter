@@ -36,8 +36,12 @@ class Stream extends EventEmitter {
           },
           "facingMode": 'user',
         };
+        Map<String, dynamic> audioConstrains = {
+            "echoCancellation": true,
+            "noiseSuppression": true,
+        };
         this._stream = await navigator
-            .getUserMedia(_buildMediaConstraints(audio, videoConstrains));
+            .getUserMedia(_buildMediaConstraints(audioConstrains, videoConstrains));
       }
     }
   }
