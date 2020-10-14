@@ -1,5 +1,5 @@
 import 'package:events2/events2.dart';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'logger.dart' show Logger;
 
 // 'vga': {'minWidth': '640', 'minHeight': '360'},
@@ -37,11 +37,11 @@ class Stream extends EventEmitter {
           "facingMode": 'user',
         };
         Map<String, dynamic> audioConstrains = {
-            "echoCancellation": true,
-            "noiseSuppression": true,
+          "echoCancellation": true,
+          "noiseSuppression": true,
         };
-        this._stream = await navigator
-            .getUserMedia(_buildMediaConstraints(audioConstrains, videoConstrains));
+        this._stream = await navigator.getUserMedia(
+            _buildMediaConstraints(audioConstrains, videoConstrains));
       }
     }
   }

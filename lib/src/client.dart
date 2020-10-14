@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:events2/events2.dart';
-import 'package:flutter_webrtc/webrtc.dart';
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:protoo_client/protoo_client.dart';
 import 'package:sdp_transform/sdp_transform.dart' as sdpTransform;
 import 'package:uuid/uuid.dart';
@@ -136,8 +136,12 @@ class Client extends EventEmitter {
             'bandwidth': int.parse(bandwidth),
             'resolution': resolution,
           };
-          var result = await this._protoo.send('publish',
-              {'rid': this._rid, 'uid': this._uid, 'jsep': offer.toMap(), 'options': options});
+          var result = await this._protoo.send('publish', {
+            'rid': this._rid,
+            'uid': this._uid,
+            'jsep': offer.toMap(),
+            'options': options
+          });
           await pc.setRemoteDescription(RTCSessionDescription(
               result['jsep']['sdp'], result['jsep']['type']));
           logger.debug('publish success => ' + _encoder.convert(result));
@@ -169,8 +173,9 @@ class Client extends EventEmitter {
     logger.debug('unpublish rid => ${this._rid}, mid => $mid');
     this._removePC(mid);
     try {
-      var data =
-          await this._protoo.send('unpublish', {'rid': this._rid, 'uid': this._uid, 'mid': mid});
+      var data = await this
+          ._protoo
+          .send('unpublish', {'rid': this._rid, 'uid': this._uid, 'mid': mid});
       logger.debug('unpublish success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -178,28 +183,26 @@ class Client extends EventEmitter {
     }
   }
 
-  Future<Stream> subscribe(rid, mid,
-      tracks, [String bandwidth = '512']) async {
-    logger.debug('subscribe rid => $rid, mid => $mid,  tracks => ${tracks.toString()}');
+  Future<Stream> subscribe(rid, mid, tracks, [String bandwidth = '512']) async {
+    logger.debug(
+        'subscribe rid => $rid, mid => $mid,  tracks => ${tracks.toString()}');
     Completer completer = new Completer<Stream>();
     var codec = "";
-    tracks?.forEach((trackID,trackInfoArr) async {
-        logger.debug('trackInfoArr=$trackInfoArr');
+    tracks?.forEach((trackID, trackInfoArr) async {
+      logger.debug('trackInfoArr=$trackInfoArr');
 
-        for(var i=0; i<trackInfoArr.length; i++){
-          var trackInfo=trackInfoArr[i];
-          logger.debug('trackInfo=$trackInfo');
-          var type = trackInfo['type'];
-          logger.debug('type=$type');
-          if (type == "video") {
-            codec = trackInfo['codec'];
-            logger.debug('codec=$codec');
-          }
+      for (var i = 0; i < trackInfoArr.length; i++) {
+        var trackInfo = trackInfoArr[i];
+        logger.debug('trackInfo=$trackInfo');
+        var type = trackInfo['type'];
+        logger.debug('type=$type');
+        if (type == "video") {
+          codec = trackInfo['codec'];
+          logger.debug('codec=$codec');
         }
       }
-    );
+    });
 
-     
     var options = {
       'codec': codec,
       'bandwidth': int.parse(bandwidth),
@@ -273,9 +276,8 @@ class Client extends EventEmitter {
 
   Future<dynamic> broadcast(rid, info) async {
     try {
-      var data = await this
-          ._protoo
-          .send('broadcast', {'rid': this._rid, 'uid': this._uid, 'info': info});
+      var data = await this._protoo.send(
+          'broadcast', {'rid': this._rid, 'uid': this._uid, 'info': info});
       logger.debug('broadcast success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -515,7 +517,7 @@ class Client extends EventEmitter {
           this._removePC(mid);
           break;
         }
-     case 'broadcast':
+      case 'broadcast':
         {
           var rid = data['rid'];
           var uid = data['uid'];
