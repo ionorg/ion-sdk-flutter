@@ -9,7 +9,6 @@ import 'package:uuid/uuid.dart';
 
 import 'logger.dart' show Logger;
 import 'stream.dart';
-import 'utils.dart' if (dart.library.js) 'utils_web.dart';
 
 const DefaultPayloadTypePCMU = 0;
 const DefaultPayloadTypePCMA = 8;
@@ -239,8 +238,14 @@ class Client extends EventEmitter {
         }
       };
 
-      addTransceiver(pc, "audio", {"direction": 'recvonly'});
-      addTransceiver(pc, "video", {"direction": 'recvonly'});
+      pc.addTransceiver(
+          kind: RTCRtpMediaType.RTCRtpMediaTypeAudio,
+          init:
+              RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly));
+      pc.addTransceiver(
+          kind: RTCRtpMediaType.RTCRtpMediaTypeVideo,
+          init:
+              RTCRtpTransceiverInit(direction: TransceiverDirection.RecvOnly));
 
       var offer = await pc.createOffer({
         'mandatory': {
