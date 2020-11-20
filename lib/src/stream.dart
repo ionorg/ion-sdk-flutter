@@ -32,8 +32,6 @@ class MediaTrackConstraints {
       };
 }
 
-final jsonEncoder = JsonEncoder();
-
 class VideoConstraints {
   VideoConstraints({this.constraints, this.encodings});
   MediaTrackConstraints constraints;
@@ -321,6 +319,7 @@ class RemoteStream {
   Function(String kind) unmute;
 }
 
+final jsonEncoder = JsonEncoder();
 RemoteStream makeRemote(MediaStream stream, Transport transport) {
   var remote = stream as RemoteStream;
   remote.audio = true;

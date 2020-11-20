@@ -2,9 +2,16 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class Trickle {
   Trickle({this.target, this.candidate});
+  factory Trickle.fromMap(Map<String, dynamic> map) => Trickle(
+      candidate: RTCIceCandidate(
+        map['candidate']['candidate'],
+        map['candidate']['sdpMid'],
+        map['candidate']['sdpMLineIndex'],
+      ),
+      target: map['target']);
   RTCIceCandidate candidate;
   int target;
-  Map toMap() => {'role': target, candidate: candidate.toMap()};
+  Map toMap() => {'role': target, 'candidate': candidate.toMap()};
 }
 
 final RolePub = 0;

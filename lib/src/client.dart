@@ -26,7 +26,8 @@ class Transport {
     candidates = [];
 
     if (role == RolePub) {
-      pc.createDataChannel('ion-sfu', RTCDataChannelInit());
+      pc.createDataChannel(
+          'ion-sfu', RTCDataChannelInit()..maxRetransmits = 30);
     }
 
     pc.onDataChannel = (channel) {
@@ -55,7 +56,6 @@ class Transport {
 class Client {
   Client({String sid, Signal singal, Map<String, dynamic> config}) {
     signal = signal;
-    codec = config['codec'];
     transports = {
       RolePub: Transport(role: RolePub, signal: signal, config: config),
       RoleSub: Transport(role: RoleSub, signal: signal, config: config)
@@ -77,14 +77,12 @@ class Client {
     };
   }
   final defaultConfig = {
-    'codec': 'vp8',
     'iceServers': [
       {'urls': 'stun:stun.stunprotocol.org:3478'}
     ],
   };
   bool initialized = false;
   Signal signal;
-  String codec;
   Map<int, Transport> transports = {};
   Function(MediaStreamTrack track, RemoteStream stream) ontrack;
 

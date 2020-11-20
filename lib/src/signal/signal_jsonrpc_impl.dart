@@ -33,9 +33,10 @@ class JsonRPCSignal extends Signal {
     try {
       var resp = _jsonDecoder.convert(msg);
       if (resp['method'] == 'offer') {
-        onnegotiate?.call(resp['params']);
+        onnegotiate?.call(RTCSessionDescription(
+            resp['params']['sdp'], resp['params']['type']));
       } else if (resp['method'] == 'trickle') {
-        ontrickle?.call(resp['params']);
+        ontrickle?.call(Trickle.fromMap(resp['params']));
       } else {
         _emitter.emit('message', resp);
       }
