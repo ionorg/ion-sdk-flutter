@@ -12,10 +12,10 @@ final Map<String, dynamic> resolutions = {
 };
 
 class Stream extends EventEmitter {
-  var logger = new Logger("Ion::Stream");
+  var logger = Logger("Ion::Stream");
   String _mid;
   MediaStream _stream;
-  Stream([this._mid, this._stream]);
+  Stream([_mid, _stream]);
 
   init(
       [sender = false,
@@ -25,7 +25,7 @@ class Stream extends EventEmitter {
       quality = 'hd']) async {
     if (sender) {
       if (screen) {
-        this._stream = await navigator
+        _stream = await navigator
             .getDisplayMedia(_buildMediaConstraints(false, true));
       } else {
         Map<String, dynamic> videoConstrains = {
@@ -40,14 +40,14 @@ class Stream extends EventEmitter {
           "echoCancellation": true,
           "noiseSuppression": true,
         };
-        this._stream = await navigator.getUserMedia(
+        _stream = await navigator.getUserMedia(
             _buildMediaConstraints(audioConstrains, videoConstrains));
       }
     }
   }
 
   set mid(id) {
-    this._mid = id;
+    _mid = id;
   }
 
   String get mid => _mid;

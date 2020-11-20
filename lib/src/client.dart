@@ -20,9 +20,9 @@ const DefaultPayloadTypeH264 = 102;
 
 class Client extends EventEmitter {
   JsonEncoder _encoder = JsonEncoder();
-  var logger = new Logger("Ion::Client");
-  var _uuid = new Uuid();
-  var _pcs = new Map();
+  var logger = Logger("Ion::Client");
+  var _uuid = Uuid();
+  var _pcs = Map();
   var _uid;
   var _rid;
   var _url;
@@ -54,38 +54,38 @@ class Client extends EventEmitter {
     _iceServers = iceServers != null ? iceServers : defaultIceServers;
     _uid = _uuid.v4();
     _url = url + '?peer=' + _uid;
-    _protoo = new Peer(_url);
+    _protoo = Peer(_url);
 
-    this._protoo.on('open', () {
+    _protoo.on('open', () {
       logger.debug('Peer "open" event');
-      this.emit('transport-open');
+      emit('transport-open');
     });
 
-    this._protoo.on('disconnected', () {
+    _protoo.on('disconnected', () {
       logger.debug('Peer "disconnected" event');
-      this.emit('transport-failed');
+      emit('transport-failed');
     });
 
-    this._protoo.on('close', () {
+    _protoo.on('close', () {
       logger.debug('Peer "close" event');
-      this.emit('transport-closed');
+      emit('transport-closed');
     });
 
-    this._protoo.on('request', this._handleRequest);
-    this._protoo.on('notification', this._handleNotification);
+    _protoo.on('request', _handleRequest);
+    _protoo.on('notification', _handleNotification);
   }
 
-  connect() async => this._protoo.connect();
+  connect() async => _protoo.connect();
 
   String get uid => _uid;
 
   Future<dynamic> join(roomId, info) async {
-    this._rid = roomId;
+    _rid = roomId;
     info = info ?? {'name': 'Guest'};
     try {
       var data = await this
           ._protoo
-          .send('join', {'rid': this._rid, 'uid': this._uid, 'info': info});
+          .send('join', {'rid': _rid, 'uid': _uid, 'info': info});
       logger.debug('join success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -95,9 +95,7 @@ class Client extends EventEmitter {
 
   Future<dynamic> leave() async {
     try {
-      var data = await this
-          ._protoo
-          .send('leave', {'rid': this._rid, 'uid': this._uid});
+      var data = await this._protoo.send('leave', {'rid': _rid, 'uid': _uid});
       logger.debug('leave success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -113,10 +111,10 @@ class Client extends EventEmitter {
       bandwidth = 512,
       resolution = 'hd']) async {
     logger.debug('publish');
-    Completer completer = new Completer<Stream>();
+    Completer completer = Completer<Stream>();
     RTCPeerConnection pc;
     try {
-      var stream = new Stream();
+      var stream = Stream();
       await stream.init(true, audio, video, screen, resolution);
       logger.debug('create sender => $codec');
       pc = await createPeerConnection(_iceServers, _config);
@@ -135,9 +133,9 @@ class Client extends EventEmitter {
             'bandwidth': int.parse(bandwidth),
             'resolution': resolution,
           };
-          var result = await this._protoo.send('publish', {
-            'rid': this._rid,
-            'uid': this._uid,
+          var result = await _protoo.send('publish', {
+            'rid': _rid,
+            'uid': _uid,
             'jsep': offer.toMap(),
             'options': options
           });
@@ -145,7 +143,7 @@ class Client extends EventEmitter {
               result['jsep']['sdp'], result['jsep']['type']));
           logger.debug('publish success => ' + _encoder.convert(result));
           stream.mid = result['mid'];
-          this._pcs[stream.mid] = pc;
+          _pcs[stream.mid] = pc;
           completer.complete(stream);
         }
       };
@@ -156,7 +154,7 @@ class Client extends EventEmitter {
         },
         'optional': [],
       });
-      var desc = this._payloadModify(offer, codec, true);
+      var desc = _payloadModify(offer, codec, true);
       await pc.setLocalDescription(desc);
     } catch (error) {
       logger.debug('publish request error  => ' + error);
@@ -169,12 +167,12 @@ class Client extends EventEmitter {
   }
 
   Future<dynamic> unpublish(mid) async {
-    logger.debug('unpublish rid => ${this._rid}, mid => $mid');
-    this._removePC(mid);
+    logger.debug('unpublish rid => ${_rid}, mid => $mid');
+    _removePC(mid);
     try {
       var data = await this
           ._protoo
-          .send('unpublish', {'rid': this._rid, 'uid': this._uid, 'mid': mid});
+          .send('unpublish', {'rid': _rid, 'uid': _uid, 'mid': mid});
       logger.debug('unpublish success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -185,7 +183,7 @@ class Client extends EventEmitter {
   Future<Stream> subscribe(rid, mid, tracks, [String bandwidth = '512']) async {
     logger.debug(
         'subscribe rid => $rid, mid => $mid,  tracks => ${tracks.toString()}');
-    Completer completer = new Completer<Stream>();
+    Completer completer = Completer<Stream>();
     var codec = "";
     tracks?.forEach((trackID, trackInfoArr) async {
       logger.debug('trackInfoArr=$trackInfoArr');
@@ -213,7 +211,7 @@ class Client extends EventEmitter {
       var sub_mid = "";
       pc.onAddStream = (stream) {
         logger.debug('Stream::pc::onaddstream ' + stream.id);
-        completer.complete(new Stream(sub_mid, stream));
+        completer.complete(Stream(sub_mid, stream));
       };
       pc.onRemoveStream = (stream) {
         logger.debug('Stream::pc::onremovestream ' + stream.id);
@@ -223,9 +221,9 @@ class Client extends EventEmitter {
           sendOffer = true;
           RTCSessionDescription jsep = await pc.getLocalDescription();
           logger.debug('Send offer sdp => ' + jsep.sdp);
-          var result = await this._protoo.send('subscribe', {
+          var result = await _protoo.send('subscribe', {
             'rid': rid,
-            'uid': this._uid,
+            'uid': _uid,
             'mid': mid,
             'jsep': jsep.toMap(),
             'options': options
@@ -254,9 +252,9 @@ class Client extends EventEmitter {
         },
         'optional': [],
       });
-      var desc = this._payloadModify(offer, codec, false);
+      var desc = _payloadModify(offer, codec, false);
       await pc.setLocalDescription(desc);
-      this._pcs[mid] = pc;
+      _pcs[mid] = pc;
     } catch (error) {
       logger.debug('subscribe request error  => ' + error.toString());
       completer.completeError(error);
@@ -268,21 +266,20 @@ class Client extends EventEmitter {
   Future<dynamic> unsubscribe(rid, mid) async {
     logger.debug('unsubscribe rid => $rid, mid => $mid');
     try {
-      var data =
-          await this._protoo.send('unsubscribe', {'rid': rid, 'mid': mid});
+      var data = await _protoo.send('unsubscribe', {'rid': rid, 'mid': mid});
       logger.debug('unsubscribe success: result => ' + _encoder.convert(data));
-      this._removePC(mid);
+      _removePC(mid);
       return data;
     } catch (error) {
       logger.debug('unsubscribe reject: error =>' + error.toString());
-      this._removePC(mid);
+      _removePC(mid);
     }
   }
 
   Future<dynamic> broadcast(rid, info) async {
     try {
-      var data = await this._protoo.send(
-          'broadcast', {'rid': this._rid, 'uid': this._uid, 'info': info});
+      var data = await _protoo
+          .send('broadcast', {'rid': _rid, 'uid': _uid, 'info': info});
       logger.debug('broadcast success: result => ' + _encoder.convert(data));
       return data;
     } catch (error) {
@@ -291,7 +288,7 @@ class Client extends EventEmitter {
   }
 
   close() {
-    this._protoo.close();
+    _protoo.close();
   }
 
   _payloadModify(desc, codec, sender) {
@@ -464,12 +461,12 @@ class Client extends EventEmitter {
   }
 
   _removePC(mid) {
-    RTCPeerConnection pc = this._pcs[mid];
+    RTCPeerConnection pc = _pcs[mid];
     if (pc != null) {
       logger.debug('remove pc mid => $mid');
       pc.dispose();
       pc.close();
-      this._pcs.remove(mid);
+      _pcs.remove(mid);
     }
   }
 
@@ -491,7 +488,7 @@ class Client extends EventEmitter {
           var info = data['info'];
           logger.debug(
               'peer-join peer rid => $rid, uid => $uid, info => ${info.toString()}');
-          this.emit('peer-join', rid, uid, info);
+          emit('peer-join', rid, uid, info);
           break;
         }
       case 'peer-leave':
@@ -499,7 +496,7 @@ class Client extends EventEmitter {
           var rid = data['rid'];
           var uid = data['uid'];
           logger.debug('peer-leave peer rid => $rid, uid => $uid');
-          this.emit('peer-leave', rid, uid);
+          emit('peer-leave', rid, uid);
           break;
         }
       case 'stream-add':
@@ -510,7 +507,7 @@ class Client extends EventEmitter {
           var tracks = data['tracks'];
           logger.debug(
               'stream-add peer rid => $rid, mid => $mid, info => ${info.toString()},  tracks => $tracks');
-          this.emit('stream-add', rid, mid, info, tracks);
+          emit('stream-add', rid, mid, info, tracks);
           break;
         }
       case 'stream-remove':
@@ -518,8 +515,8 @@ class Client extends EventEmitter {
           var rid = data['rid'];
           var mid = data['mid'];
           logger.debug('stream-remove peer rid => $rid, mid => $mid');
-          this.emit('stream-remove', rid, mid);
-          this._removePC(mid);
+          emit('stream-remove', rid, mid);
+          _removePC(mid);
           break;
         }
       case 'broadcast':
@@ -529,7 +526,7 @@ class Client extends EventEmitter {
           var info = data['info'];
           logger.debug(
               'broadcast peer rid => $rid, uid => $uid, info => ${info.toString()}');
-          this.emit('broadcast', rid, uid, info);
+          emit('broadcast', rid, uid, info);
           break;
         }
     }

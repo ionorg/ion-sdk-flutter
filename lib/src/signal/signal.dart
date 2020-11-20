@@ -4,22 +4,25 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class Trickle {
   RTCIceCandidate candidate;
-  Role target;
+  int target;
+  Map toMap() => {'role': target, candidate: candidate.toMap()};
 }
 
-enum Role {
-  pub,
-  sub,
-}
+final RolePub = 0;
+
+final Rolesub = 1;
 
 typedef OnNegotiateCallback = void Function(RtcSessionDescription jsep);
 typedef OnReadyCallback = void Function();
 typedef OnTrickleCallback = void Function(Trickle trickle);
+typedef OnCloseCallback = void Function(int code, String reason);
 
 abstract class Signal {
   OnNegotiateCallback onnegotiate;
 
   OnReadyCallback onready;
+
+  OnCloseCallback onclose;
 
   OnTrickleCallback ontrickle;
 
@@ -27,7 +30,7 @@ abstract class Signal {
 
   Future<RTCSessionDescription> offer(RTCSessionDescription offer);
 
-  void answer(RTCSessionDescription offer);
+  void answer(RTCSessionDescription answer);
 
   void trickle(Trickle trickle);
 
