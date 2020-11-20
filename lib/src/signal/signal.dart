@@ -1,18 +1,16 @@
-import 'dart:html';
-
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class Trickle {
+  Trickle({this.target, this.candidate});
   RTCIceCandidate candidate;
   int target;
   Map toMap() => {'role': target, candidate: candidate.toMap()};
 }
 
 final RolePub = 0;
+final RoleSub = 1;
 
-final Rolesub = 1;
-
-typedef OnNegotiateCallback = void Function(RtcSessionDescription jsep);
+typedef OnNegotiateCallback = void Function(RTCSessionDescription jsep);
 typedef OnReadyCallback = void Function();
 typedef OnTrickleCallback = void Function(Trickle trickle);
 typedef OnCloseCallback = void Function(int code, String reason);

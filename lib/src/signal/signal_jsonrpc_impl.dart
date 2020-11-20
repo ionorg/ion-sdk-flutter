@@ -5,8 +5,8 @@ import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:uuid/uuid.dart';
 
-import 'signal.dart';
 import '../logger.dart';
+import 'signal.dart';
 import 'transport/websocket.dart'
     if (dart.library.js) 'transport/websocket_web.dart';
 
