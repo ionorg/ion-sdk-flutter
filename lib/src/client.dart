@@ -31,6 +31,11 @@ class Transport {
 
     pc.onDataChannel = (channel) {
       api = channel;
+      api.onDataChannelState = (state) {
+        if (state == RTCDataChannelState.RTCDataChannelOpen) {
+          onapiopen?.call();
+        }
+      };
     };
 
     pc.onIceCandidate = (candidate) {
@@ -40,6 +45,7 @@ class Transport {
     };
   }
 
+  Function() onapiopen;
   RTCDataChannel api;
   Signal signal;
   RTCPeerConnection pc;

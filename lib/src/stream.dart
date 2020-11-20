@@ -7,129 +7,66 @@ import 'package:uuid/uuid.dart';
 import 'client.dart';
 import 'logger.dart';
 
-class ConstrainDouble {
-  double exact;
-  double ideal;
-}
-
-class ConstrainULong {
-  int exact;
+class FrameRate {
+  FrameRate({this.ideal, this.max});
   int ideal;
+  int max;
+  Map<String, dynamic> toMap() => {
+        'ideal': ideal,
+        'max': max,
+      };
 }
 
 class MediaTrackConstraints {
-  /// Properties of all media tracks
-  String deviceId;
-  String groupId;
-
-  /// Properties of audio tracks
+  MediaTrackConstraints({this.frameRate, this.height, this.width});
 
   /// Properties of video tracks
-  ConstrainDouble aspectRatio;
+  FrameRate frameRate;
+  int height;
+  int width;
 
-  String facingMode;
-
-  ConstrainDouble frameRate;
-
-  ConstrainULong height;
-
-  ConstrainULong width;
+  Map<String, dynamic> toMap() => {
+        'width': {'ideal': width},
+        'height': {'ideal': height},
+        'frameRate': frameRate.toMap()
+      };
 }
 
 final jsonEncoder = JsonEncoder();
 
 class VideoConstraints {
-  MediaTrackConstraints resolution;
-  List<RTCRtpEncoding> encodings;
+  VideoConstraints({this.constraints, this.encodings});
+  MediaTrackConstraints constraints;
+  RTCRtpEncoding encodings;
 }
 
 var resolutions = ['qvga', 'vga', 'shd', 'hd', 'fhd', 'qhd'];
 
-var videoConstraints = {
-  'qvga': {
-    'resolution': {
-      'width': {'ideal': 320},
-      'height': {'ideal': 180},
-      'frameRate': {
-        'ideal': 15,
-        'max': 30,
-      },
-    },
-    'encodings': {
-      'maxBitrate': 150000,
-      'maxFramerate': 15.0,
-    },
-  },
-  'vga': {
-    'resolution': {
-      'width': {'ideal': 640},
-      'height': {'ideal': 360},
-      'frameRate': {
-        'ideal': 30,
-        'max': 60,
-      },
-    },
-    'encodings': {
-      'maxBitrate': 500000,
-      'maxFramerate': 30.0,
-    },
-  },
-  'shd': {
-    'resolution': {
-      'width': {'ideal': 960},
-      'height': {'ideal': 540},
-      'frameRate': {
-        'ideal': 30,
-        'max': 60,
-      },
-    },
-    'encodings': {
-      'maxBitrate': 1200000,
-      'maxFramerate': 30.0,
-    },
-  },
-  'hd': {
-    'resolution': {
-      'width': {'ideal': 1280},
-      'height': {'ideal': 720},
-      'frameRate': {
-        'ideal': 30,
-        'max': 60,
-      },
-    },
-    'encodings': {
-      'maxBitrate': 2500000,
-      'maxFramerate': 30.0,
-    },
-  },
-  'fhd': {
-    'resolution': {
-      'width': {'ideal': 1920},
-      'height': {'ideal': 1080},
-      'frameRate': {
-        'ideal': 30,
-        'max': 60,
-      },
-    },
-    'encodings': {
-      'maxBitrate': 4000000,
-      'maxFramerate': 30.0,
-    },
-  },
-  'qhd': {
-    'resolution': {
-      'width': {'ideal': 2560},
-      'height': {'ideal': 1440},
-      'frameRate': {
-        'ideal': 30,
-        'max': 60,
-      },
-    },
-    'encodings': {
-      'maxBitrate': 8000000,
-      'maxFramerate': 30.0,
-    },
-  },
+var videoConstraints = <String, VideoConstraints>{
+  'qvga': VideoConstraints(
+      constraints: MediaTrackConstraints(
+          width: 320, height: 180, frameRate: FrameRate(ideal: 15, max: 30)),
+      encodings: RTCRtpEncoding(maxBitrate: 150000, maxFramerate: 15)),
+  'vga': VideoConstraints(
+      constraints: MediaTrackConstraints(
+          width: 640, height: 360, frameRate: FrameRate(ideal: 30, max: 60)),
+      encodings: RTCRtpEncoding(maxBitrate: 500000, maxFramerate: 30)),
+  'shd': VideoConstraints(
+      constraints: MediaTrackConstraints(
+          width: 960, height: 540, frameRate: FrameRate(ideal: 30, max: 60)),
+      encodings: RTCRtpEncoding(maxBitrate: 1200000, maxFramerate: 30)),
+  'hd': VideoConstraints(
+      constraints: MediaTrackConstraints(
+          width: 1280, height: 720, frameRate: FrameRate(ideal: 30, max: 60)),
+      encodings: RTCRtpEncoding(maxBitrate: 2500000, maxFramerate: 30)),
+  'fhd': VideoConstraints(
+      constraints: MediaTrackConstraints(
+          width: 1920, height: 1080, frameRate: FrameRate(ideal: 30, max: 60)),
+      encodings: RTCRtpEncoding(maxBitrate: 4000000, maxFramerate: 30)),
+  'qhd': VideoConstraints(
+      constraints: MediaTrackConstraints(
+          width: 2560, height: 1440, frameRate: FrameRate(ideal: 30, max: 60)),
+      encodings: RTCRtpEncoding(maxBitrate: 8000000, maxFramerate: 30)),
 };
 
 enum Layer { none, low, medium, high }
@@ -149,21 +86,22 @@ class Encoding {
 
 class Constraints {
   Constraints(
-      {this.resolution, this.codec, this.audio, this.video, this.simulcast});
+      {this.resolution,
+      this.deviceId,
+      this.codec,
+      this.audio,
+      this.video,
+      this.simulcast});
   String resolution;
   String codec;
   bool simulcast;
-  dynamic audio;
-  dynamic video;
+  bool audio;
+  bool video;
+  String deviceId;
 }
 
 final defaults = Constraints(
-  resolution: 'hd',
-  codec: 'vp8',
-  audio: true,
-  video: true,
-  simulcast: false,
-);
+    resolution: 'hd', codec: 'vp8', audio: true, video: true, simulcast: false);
 
 class LocalStream {
   LocalStream(this._stream, this._constraints);
@@ -173,7 +111,7 @@ class LocalStream {
 
   static Future<LocalStream> getUserMedia({Constraints constraints}) async {
     var stream = await navigator.mediaDevices.getUserMedia({
-      'audio': constraints.audio,
+      'audio': LocalStream.computeAudioConstraints(constraints ?? defaults),
       'video': LocalStream.computeVideoConstraints(constraints ?? defaults)
     });
     return LocalStream(stream, constraints ?? defaults);
@@ -186,22 +124,29 @@ class LocalStream {
     return LocalStream(stream, defaults);
   }
 
-  static MediaTrackConstraints computeAudioConstraints(
-      Constraints constraints) {
-    return constraints.audio as MediaTrackConstraints;
-  }
-
-  static MediaTrackConstraints computeVideoConstraints(
-      Constraints constraints) {
-    if (constraints.video is MediaTrackConstraints) {
-      return constraints.video as MediaTrackConstraints;
+  static dynamic computeAudioConstraints(Constraints constraints) {
+    if (constraints.audio) {
+      return true;
     } else if (constraints.video && constraints.resolution != null) {
-      var resolution = videoConstraints[constraints.resolution]['resolution'];
+      return {'deviceId': constraints.deviceId};
     }
-    return constraints.video as MediaTrackConstraints;
+    return false;
   }
 
-/* 'audio' | 'video'*/
+  static dynamic computeVideoConstraints(Constraints constraints) {
+    if (constraints.video) {
+      return true;
+    } else if (constraints.video && constraints.resolution != null) {
+      var resolution = videoConstraints[constraints.resolution].constraints;
+      return {
+        ...{'deviceId': constraints.deviceId},
+        ...resolution.toMap()
+      };
+    }
+    return false;
+  }
+
+  /// 'audio' | 'video'
   MediaStreamTrack getTrack(String kind) {
     var tracks;
     if (kind == 'video') {
@@ -212,7 +157,7 @@ class LocalStream {
     return tracks.length > 0 ? _stream.getAudioTracks()[0] : null;
   }
 
-/* 'audio' | 'video'*/
+  /// 'audio' | 'video'
   Future<MediaStreamTrack> getNewTrack(String kind) async {
     var stream = await navigator.mediaDevices.getUserMedia({
       kind: kind == 'video'
@@ -229,10 +174,9 @@ class LocalStream {
         var encodings = <RTCRtpEncoding>[
           RTCRtpEncoding(
             rid: 'f',
-            maxBitrate: videoConstraints[resolutions[idx]]['encodings']
-                ['maxBitrate'],
-            maxFramerate: videoConstraints[resolutions[idx]]['encodings']
-                ['maxFramerate'],
+            maxBitrate: videoConstraints[resolutions[idx]].encodings.maxBitrate,
+            maxFramerate:
+                videoConstraints[resolutions[idx]].encodings.maxFramerate,
           )
         ];
 
@@ -240,10 +184,10 @@ class LocalStream {
           encodings.add(RTCRtpEncoding(
             rid: 'h',
             scaleResolutionDownBy: 2.0,
-            maxBitrate: videoConstraints[resolutions[idx - 1]]['encodings']
-                ['maxBitrate'],
-            maxFramerate: videoConstraints[resolutions[idx - 1]]['encodings']
-                ['maxFramerate'],
+            maxBitrate:
+                videoConstraints[resolutions[idx - 1]].encodings.maxBitrate,
+            maxFramerate:
+                videoConstraints[resolutions[idx - 1]].encodings.maxFramerate,
           ));
         }
 
@@ -251,10 +195,10 @@ class LocalStream {
           encodings.add(RTCRtpEncoding(
             rid: 'q',
             scaleResolutionDownBy: 4.0,
-            maxBitrate: videoConstraints[resolutions[idx - 2]]['encodings']
-                ['maxBitrate'],
-            maxFramerate: videoConstraints[resolutions[idx - 2]]['encodings']
-                ['maxFramerate'],
+            maxBitrate:
+                videoConstraints[resolutions[idx - 2]].encodings.maxBitrate,
+            maxFramerate:
+                videoConstraints[resolutions[idx - 2]].encodings.maxFramerate,
           ));
         }
 
@@ -273,11 +217,7 @@ class LocalStream {
               streams: [_stream],
               direction: TransceiverDirection.SendOnly,
               sendEncodings: track.kind == 'video'
-                  ? [
-                      RTCRtpEncoding.fromMap(
-                          videoConstraints[_constraints.resolution]
-                              ['encodings'])
-                    ]
+                  ? [videoConstraints[_constraints.resolution].encodings]
                   : [],
             ));
         if (track.kind == 'video') {
@@ -288,7 +228,7 @@ class LocalStream {
   }
 
   void setPreferredCodec(RTCRtpTransceiver transceiver) {
-    // TODO(cloudwebrtc):
+    /// TODO(cloudwebrtc):
     /*
     if ('setCodecPreferences' in transceiver) {
       var  cap = RTCRtpSender.getCapabilities('video');
@@ -337,9 +277,9 @@ class LocalStream {
     if (_pc != null) {
       var tracks = _stream.getTracks();
       var senders = await _pc.getSenders();
-      senders.forEach((RTCRtpSender s) {
+      senders.forEach((RTCRtpSender s) async {
         if (s.track != null && tracks.contains((e) => s.track.id == e.id)) {
-          _pc?.removeTrack(s);
+          await _pc?.removeTrack(s);
         }
       });
     }
@@ -347,11 +287,7 @@ class LocalStream {
 
   /// 'audio' | 'video'
   void switchDevice(String kind, {String deviceId}) async {
-    if (kind == 'audio') {
-      _constraints.audio = {'deviceId': deviceId};
-    } else if (kind == 'video') {
-      _constraints.video = {'deviceId': deviceId};
-    }
+    _constraints.deviceId = deviceId;
     var prev = getTrack(kind);
     var next = await getNewTrack(kind);
     updateTrack(next: next, prev: prev);
@@ -365,7 +301,7 @@ class LocalStream {
     }
   }
 
-// 'audio' | 'video'
+  /// 'audio' | 'video'
   void unmute(String kind) async {
     var prev = getTrack(kind);
     var track = await getNewTrack(kind);
@@ -398,15 +334,14 @@ RemoteStream makeRemote(MediaStream stream, Transport transport) {
       'audio': remote.audio,
     };
     if (transport.api == null) {
-      /* tslint:disable-next-line:no-console */
       log.warn('api datachannel not ready yet');
     }
 
     if (transport.api != null &&
         transport.api.state != RTCDataChannelState.RTCDataChannelOpen) {
-      // queue call if we aren't open yet
-      // TODO(cloudwebrtc):
-      // transport.api.onopen = () => transport.api?.send(RTCDataChannelMessage(jsonEncoder.convert(call)));
+      /// queue call if we aren't open yet
+      transport.onapiopen = () =>
+          transport.api?.send(RTCDataChannelMessage(jsonEncoder.convert(call)));
     }
 
     transport.api?.send(RTCDataChannelMessage(jsonEncoder.convert(call)));
