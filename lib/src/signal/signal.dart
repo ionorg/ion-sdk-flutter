@@ -39,5 +39,7 @@ abstract class Signal {
 
   void trickle(Trickle trickle);
 
+  void connect();
+
   void close();
 }

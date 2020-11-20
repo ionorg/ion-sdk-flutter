@@ -75,12 +75,16 @@ class Client {
         initialized = true;
       }
     };
+
+    signal.connect();
   }
+
   final defaultConfig = {
     'iceServers': [
       {'urls': 'stun:stun.stunprotocol.org:3478'}
     ],
   };
+
   bool initialized = false;
   Signal signal;
   Map<int, Transport> transports = {};

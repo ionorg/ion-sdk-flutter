@@ -46,6 +46,11 @@ class JsonRPCSignal extends Signal {
   }
 
   @override
+  void connect() {
+    _socket.connect();
+  }
+
+  @override
   void close() {
     _socket.close();
   }
