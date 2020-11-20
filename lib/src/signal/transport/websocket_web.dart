@@ -5,9 +5,7 @@ import '../../logger.dart';
 import 'common.dart';
 
 class SimpleWebSocket {
-  SimpleWebSocket(this._url) {
-    _url = _url.replaceAll('https:', 'wss:');
-  }
+  SimpleWebSocket(this._url);
 
   String _url;
   var _socket;

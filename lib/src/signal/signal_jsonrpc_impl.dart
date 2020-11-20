@@ -32,13 +32,19 @@ class JsonRPCSignal extends Signal {
     log.debug('msg: $msg');
     try {
       var resp = _jsonDecoder.convert(msg);
-      if (resp['method'] == 'offer') {
-        onnegotiate?.call(RTCSessionDescription(
-            resp['params']['sdp'], resp['params']['type']));
-      } else if (resp['method'] == 'trickle') {
-        ontrickle?.call(Trickle.fromMap(resp['params']));
-      } else {
-        _emitter.emit('message', resp);
+      if (resp['method'] != null) {
+        if (resp['method'] == 'offer') {
+          onnegotiate?.call(RTCSessionDescription(
+              resp['params']['sdp'], resp['params']['type']));
+        } else if (resp['method'] == 'trickle') {
+          ontrickle?.call(Trickle.fromMap(resp['params']));
+        } else {
+          _emitter.emit('message', resp);
+        }
+      } else if (resp['error'] != null) {
+        var code = resp['error']['code'];
+        var message = resp['error']['message'];
+        log.error('error: code => $code, message => $message');
       }
     } catch (e) {
       log.error('onmessage: err => $e');
@@ -67,7 +73,7 @@ class JsonRPCSignal extends Signal {
 
     Function(dynamic) handler;
     handler = (resp) {
-      if (resp['id'] == id) {
+      if (resp['id'] == id && resp['result'] != null) {
         completer.complete(resp['result']);
       }
       _emitter.remove('message', handler);

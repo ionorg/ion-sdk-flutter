@@ -7,7 +7,7 @@ import '../../logger.dart';
 import 'common.dart';
 
 class SimpleWebSocket {
-  SimpleWebSocket(_url);
+  SimpleWebSocket(this._url);
 
   String _url;
   var _socket;
@@ -27,6 +27,7 @@ class SimpleWebSocket {
         onClose?.call(_socket.closeCode, _socket.closeReason);
       });
     } catch (e) {
+      print('connect: error => $e');
       onClose?.call(500, e.toString());
     }
   }
@@ -54,8 +55,12 @@ class SimpleWebSocket {
         return true;
       };
 
+      Uri parsed_uri = Uri.parse(url);
+      Uri uri = parsed_uri.replace(
+          scheme: parsed_uri.scheme == 'wss' ? 'https' : 'http');
+
       HttpClientRequest request =
-          await client.getUrl(Uri.parse(url)); // form the correct url here
+          await client.getUrl(uri); // form the correct url here
       request.headers.add('Connection', 'Upgrade');
       request.headers.add('Upgrade', 'websocket');
       request.headers.add(
