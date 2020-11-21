@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:sdp_transform/sdp_transform.dart' as sdpTransform;
 
 import 'logger.dart';
 import 'signal/signal.dart';
@@ -87,7 +86,7 @@ class Client {
 
     client.signal.onnegotiate = (desc) => client.negotiate(desc);
     client.signal.ontrickle = (trickle) => client.trickle(trickle);
-    client.signal.onready = () {
+    client.signal.onready = () async {
       if (!client.initialized) {
         client.join(sid);
         client.initialized = true;
@@ -129,15 +128,18 @@ class Client {
   }
 
   void join(String sid) async {
-    var offer = await transports[RolePub].pc.createOffer();
-    await transports[RolePub].pc.setLocalDescription(offer);
-    var answer = await signal.join(sid, offer);
+    try {
+      var pc = transports[RolePub].pc;
+      var offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+      var answer = await signal.join(sid, offer);
 
-    await transports[RolePub].pc.setRemoteDescription(answer);
-    transports[RolePub]
-        .candidates
-        .forEach((c) => transports[RolePub].pc.addCandidate(c));
-    transports[RolePub].pc.onRenegotiationNeeded = onNegotiationNeeded;
+      await pc.setRemoteDescription(answer);
+      transports[RolePub].candidates.forEach((c) => pc.addCandidate(c));
+      pc.onRenegotiationNeeded = () => onNegotiationNeeded();
+    } catch (e) {
+      print('join: e => $e');
+    }
   }
 
   void trickle(Trickle trickle) async {
@@ -152,22 +154,23 @@ class Client {
 
   void negotiate(RTCSessionDescription description) async {
     try {
-      await transports[RoleSub].pc.setRemoteDescription(description);
-      var answer = await transports[RoleSub].pc.createAnswer();
-      await transports[RoleSub].pc.setLocalDescription(answer);
+      var pc = transports[RoleSub].pc;
+      await pc.setRemoteDescription(description);
+      var answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
       signal.answer(answer);
     } catch (err) {
-      /* tslint:disable-next-line:no-console */
       log.error(err);
     }
   }
 
   void onNegotiationNeeded() async {
     try {
-      var offer = await transports[RolePub].pc.createOffer();
-      await transports[RolePub].pc.setLocalDescription(offer);
+      var pc = transports[RolePub].pc;
+      var offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
       var answer = await signal.offer(offer);
-      await transports[RolePub].pc.setRemoteDescription(answer);
+      await pc.setRemoteDescription(answer);
     } catch (err) {
       /* tslint:disable-next-line:no-console */
       log.error(err);

@@ -107,6 +107,8 @@ class LocalStream {
   RTCPeerConnection _pc;
   MediaStream _stream;
 
+  MediaStream get stream => _stream;
+
   static Future<LocalStream> getUserMedia({Constraints constraints}) async {
     var stream = await navigator.mediaDevices.getUserMedia({
       'audio': LocalStream.computeAudioConstraints(constraints ?? defaults),
@@ -309,6 +311,7 @@ class LocalStream {
 
 class RemoteStream {
   RTCDataChannel api;
+  MediaStream stream;
   bool audio;
   Layer video;
   Layer _videoPreMute;
@@ -321,7 +324,8 @@ class RemoteStream {
 
 final jsonEncoder = JsonEncoder();
 RemoteStream makeRemote(MediaStream stream, Transport transport) {
-  var remote = stream as RemoteStream;
+  var remote = RemoteStream();
+  remote.stream = stream;
   remote.audio = true;
   remote.video = Layer.none;
   remote._videoPreMute = Layer.high;

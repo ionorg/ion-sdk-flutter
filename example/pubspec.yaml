@@ -6,13 +6,13 @@ environment:
   sdk: ">=2.2.0 <3.0.0"
 
 dependencies:
+  cupertino_icons: ^0.1.2
   flutter:
     sdk: flutter
-  get: ^3.17.1
-  cupertino_icons: ^0.1.2
   flutter_icons: ^1.0.0
   flutter_ion:
     path: ../
+  get: ^3.17.1
 
 dev_dependencies:
   flutter_test:

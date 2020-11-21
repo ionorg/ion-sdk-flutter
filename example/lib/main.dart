@@ -1,18 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
-
-final signalLocal = ion.JsonRPCSignal("ws://localhost:7000/ws");
-final signalRemote = ion.JsonRPCSignal("ws://localhost:7000/ws");
-ion.Client clientLocal;
-
-void connect() async {
-  if (clientLocal == null) {
-    clientLocal =
-        await ion.Client.create(sid: "test session", signal: signalLocal);
-  }
-}
 
 void main() {
   runApp(GetMaterialApp(
@@ -20,16 +10,64 @@ void main() {
   ));
 }
 
+class Controller extends GetxController {
+  Rx<RTCVideoRenderer> localRenderer = RTCVideoRenderer().obs;
+  Rx<RTCVideoRenderer> remoteRenderer = RTCVideoRenderer().obs;
+  Future<void> setLocalSrcObject(MediaStream stream) async {
+    var old = localRenderer.value;
+    await old.initialize();
+    old.srcObject = stream;
+    localRenderer.value = old;
+  }
+
+  Future<void> setRemoteSrcObject(MediaStream stream) async {
+    var old = remoteRenderer.value;
+    await old.initialize();
+    old.srcObject = stream;
+    remoteRenderer.value = old;
+  }
+}
+
 class Home extends StatelessWidget {
-  var count = 0.obs;
+  final Controller c = Get.put(Controller());
+  final signalLocal = ion.JsonRPCSignal("ws://localhost:7000/ws");
+  ion.Client clientLocal;
+
+  Future<ion.LocalStream> connect() async {
+    if (clientLocal == null) {
+      clientLocal =
+          await ion.Client.create(sid: "test session", signal: signalLocal);
+      var localStream = await ion.LocalStream.getUserMedia();
+      clientLocal.publish(localStream);
+      return localStream;
+    }
+    return null;
+  }
+
+  void _echotest() async {
+    var localStream = await connect();
+    await c.setLocalSrcObject(localStream.stream);
+    clientLocal.ontrack = (track, ion.RemoteStream stream) {
+      print('ontrack: stream => ${stream.id}');
+      if (track.kind == 'video') {
+        c.setRemoteSrcObject(stream.stream);
+      }
+    };
+  }
+
   @override
   Widget build(context) => Scaffold(
-      appBar: AppBar(title: Text("ion sdk flutter example")),
-      body: Center(child: Obx(() => Text("Clicks: ${count.string}"))),
+      appBar: AppBar(title: Text("ion flutter echotest")),
+      body: Center(
+          child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Text("Local"),
+          Obx(() => Expanded(child: RTCVideoView(c.localRenderer.value))),
+          Text("Remote"),
+          Obx(() => Expanded(child: RTCVideoView(c.remoteRenderer.value)))
+        ],
+      )),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.add),
-          onPressed: () {
-            connect();
-            count.value++;
-          }));
+          child: Icon(Icons.video_call), onPressed: _echotest));
 }
