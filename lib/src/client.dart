@@ -170,7 +170,6 @@ class Client {
       var answer = await signal.offer(offer);
       await pc.setRemoteDescription(answer);
     } catch (err) {
-      /* tslint:disable-next-line:no-console */
       log.error(err);
     }
   }
