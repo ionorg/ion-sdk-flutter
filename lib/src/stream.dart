@@ -145,7 +145,11 @@ class LocalStream {
     } else if (constraints.video && constraints.resolution != null) {
       var resolution = videoConstraints[constraints.resolution].constraints;
       return {
-        ...{'deviceId': constraints.deviceId},
+        'mandatory': {
+          'minWidth': '1280',
+          'minHeight': '720',
+          'minFrameRate': '30',
+        },
         ...resolution.toMap()
       };
     }
@@ -180,7 +184,10 @@ class LocalStream {
         var encodings = <RTCRtpEncoding>[
           RTCRtpEncoding(
             rid: 'f',
+            active: true,
             maxBitrate: videoConstraints[resolutions[idx]].encodings.maxBitrate,
+            minBitrate: 256000,
+            scaleResolutionDownBy: 1.0,
             maxFramerate:
                 videoConstraints[resolutions[idx]].encodings.maxFramerate,
           )
@@ -189,9 +196,11 @@ class LocalStream {
         if (idx - 1 >= 0) {
           encodings.add(RTCRtpEncoding(
             rid: 'h',
+            active: true,
             scaleResolutionDownBy: 2.0,
             maxBitrate:
                 videoConstraints[resolutions[idx - 1]].encodings.maxBitrate,
+            minBitrate: 128000,
             maxFramerate:
                 videoConstraints[resolutions[idx - 1]].encodings.maxFramerate,
           ));
@@ -200,6 +209,8 @@ class LocalStream {
         if (idx - 2 >= 0) {
           encodings.add(RTCRtpEncoding(
             rid: 'q',
+            active: true,
+            minBitrate: 64000,
             scaleResolutionDownBy: 4.0,
             maxBitrate:
                 videoConstraints[resolutions[idx - 2]].encodings.maxBitrate,
@@ -274,9 +285,9 @@ class LocalStream {
     }
   }
 
-  void publish(RTCPeerConnection pc) {
+  Future<void> publish(RTCPeerConnection pc) async {
     _pc = pc;
-    _stream.getTracks().forEach((track) => publishTrack(track: track));
+    _stream.getTracks().forEach((track) async => publishTrack(track: track));
   }
 
   void unpublish() async {
@@ -321,7 +332,7 @@ class RemoteStream {
   bool audio;
   Layer video;
   Layer _videoPreMute;
-  String id = Uuid().v4();
+  String get id => stream.id;
 
   Function(Layer layer) preferLayer;
   Function(String kind) mute;
@@ -346,11 +357,11 @@ RemoteStream makeRemote(MediaStream stream, Transport transport) {
       log.warn('api datachannel not ready yet');
     }
 
-    if (transport.api != null &&
-        transport.api.state != RTCDataChannelState.RTCDataChannelOpen) {
+    if (transport.api == null) {
       /// queue call if we aren't open yet
-      transport.onapiopen = () =>
-          transport.api?.send(RTCDataChannelMessage(jsonEncoder.convert(call)));
+      transport.onapiopen = () {
+        transport.api?.send(RTCDataChannelMessage(jsonEncoder.convert(call)));
+      };
     }
 
     transport.api?.send(RTCDataChannelMessage(jsonEncoder.convert(call)));

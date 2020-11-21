@@ -87,7 +87,7 @@ class JsonRPCSignal extends Signal {
     Completer completer = Completer<RTCSessionDescription>();
     var id = _uuid.v4();
     _socket.send(_jsonEncoder.convert(<String, dynamic>{
-      'method': 'join',
+      'method': 'offer',
       'params': {'desc': offer.toMap()},
       'id': id
     }));
@@ -95,7 +95,8 @@ class JsonRPCSignal extends Signal {
     Function(dynamic) handler;
     handler = (resp) {
       if (resp['id'] == id) {
-        completer.complete();
+        completer.complete(RTCSessionDescription(
+            resp['result']['sdp'], resp['result']['type']));
       }
     };
     _emitter.once('message', handler);

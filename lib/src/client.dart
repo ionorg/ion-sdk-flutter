@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:sdp_transform/sdp_transform.dart' as sdpTransform;
 
 import 'logger.dart';
 import 'signal/signal.dart';
@@ -29,31 +30,19 @@ class Transport {
     transport.pc = pc;
 
     if (role == RolePub) {
-      pc.createDataChannel(
+      transport.api = await pc.createDataChannel(
           'ion-sfu', RTCDataChannelInit()..maxRetransmits = 30);
     }
 
     pc.onDataChannel = (channel) {
       transport.api = channel;
-      transport.api.onDataChannelState = (state) {
-        if (state == RTCDataChannelState.RTCDataChannelOpen) {
-          transport.onapiopen?.call();
-        }
-      };
+      transport.onapiopen?.call();
     };
 
     pc.onIceCandidate = (candidate) {
       if (candidate != null) {
         signal.trickle(Trickle(target: role, candidate: candidate));
       }
-    };
-
-    pc.onIceGatheringState = (state) {
-      print(state);
-    };
-
-    pc.onConnectionState = (state) {
-      print(state);
     };
 
     return transport;
@@ -115,8 +104,9 @@ class Client {
     return transports[RoleSub].pc.getStats(selector);
   }
 
-  void publish(LocalStream stream) {
-    stream.publish(transports[RolePub].pc);
+  Future<void> publish(LocalStream stream) async {
+    await stream.publish(transports[RolePub].pc);
+    await onnegotiationneeded();
   }
 
   void close() {
@@ -135,7 +125,7 @@ class Client {
 
       await pc.setRemoteDescription(answer);
       transports[RolePub].candidates.forEach((c) => pc.addCandidate(c));
-      pc.onRenegotiationNeeded = () => onNegotiationNeeded();
+      pc.onRenegotiationNeeded = () => onnegotiationneeded();
     } catch (e) {
       print('join: e => $e');
     }
@@ -162,7 +152,7 @@ class Client {
     }
   }
 
-  void onNegotiationNeeded() async {
+  Future<void> onnegotiationneeded() async {
     try {
       var pc = transports[RolePub].pc;
       var offer = await pc.createOffer();
