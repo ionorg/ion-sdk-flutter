@@ -7,6 +7,7 @@ A new Flutter project.
 Make sure your flutter is using the `dev` channel.
 
 - `flutter channel dev`
+- `flutter upgrade`
 - `./scripts/project_tools.sh create`
 
 ## For Android/iOS

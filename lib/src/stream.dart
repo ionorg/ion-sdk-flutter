@@ -96,10 +96,14 @@ class Constraints {
   bool audio;
   bool video;
   String deviceId;
-}
 
-final defaults = Constraints(
-    resolution: 'hd', codec: 'vp8', audio: true, video: true, simulcast: false);
+  static final defaults = Constraints(
+      resolution: 'hd',
+      codec: 'vp8',
+      audio: true,
+      video: true,
+      simulcast: false);
+}
 
 class LocalStream {
   LocalStream(this._stream, this._constraints);
@@ -111,17 +115,19 @@ class LocalStream {
 
   static Future<LocalStream> getUserMedia({Constraints constraints}) async {
     var stream = await navigator.mediaDevices.getUserMedia({
-      'audio': LocalStream.computeAudioConstraints(constraints ?? defaults),
-      'video': LocalStream.computeVideoConstraints(constraints ?? defaults)
+      'audio': LocalStream.computeAudioConstraints(
+          constraints ?? Constraints.defaults),
+      'video': LocalStream.computeVideoConstraints(
+          constraints ?? Constraints.defaults)
     });
-    return LocalStream(stream, constraints ?? defaults);
+    return LocalStream(stream, constraints ?? Constraints.defaults);
   }
 
   static Future<LocalStream> getDisplayMedia({Constraints constraints}) async {
     var stream = await navigator.mediaDevices.getDisplayMedia({
       'video': true,
     });
-    return LocalStream(stream, defaults);
+    return LocalStream(stream, Constraints.defaults);
   }
 
   static dynamic computeAudioConstraints(Constraints constraints) {

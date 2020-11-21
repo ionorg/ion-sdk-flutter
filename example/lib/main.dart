@@ -37,7 +37,8 @@ class Home extends StatelessWidget {
     if (clientLocal == null) {
       clientLocal =
           await ion.Client.create(sid: "test session", signal: signalLocal);
-      var localStream = await ion.LocalStream.getUserMedia();
+      var localStream = await ion.LocalStream.getUserMedia(
+          constraints: ion.Constraints.defaults..simulcast = true);
       clientLocal.publish(localStream);
       return localStream;
     }

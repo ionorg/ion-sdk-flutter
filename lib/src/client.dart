@@ -79,8 +79,7 @@ class Client {
     };
 
     client.transports[RoleSub].pc.onTrack = (RTCTrackEvent ev) {
-      var stream = ev.streams[0];
-      var remote = makeRemote(stream, client.transports[RoleSub]);
+      var remote = makeRemote(ev.streams[0], client.transports[RoleSub]);
       client.ontrack?.call(ev.track, remote);
     };
 
