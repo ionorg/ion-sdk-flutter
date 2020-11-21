@@ -143,7 +143,6 @@ class Client {
 
   void trickle(Trickle trickle) async {
     var pc = transports[trickle.target].pc;
-    //var remoteDesc = await pc.getRemoteDescription();
     if (pc != null) {
       pc.addCandidate(trickle.candidate);
     } else {
