@@ -11,6 +11,13 @@ Add
     flutter_ion: ^0.2.0
 ```
 
+## Platform Support.
+
+* Android
+* iOS
+* macOS
+* Web
+
 ## Usage
 
 ```dart
