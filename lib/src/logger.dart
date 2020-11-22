@@ -1,22 +1,25 @@
 class Logger {
-  String _app_name;
-  Logger(this._app_name) {}
+  Logger(this._appName) {}
+
+  String _appName;
 
   void error(error) {
-    print('[' + _app_name + '] ERROR: ' + error);
+    print('[' + _appName + '] ERROR: ' + error);
   }
 
   void debug(msg) {
-    print('[' + _app_name + '] DEBUG: ' + msg);
+    print('[' + _appName + '] DEBUG: ' + msg);
   }
 
   void warn(msg) {
-    print('[' + _app_name + '] WARN: ' + msg);
+    print('[' + _appName + '] WARN: ' + msg);
   }
 
   void failure(error) {
-    var log = '[' + _app_name + '] FAILURE: ' + error;
+    var log = '[' + _appName + '] FAILURE: ' + error;
     print(log);
-    throw (log);
+    throw log;
   }
 }
+
+final log = Logger('ion-sdk-flutter');

@@ -8,61 +8,42 @@ Edit `pubspec.yaml` in your flutter projects.
 
 Add
 ```yml
-    flutter_ion: ^0.1.2
+    flutter_ion: ^0.2.0
 ```
+
+## Platform Support.
+
+* Android
+* iOS
+* macOS
+* Web
 
 ## Usage
 
 ```dart
-import 'package:flutter_ion/flutter_ion.dart';
+import 'package:flutter_ion/flutter_ion.dart' as ion;
 
-...
-var url = 'https://$host:8443/ws';
-Client client = Client(url);
+// Connect to ion-sfu.
+final signalLocal = ion.JsonRPCSignal("ws://123.45.67.89:7000/ws");
+final signalRemote = ion.JsonRPCSignal("ws://123.45.67.89:7000/ws");
 
-// Setup handlers
-client.on('peer-join', (rid, id, info) async {});
+ion.Client clientPub = await ion.Client.create(sid: "test session", signal: signalLocal);
 
-client.on('peer-leave', (rid, id) async {});
+ion.LocalStream localStream = await ion.LocalStream.getUserMedia(
+               constraints: ion.Constraints.defaults..simulcast = false);
+          
+await clientPub.publish(localStream);
+
+/// render local stream.
+/// localSrcObject = localStream.stream;
+
+ion.Client clientSub = await ion.Client.create(sid: "test session", signal: signalRemote);
+clientSub.ontrack = (track, ion.RemoteStream stream) {
+  if (track.kind == 'video') {
+  print('ontrack: stream => ${stream.id}');
+  /// remoteSrcObject = stream.stream;
   
-client.on('transport-open', () {}));
+  stream.preferLayer(ion.Layer.low);
+};
 
-client.on('transport-closed', () {});
-
-client.on('stream-add', (rid, mid, info, tracks) async {
-      // handle stream-add
-  });
-
-client.on('stream-remove', (rid, mid) async {
-      // handle stream-remove
-  });
-    
-client.on('broadcast', (rid, uid, info) async {
-      // handle broadcast
-  });
-
-// Connect to ion biz node.
-await client.connect();
-
-// Join a room
-await _client.join(rid, {'name': 'Bob'});
-
-// Leave current room
-await client.leave();
-
-// Publish local stream
-var resolution = 'vga';
-var bandwidth =  '512';
-var codec = 'vp8';
-var localStream = await client.publish(true, true, false, codec, bandwidth, resolution);
-
-// Subscribe to a remote stream
-var bandwidth = '512';
-var remoteStream = await client.subscribe(rid, mid, tracks, bandwidth);
-
-// Broadcast a payload to the room
-client.broadcast(rid, payload);
-
-// Close client connection
-await client.close();
 ```
