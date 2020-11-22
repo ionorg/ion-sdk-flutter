@@ -29,24 +29,29 @@ class Controller extends GetxController {
   }
 }
 
-class EchoTestView extends StatelessWidget {
+class PubSubTestView extends StatelessWidget {
   final Controller c = Get.put(Controller());
-  ion.Signal _signalLocal;
-  ion.Signal _signalRemote;
-  ion.Client _clientPub;
-  ion.Client _clientSub;
+  ion.Signal _signal = ion.JsonRPCSignal("ws://192.168.1.2:7000/ws");
+  ion.Client _client;
   ion.LocalStream _localStream;
 
   void _echotest() async {
-    if (_clientPub == null) {
-      _signalLocal = ion.JsonRPCSignal("ws://192.168.1.2:7000/ws");
-
-      _clientPub = await ion.Client.create(
-          sid: "echotest-session", signal: _signalLocal);
-
+    if (_client == null) {
+      _client =
+          await ion.Client.create(sid: "pub-sub-session", signal: _signal);
       _localStream = await ion.LocalStream.getUserMedia(
           constraints: ion.Constraints.defaults..simulcast = false);
-      await _clientPub.publish(_localStream);
+      await _client.publish(_localStream);
+
+      _client.ontrack = (track, ion.RemoteStream stream) {
+        if (track.kind == 'video') {
+          print('ontrack: stream => ${stream.id}');
+          c.remoteSrcObject = stream.stream;
+          Timer(Duration(seconds: 4), () {
+            stream.preferLayer(ion.Layer.low);
+          });
+        }
+      };
 
       c.localSrcObject = _localStream.stream;
     } else {
@@ -56,34 +61,15 @@ class EchoTestView extends StatelessWidget {
       });
       _localStream.stream.dispose();
       _localStream = null;
-      _clientPub.close();
-      _clientPub = null;
+      _client.close();
+      _client = null;
       c.localSrcObject = null;
-    }
-
-    if (_clientSub == null) {
-      _signalRemote = ion.JsonRPCSignal("ws://192.168.1.2:7000/ws");
-      _clientSub = await ion.Client.create(
-          sid: "echotest-session", signal: _signalRemote);
-      _clientSub.ontrack = (track, ion.RemoteStream stream) {
-        if (track.kind == 'video') {
-          print('ontrack: stream => ${stream.id}');
-          c.remoteSrcObject = stream.stream;
-          Timer(Duration(seconds: 4), () {
-            stream.preferLayer(ion.Layer.low);
-          });
-        }
-      };
-    } else {
-      _clientSub.close();
-      _clientSub = null;
-      c.remoteSrcObject = null;
     }
   }
 
   @override
   Widget build(context) => Scaffold(
-      appBar: AppBar(title: Text("echotest")),
+      appBar: AppBar(title: Text("pub sub test")),
       body: Center(
           child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,

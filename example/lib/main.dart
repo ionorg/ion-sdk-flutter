@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'views/echotest_view.dart';
+import 'views/pubsub_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -23,6 +24,11 @@ class Home extends StatelessWidget {
               child: Text("Echo Test"),
               onPressed: () {
                 Get.to(EchoTestView(), transition: Transition.rightToLeft);
+              }),
+          RaisedButton(
+              child: Text("Pub/Sub"),
+              onPressed: () {
+                Get.to(PubSubTestView(), transition: Transition.rightToLeft);
               }),
         ],
       )));

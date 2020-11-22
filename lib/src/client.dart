@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:sdp_transform/sdp_transform.dart' as sdpTransform;
 
 import 'logger.dart';
 import 'signal/signal.dart';
@@ -112,6 +111,7 @@ class Client {
   void close() {
     transports.forEach((key, element) {
       element.pc.close();
+      element.pc.dispose();
     });
     signal.close();
   }

@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter_ion/flutter_ion.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:uuid/uuid.dart';
 
 import 'client.dart';
 import 'logger.dart';
@@ -260,7 +259,8 @@ class LocalStream {
     */
   }
 
-  void updateTrack({MediaStreamTrack next, MediaStreamTrack prev}) async {
+  Future<void> updateTrack(
+      {MediaStreamTrack next, MediaStreamTrack prev}) async {
     _stream.addTrack(next);
     // If published, replace published track with track from new device
     if (prev != null && prev.enabled) {
@@ -290,7 +290,7 @@ class LocalStream {
     _stream.getTracks().forEach((track) async => publishTrack(track: track));
   }
 
-  void unpublish() async {
+  Future<void> unpublish() async {
     if (_pc != null) {
       var tracks = _stream.getTracks();
       var senders = await _pc.getSenders();
@@ -303,7 +303,7 @@ class LocalStream {
   }
 
   /// 'audio' | 'video'
-  void switchDevice(String kind, {String deviceId}) async {
+  Future<void> switchDevice(String kind, {String deviceId}) async {
     _constraints.deviceId = deviceId;
     var prev = getTrack(kind);
     var next = await getNewTrack(kind);
@@ -311,15 +311,15 @@ class LocalStream {
   }
 
   // 'audio' | 'video'
-  void mute(String kind) {
+  Future<void> mute(String kind) async {
     var track = getTrack(kind);
     if (track != null) {
-      track.dispose();
+      await track.dispose();
     }
   }
 
   /// 'audio' | 'video'
-  void unmute(String kind) async {
+  Future<void> unmute(String kind) async {
     var prev = getTrack(kind);
     var track = await getNewTrack(kind);
     updateTrack(next: track, prev: prev);
