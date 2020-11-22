@@ -7,11 +7,12 @@ Flutter sdk for the Ion backend.
 Edit `pubspec.yaml` in your flutter projects.
 
 Add
+
 ```yml
     flutter_ion: ^0.2.0
 ```
 
-## Platform Support.
+## Platform Support
 
 * Android
 * iOS
@@ -31,7 +32,7 @@ ion.Client clientPub = await ion.Client.create(sid: "test session", signal: sign
 
 ion.LocalStream localStream = await ion.LocalStream.getUserMedia(
                constraints: ion.Constraints.defaults..simulcast = false);
-          
+
 await clientPub.publish(localStream);
 
 /// render local stream.

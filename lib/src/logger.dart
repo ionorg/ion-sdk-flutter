@@ -1,7 +1,7 @@
 class Logger {
-  Logger(this._appName) {}
+  Logger(this._appName);
 
-  String _appName;
+  final String _appName;
 
   void error(error) {
     print('[' + _appName + '] ERROR: ' + error);

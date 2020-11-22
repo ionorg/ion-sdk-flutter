@@ -1,4 +1,4 @@
-name: pion_sfu_example
+name: ion_flutter_example
 description: A new Flutter project.
 version: 1.0.0+1
 
@@ -12,6 +12,7 @@ dependencies:
   flutter_icons: ^1.0.0
   flutter_ion:
     path: ../
+
   get: ^3.17.1
 
 dev_dependencies:

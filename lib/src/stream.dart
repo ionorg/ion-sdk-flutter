@@ -106,9 +106,9 @@ class Constraints {
 
 class LocalStream {
   LocalStream(this._stream, this._constraints);
-  Constraints _constraints;
+  final Constraints _constraints;
   RTCPeerConnection _pc;
-  MediaStream _stream;
+  final MediaStream _stream;
 
   MediaStream get stream => _stream;
 
@@ -244,7 +244,7 @@ class LocalStream {
   }
 
   void setPreferredCodec(RTCRtpTransceiver transceiver) {
-    /// TODO(cloudwebrtc):
+    // TODO(cloudwebrtc): need to add implementation in flutter-webrtc.
     /*
     if ('setCodecPreferences' in transceiver) {
       var  cap = RTCRtpSender.getCapabilities('video');
@@ -261,11 +261,11 @@ class LocalStream {
 
   Future<void> updateTrack(
       {MediaStreamTrack next, MediaStreamTrack prev}) async {
-    _stream.addTrack(next);
+    await _stream.addTrack(next);
     // If published, replace published track with track from new device
     if (prev != null && prev.enabled) {
-      _stream.removeTrack(prev);
-      prev.dispose();
+      await _stream.removeTrack(prev);
+      await prev.dispose();
       if (_pc != null) {
         var senders = await _pc.getSenders();
 
@@ -277,7 +277,7 @@ class LocalStream {
         });
       }
     } else {
-      _stream.addTrack(next);
+      await _stream.addTrack(next);
 
       if (_pc != null) {
         publishTrack(track: next);
@@ -307,7 +307,7 @@ class LocalStream {
     _constraints.deviceId = deviceId;
     var prev = getTrack(kind);
     var next = await getNewTrack(kind);
-    updateTrack(next: next, prev: prev);
+    await updateTrack(next: next, prev: prev);
   }
 
   // 'audio' | 'video'
@@ -322,7 +322,7 @@ class LocalStream {
   Future<void> unmute(String kind) async {
     var prev = getTrack(kind);
     var track = await getNewTrack(kind);
-    updateTrack(next: track, prev: prev);
+    await updateTrack(next: track, prev: prev);
   }
 }
 

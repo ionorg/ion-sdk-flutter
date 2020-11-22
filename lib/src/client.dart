@@ -87,7 +87,7 @@ class Client {
     'iceServers': [
       {'urls': 'stun:stun.stunprotocol.org:3478'}
     ],
-    'sdpSemantics': "unified-plan"
+    'sdpSemantics': 'unified-plan'
   };
 
   bool initialized = false;
@@ -134,7 +134,7 @@ class Client {
   void trickle(Trickle trickle) async {
     var pc = transports[trickle.target].pc;
     if (pc != null) {
-      pc.addCandidate(trickle.candidate);
+      await pc.addCandidate(trickle.candidate);
     } else {
       transports[trickle.target].candidates.add(trickle.candidate);
     }

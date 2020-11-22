@@ -7,7 +7,7 @@ import 'common.dart';
 class SimpleWebSocket {
   SimpleWebSocket(this._url);
 
-  String _url;
+  final String _url;
   var _socket;
   OnOpenCallback onOpen;
   OnMessageCallback onMessage;
