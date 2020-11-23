@@ -139,18 +139,22 @@ class LocalStream {
   }
 
   static dynamic computeVideoConstraints(Constraints constraints) {
-    if (constraints.video) {
+    if (constraints.video && constraints.resolution == null) {
       return true;
     } else if (constraints.video && constraints.resolution != null) {
       var resolution = videoConstraints[constraints.resolution].constraints;
-      return {
-        'mandatory': {
-          'minWidth': '1280',
-          'minHeight': '720',
-          'minFrameRate': '30',
-        },
-        ...resolution.toMap()
-      };
+      var mobileConstraints = WebRTC.platformIsWeb
+          ? {}
+          : {
+              'mandatory': {
+                'minWidth': '1280',
+                'minHeight': '720',
+                'minFrameRate': '30',
+              },
+              'facingMode': 'user',
+              'optional': []
+            };
+      return {...resolution.toMap(), ...mobileConstraints};
     }
     return false;
   }

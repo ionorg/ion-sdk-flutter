@@ -22,7 +22,7 @@ class PubSubController extends GetxController {
     super.onInit();
   }
 
-  ion.Signal _signal = ion.JsonRPCSignal("ws://192.168.1.2:7000/ws");
+  ion.Signal _signal = ion.JsonRPCSignal("ws://localhost:7000/ws");
   ion.Client _client;
   ion.LocalStream _localStream;
 
@@ -72,15 +72,8 @@ class PubSubTestView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                item.title,
-                style: TextStyle(fontSize: 18, color: Colors.black54),
-              ),
-            ),
-            Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                item.stream.id,
-                style: TextStyle(fontSize: 18, color: Colors.black54),
+                '${item.title}:\n${item.stream.id}',
+                style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
             ),
             Expanded(

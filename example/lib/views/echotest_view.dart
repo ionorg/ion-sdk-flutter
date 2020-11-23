@@ -14,56 +14,63 @@ class EchoTestController extends GetxController {
   ion.Client _clientPub;
   ion.Client _clientSub;
   ion.LocalStream _localStream;
+  ion.RemoteStream _remoteStream;
+
+  void preferLayer(ion.Layer layer) => _remoteStream.preferLayer(layer);
 
   @override
   @mustCallSuper
   void onInit() {
     super.onInit();
     localRenderer.value.initialize();
+    localRenderer.value.onResize = () => localRenderer.refresh();
     remoteRenderer.value.initialize();
+    remoteRenderer.value.onResize = () => remoteRenderer.refresh();
   }
 
   Future<void> echotest() async {
-    if (_clientPub == null) {
-      _signalLocal = ion.JsonRPCSignal("ws://192.168.1.2:7000/ws");
+    try {
+      if (_clientPub == null) {
+        _signalLocal = ion.JsonRPCSignal("ws://192.168.1.7:7000/ws");
 
-      _clientPub =
-          await ion.Client.create(sid: "test session", signal: _signalLocal);
+        _clientPub =
+            await ion.Client.create(sid: "test session", signal: _signalLocal);
 
-      _localStream = await ion.LocalStream.getUserMedia(
-          constraints: ion.Constraints.defaults..simulcast = false);
-      await _clientPub.publish(_localStream);
+        _localStream = await ion.LocalStream.getUserMedia(
+            constraints: ion.Constraints.defaults..simulcast = true);
+        await _clientPub.publish(_localStream);
 
-      localSrcObject = _localStream.stream;
-    } else {
-      await _localStream.unpublish();
-      _localStream.stream.getTracks().forEach((element) {
-        element.dispose();
-      });
-      _localStream.stream.dispose();
-      _localStream = null;
-      _clientPub.close();
-      _clientPub = null;
-      localSrcObject = null;
-    }
+        localSrcObject = _localStream.stream;
+      } else {
+        await _localStream.unpublish();
+        _localStream.stream.getTracks().forEach((element) {
+          element.dispose();
+        });
+        _localStream.stream.dispose();
+        _localStream = null;
+        _clientPub.close();
+        _clientPub = null;
+        localSrcObject = null;
+      }
 
-    if (_clientSub == null) {
-      _signalRemote = ion.JsonRPCSignal("ws://192.168.1.2:7000/ws");
-      _clientSub =
-          await ion.Client.create(sid: "test session", signal: _signalRemote);
-      _clientSub.ontrack = (track, ion.RemoteStream stream) {
-        if (track.kind == 'video') {
-          print('ontrack: stream => ${stream.id}');
-          remoteSrcObject = stream.stream;
-          Timer(Duration(seconds: 4), () {
-            stream.preferLayer(ion.Layer.low);
-          });
-        }
-      };
-    } else {
-      _clientSub.close();
-      _clientSub = null;
-      remoteSrcObject = null;
+      if (_clientSub == null) {
+        _signalRemote = ion.JsonRPCSignal("ws://localhost:7000/ws");
+        _clientSub =
+            await ion.Client.create(sid: "test session", signal: _signalRemote);
+        _clientSub.ontrack = (track, ion.RemoteStream stream) {
+          if (track.kind == 'video') {
+            print('ontrack: stream => ${stream.id}');
+            remoteSrcObject = stream.stream;
+            _remoteStream = stream;
+          }
+        };
+      } else {
+        _clientSub.close();
+        _clientSub = null;
+        remoteSrcObject = null;
+      }
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -81,6 +88,49 @@ class EchoTestController extends GetxController {
 class EchoTestView extends StatelessWidget {
   final EchoTestController c = Get.put(EchoTestController());
 
+  void _simulcastLayerSelect(ion.Layer layer) {
+    c.preferLayer(layer);
+    Get.back();
+  }
+
+  void _showBottomSheet() {
+    Get.bottomSheet(
+      Container(
+        child: Wrap(
+          children: <Widget>[
+            ListTile(
+              title:
+                  Text('Select Simulcast Layer:', textAlign: TextAlign.center),
+            ),
+            ListTile(
+                leading: Icon(Icons.hd),
+                title: Text('high (720p)'),
+                onTap: () => _simulcastLayerSelect(ion.Layer.high)),
+            ListTile(
+              leading: Icon(Icons.sd),
+              title: Text('medium (360p)'),
+              onTap: () => _simulcastLayerSelect(ion.Layer.medium),
+            ),
+            ListTile(
+              leading: Icon(Icons.sd),
+              title: Text('low (180p)'),
+              onTap: () => _simulcastLayerSelect(ion.Layer.low),
+            ),
+            ListTile(
+              leading: Icon(Icons.videocam_off_rounded),
+              title: Text('none (muted)'),
+              onTap: () => _simulcastLayerSelect(ion.Layer.none),
+            ),
+            SizedBox(
+              height: 100,
+            ),
+          ],
+        ),
+      ),
+      backgroundColor: Colors.white,
+    );
+  }
+
   @override
   Widget build(context) => Scaffold(
       appBar: AppBar(title: Text("echotest")),
@@ -88,12 +138,24 @@ class EchoTestView extends StatelessWidget {
           child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Text("Local"),
+          Obx(() => Text(
+              "Local ${c.localRenderer.value.videoWidth}x${c.localRenderer.value.videoHeight}")),
           Obx(() => Expanded(child: RTCVideoView(c.localRenderer.value))),
-          Text("Remote"),
-          Obx(() => Expanded(child: RTCVideoView(c.remoteRenderer.value)))
+          Obx(() => Text(
+              "Remote ${c.remoteRenderer.value.videoWidth}x${c.remoteRenderer.value.videoHeight}")),
+          Obx(() => Expanded(child: RTCVideoView(c.remoteRenderer.value))),
+          SizedBox(
+            height: 10,
+          ),
+          RaisedButton(
+            child: Text("Simulcast"),
+            onPressed: _showBottomSheet,
+          ),
+          SizedBox(
+            height: 10,
+          ),
         ],
       )),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.video_call), onPressed: c.echotest));
+          child: Icon(Icons.phone), onPressed: c.echotest));
 }

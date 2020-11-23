@@ -85,7 +85,7 @@ class Client {
 
   static final defaultConfig = {
     'iceServers': [
-      {'urls': 'stun:stun.stunprotocol.org:3478'}
+      //{'urls': 'stun:stun.stunprotocol.org:3478'}
     ],
     'sdpSemantics': 'unified-plan'
   };
