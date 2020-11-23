@@ -33,7 +33,7 @@ class EchoTestController extends GetxController {
   Future<void> echotest() async {
     try {
       if (_clientPub == null) {
-        _signalLocal = ion.JsonRPCSignal('ws://192.168.1.7:7000/ws');
+        _signalLocal = ion.JsonRPCSignal("ws://localhost:7000/ws");
 
         _clientPub =
             await ion.Client.create(sid: 'test session', signal: _signalLocal);
@@ -99,9 +99,10 @@ class EchoTestController extends GetxController {
             report.values['mediaType'] == 'video') {
           var bytes = report.values['bytesReceived'];
           if (timestampPrev != null) {
-            bitrate = (8 * bytes is String
-                    ? (int.tryParse(bytes) - int.tryParse(bytesPrev))
-                    : bytes - bytesPrev) /
+            bitrate = (8 *
+                    (WebRTC.platformIsWeb
+                        ? bytes - bytesPrev
+                        : (int.tryParse(bytes) - int.tryParse(bytesPrev)))) /
                 (now - timestampPrev);
             bitrate = bitrate.floor();
           }
