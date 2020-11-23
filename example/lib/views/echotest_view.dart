@@ -16,6 +16,8 @@ class EchoTestController extends GetxController {
   ion.LocalStream _localStream;
   ion.RemoteStream _remoteStream;
 
+  RxInt subBitrate = 0.obs;
+
   void preferLayer(ion.Layer layer) => _remoteStream.preferLayer(layer);
 
   @override
@@ -31,10 +33,10 @@ class EchoTestController extends GetxController {
   Future<void> echotest() async {
     try {
       if (_clientPub == null) {
-        _signalLocal = ion.JsonRPCSignal("ws://192.168.1.7:7000/ws");
+        _signalLocal = ion.JsonRPCSignal('ws://192.168.1.7:7000/ws');
 
         _clientPub =
-            await ion.Client.create(sid: "test session", signal: _signalLocal);
+            await ion.Client.create(sid: 'test session', signal: _signalLocal);
 
         _localStream = await ion.LocalStream.getUserMedia(
             constraints: ion.Constraints.defaults..simulcast = true);
@@ -54,14 +56,15 @@ class EchoTestController extends GetxController {
       }
 
       if (_clientSub == null) {
-        _signalRemote = ion.JsonRPCSignal("ws://localhost:7000/ws");
+        _signalRemote = ion.JsonRPCSignal('ws://localhost:7000/ws');
         _clientSub =
-            await ion.Client.create(sid: "test session", signal: _signalRemote);
+            await ion.Client.create(sid: 'test session', signal: _signalRemote);
         _clientSub.ontrack = (track, ion.RemoteStream stream) {
           if (track.kind == 'video') {
             print('ontrack: stream => ${stream.id}');
             remoteSrcObject = stream.stream;
             _remoteStream = stream;
+            getStats();
           }
         };
       } else {
@@ -82,6 +85,35 @@ class EchoTestController extends GetxController {
   set remoteSrcObject(MediaStream stream) {
     remoteRenderer.value.srcObject = stream;
     remoteRenderer.refresh();
+  }
+
+  void getStats() async {
+    var bytesPrev;
+    var timestampPrev;
+    Timer.periodic(Duration(seconds: 1), (timer) async {
+      var results = await _clientSub.getSubStats(null);
+      results.forEach((report) {
+        var now = report.timestamp;
+        var bitrate;
+        if ((report.type == 'ssrc' || report.type == 'inbound-rtp') &&
+            report.values['mediaType'] == 'video') {
+          var bytes = report.values['bytesReceived'];
+          if (timestampPrev != null) {
+            bitrate = (8 * bytes is String
+                    ? (int.tryParse(bytes) - int.tryParse(bytesPrev))
+                    : bytes - bytesPrev) /
+                (now - timestampPrev);
+            bitrate = bitrate.floor();
+          }
+          bytesPrev = bytes;
+          timestampPrev = now;
+        }
+        if (bitrate != null) {
+          subBitrate.value = bitrate;
+          //print('$bitrate kbps');
+        }
+      });
+    });
   }
 }
 
@@ -133,22 +165,22 @@ class EchoTestView extends StatelessWidget {
 
   @override
   Widget build(context) => Scaffold(
-      appBar: AppBar(title: Text("echotest")),
+      appBar: AppBar(title: Text('echotest')),
       body: Center(
           child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Obx(() => Text(
-              "Local ${c.localRenderer.value.videoWidth}x${c.localRenderer.value.videoHeight}")),
+              'Local ${c.localRenderer.value.videoWidth}x${c.localRenderer.value.videoHeight}')),
           Obx(() => Expanded(child: RTCVideoView(c.localRenderer.value))),
           Obx(() => Text(
-              "Remote ${c.remoteRenderer.value.videoWidth}x${c.remoteRenderer.value.videoHeight}")),
+              'Remote   ${c.remoteRenderer.value.videoWidth}x${c.remoteRenderer.value.videoHeight}   ${c.subBitrate.value} kbps')),
           Obx(() => Expanded(child: RTCVideoView(c.remoteRenderer.value))),
           SizedBox(
             height: 10,
           ),
           RaisedButton(
-            child: Text("Simulcast"),
+            child: Text('Simulcast'),
             onPressed: _showBottomSheet,
           ),
           SizedBox(
