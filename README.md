@@ -9,7 +9,7 @@ Edit `pubspec.yaml` in your flutter projects.
 Add
 
 ```yml
-    flutter_ion: ^0.2.0
+    flutter_ion: ^0.2.2
 ```
 
 ## Platform Support
