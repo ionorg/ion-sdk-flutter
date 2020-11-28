@@ -31,7 +31,7 @@ final signalRemote = ion.JsonRPCSignal("ws://123.45.67.89:7000/ws");
 ion.Client clientPub = await ion.Client.create(sid: "test session", signal: signalLocal);
 
 ion.LocalStream localStream = await ion.LocalStream.getUserMedia(
-               constraints: ion.Constraints.defaults..simulcast = false);
+               constraints: ion.Constraints.defaults..simulcast = true);
 
 await clientPub.publish(localStream);
 
