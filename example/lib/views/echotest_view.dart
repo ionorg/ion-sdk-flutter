@@ -33,13 +33,15 @@ class EchoTestController extends GetxController {
   Future<void> echotest() async {
     try {
       if (_clientPub == null) {
-        _signalLocal = ion.JsonRPCSignal("ws://localhost:7000/ws");
+        _signalLocal = ion.JsonRPCSignal('ws://localhost:7000/ws');
 
         _clientPub =
             await ion.Client.create(sid: 'test session', signal: _signalLocal);
 
         _localStream = await ion.LocalStream.getUserMedia(
-            constraints: ion.Constraints.defaults..simulcast = true);
+            constraints: ion.Constraints.defaults
+              ..simulcast = true
+              ..codec = 'h264');
         await _clientPub.publish(_localStream);
 
         localSrcObject = _localStream.stream;
