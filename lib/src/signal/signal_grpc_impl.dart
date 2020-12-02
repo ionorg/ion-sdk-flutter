@@ -4,21 +4,19 @@ import 'dart:convert';
 import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart';
-import 'package:grpc/grpc_connection_interface.dart';
 import 'package:uuid/uuid.dart';
 
-import '../logger.dart';
 import '_proto/library/sfu.pbgrpc.dart' as grpc;
-import 'grpc-web/websocket_channel.dart';
+import 'grpc-web/_channel.dart'
+    if (dart.library.html) 'grpc-web/_channel_html.dart';
 import 'signal.dart';
 
 class GRPCWebSignal extends Signal {
   GRPCWebSignal(this._uri) {
     var uri = Uri.parse(_uri);
-    _client = grpc.SFUClient(WebSocketClientChannel(uri.host,
-        port: uri.port,
-        options:
-            const ChannelOptions(credentials: ChannelCredentials.insecure())));
+    var channel = createChannel(uri.host, uri.port);
+    _client = grpc.SFUClient(channel);
+    _requestStream = StreamController<grpc.SignalRequest>();
   }
 
   final String _uri;
@@ -26,7 +24,6 @@ class GRPCWebSignal extends Signal {
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final Uuid _uuid = Uuid();
   final EventEmitter _emitter = EventEmitter();
-
   grpc.SFUClient _client;
   StreamController<grpc.SignalRequest> _requestStream;
   ResponseStream<grpc.SignalReply> _replyStream;
@@ -65,12 +62,15 @@ class GRPCWebSignal extends Signal {
   @override
   void connect() {
     _replyStream = _client.signal(_requestStream.stream);
-    _replyStream.listen(_onSignalReply);
+    _replyStream.listen(_onSignalReply,
+        onDone: () => close?.call(), onError: (e) => close?.call());
+    onready?.call();
   }
 
   @override
   void close() {
-    _requestStream.close();
+    _requestStream?.close();
+    _replyStream?.cancel();
   }
 
   @override
@@ -124,7 +124,7 @@ class GRPCWebSignal extends Signal {
     var reply = grpc.SignalRequest()
       ..trickle = (grpc.Trickle()
         ..target = grpc.Trickle_Target.valueOf(trickle.target)
-        ..init = _jsonEncoder.convert(trickle.candidate));
+        ..init = _jsonEncoder.convert(trickle.candidate.toMap()));
     _requestStream.add(reply);
   }
 }
