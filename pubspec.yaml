@@ -8,7 +8,10 @@ environment:
 dependencies:
   events2: ^0.1.3
   flutter_webrtc: ^0.5.7
+  grpc: ^2.8.0
+  protobuf: ^1.0.1
   uuid: ^2.0.1
+  
 
 dev_dependencies:
   flutter_test:
