@@ -63,7 +63,8 @@ class GRPCWebSignal extends Signal {
   void connect() {
     _replyStream = _client.signal(_requestStream.stream);
     _replyStream.listen(_onSignalReply,
-        onDone: () => close?.call(), onError: (e) => close?.call());
+        onDone: () => onclose?.call(0, 'closed'),
+        onError: (e) => onclose?.call(500, '$e'));
     onready?.call();
   }
 
