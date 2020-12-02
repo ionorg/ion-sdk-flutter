@@ -3,3 +3,4 @@
 .idea
 pubspec.lock
 example/.flutter-plugins-dependencies
+.DS_Store
