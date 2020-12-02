@@ -54,7 +54,7 @@ class WebSocketTransportStream implements GrpcTransportStream {
     }
 
     _channel =
-        HtmlWebSocketChannel.connect(this._uri, protocols: ['grpc-websockets']);
+        HtmlWebSocketChannel.connect(_uri, protocols: ['grpc-websockets']);
     _metadata.addAll({
       'content-type': 'application/grpc-web+proto',
       'x-grpc-web': '1',
@@ -63,9 +63,9 @@ class WebSocketTransportStream implements GrpcTransportStream {
     _channel.sink.add(headersToBytes(_metadata));
 
     _outgoingMessages.stream.listen((message) {
-      final ByteData frame = ByteData(message.length + 6);
+      final frame = ByteData(message.length + 6);
       frame.setUint32(2, message.length);
-      int idx = 6;
+      var idx = 6;
       for (var i = 0; i < message.length; i++) {
         frame.setUint8(idx++, message[i]);
       }
@@ -73,7 +73,7 @@ class WebSocketTransportStream implements GrpcTransportStream {
     });
 
     _channel.stream.listen((message) async {
-      final List<int> listBuffer = <int>[];
+      final listBuffer = <int>[];
       for (var i = 0; i < message.length; i++) {
         listBuffer.add(message[i]);
       }
@@ -93,7 +93,7 @@ class WebSocketTransportStream implements GrpcTransportStream {
     return ascii.encoder.convert(asString);
   }
 
-  _close() {
+  void _close() {
     if (!_firstMessageReceived.isCompleted) {
       _firstMessageReceived.complete(false);
     }
@@ -115,16 +115,17 @@ class WebSocketClientConnection extends ClientConnection {
   final String host;
   final int port;
   final ChannelOptions options;
-  final Set<WebSocketTransportStream> _requests =
-      Set<WebSocketTransportStream>();
+  final Set<WebSocketTransportStream> _requests = <WebSocketTransportStream>{};
 
   WebSocketClientConnection(this.host, this.port, {this.options})
       : assert(host?.isNotEmpty == true),
         assert(port == null || port > 0);
 
+  @override
   String get authority =>
-      "${this.host}:${this.port ?? (options.credentials.isSecure ? 443 : 80)}";
+      '$host:${port ?? (options.credentials.isSecure ? 443 : 80)}';
 
+  @override
   String get scheme => "ws${options.credentials.isSecure ? "s" : ""}";
 
 /*
@@ -143,7 +144,7 @@ class WebSocketClientConnection extends ClientConnection {
   GrpcTransportStream makeRequest(String path, Duration timeout,
       Map<String, String> metadata, ErrorHandler onError,
       {CallOptions callOptions}) {
-    final uri = Uri.parse("$scheme://${host}:${port}$path");
+    final uri = Uri.parse('$scheme://$host:$port$path');
     final transportStream = WebSocketTransportStream(uri, metadata,
         onError: onError, onDone: _removeStream);
     _requests.add(transportStream);
@@ -156,8 +157,8 @@ class WebSocketClientConnection extends ClientConnection {
 
   @override
   Future<void> terminate() async {
-    for (WebSocketTransportStream request in _requests) {
-      request.terminate();
+    for (var request in _requests) {
+      await request.terminate();
     }
   }
 

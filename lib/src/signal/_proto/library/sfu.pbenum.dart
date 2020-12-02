@@ -10,17 +10,25 @@ import 'dart:core' as $core;
 import 'package:protobuf/protobuf.dart' as $pb;
 
 class Trickle_Target extends $pb.ProtobufEnum {
-  static const Trickle_Target PUBLISHER = Trickle_Target._(0, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'PUBLISHER');
-  static const Trickle_Target SUBSCRIBER = Trickle_Target._(1, const $core.bool.fromEnvironment('protobuf.omit_enum_names') ? '' : 'SUBSCRIBER');
+  static const Trickle_Target PUBLISHER = Trickle_Target._(
+      0,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'PUBLISHER');
+  static const Trickle_Target SUBSCRIBER = Trickle_Target._(
+      1,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'SUBSCRIBER');
 
-  static const $core.List<Trickle_Target> values = <Trickle_Target> [
+  static const $core.List<Trickle_Target> values = <Trickle_Target>[
     PUBLISHER,
     SUBSCRIBER,
   ];
 
-  static final $core.Map<$core.int, Trickle_Target> _byValue = $pb.ProtobufEnum.initByValue(values);
+  static final $core.Map<$core.int, Trickle_Target> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
   static Trickle_Target valueOf($core.int value) => _byValue[value];
 
   const Trickle_Target._($core.int v, $core.String n) : super(v, n);
 }
-

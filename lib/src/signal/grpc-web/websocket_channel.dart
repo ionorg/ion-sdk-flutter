@@ -3,8 +3,11 @@ import 'package:grpc/src/client/connection.dart';
 import 'transport/websocket_transport.dart';
 
 class WebSocketClientChannel extends ClientChannel {
+  @override
   final String host;
+  @override
   final int port;
+  @override
   final ChannelOptions options;
 
   WebSocketClientChannel(this.host, {this.port, this.options})
@@ -13,7 +16,6 @@ class WebSocketClientChannel extends ClientChannel {
 
   @override
   ClientConnection createConnection() {
-    return WebSocketClientConnection(this.host, this.port,
-        options: this.options);
+    return WebSocketClientConnection(host, port, options: options);
   }
 }
