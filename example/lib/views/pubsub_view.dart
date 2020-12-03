@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -22,14 +20,14 @@ class PubSubController extends GetxController {
     super.onInit();
   }
 
-  ion.Signal _signal = ion.JsonRPCSignal("ws://localhost:7000/ws");
+  final ion.Signal _signal = ion.GRPCWebSignal('http://localhost:9090');
   ion.Client _client;
   ion.LocalStream _localStream;
 
   void pubsub() async {
     if (_client == null) {
       _client =
-          await ion.Client.create(sid: "pub-sub-session", signal: _signal);
+          await ion.Client.create(sid: 'pub-sub-session', signal: _signal);
       _localStream = await ion.LocalStream.getUserMedia(
           constraints: ion.Constraints.defaults..simulcast = false);
       await _client.publish(_localStream);
@@ -53,7 +51,7 @@ class PubSubController extends GetxController {
       _localStream.stream.getTracks().forEach((element) {
         element.dispose();
       });
-      _localStream.stream.dispose();
+      await _localStream.stream.dispose();
       _localStream = null;
       _client.close();
       _client = null;
@@ -88,7 +86,7 @@ class PubSubTestView extends StatelessWidget {
   @override
   Widget build(context) {
     return Scaffold(
-        appBar: AppBar(title: Text("pub sub test")),
+        appBar: AppBar(title: Text('pub sub test')),
         body: Container(
             padding: EdgeInsets.all(10.0),
             child: Obx(() => GridView.builder(
