@@ -11,7 +11,7 @@ dependencies:
   grpc: ^2.8.0
   protobuf: ^1.0.1
   uuid: ^2.0.1
-  web_socket_channel: 1.1.0
+  web_socket_channel: 1.2.0
 
 dev_dependencies:
   flutter_test:
