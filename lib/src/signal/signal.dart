@@ -31,7 +31,7 @@ abstract class Signal {
 
   OnTrickleCallback ontrickle;
 
-  Future<RTCSessionDescription> join(String sid, RTCSessionDescription offer);
+  Future<RTCSessionDescription> join(String sid, String uid, RTCSessionDescription offer);
 
   Future<RTCSessionDescription> offer(RTCSessionDescription offer);
 

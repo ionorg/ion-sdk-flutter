@@ -78,7 +78,7 @@ class WebSocketTransportStream implements GrpcTransportStream {
         listBuffer.add(message[i]);
       }
       _incomingProcessor.add(Uint8List.fromList(listBuffer).buffer);
-    });
+    }, onDone: _onDone(this), onError: _onError);
   }
 
   final Uint8List finishSendFrame = Uint8List.fromList([1]);

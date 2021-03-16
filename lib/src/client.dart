@@ -47,6 +47,7 @@ class Transport {
     return transport;
   }
 
+  bool hasRemoteDescription = false;
   Function() onapiopen;
   RTCDataChannel api;
   Signal signal;
@@ -55,33 +56,26 @@ class Transport {
 }
 
 class Client {
-  Client(this.signal);
+  Client(this.signal, this.config);
   static Future<Client> create(
-      {String sid, Signal signal, Map<String, dynamic> config}) async {
-    var client = Client(signal);
-    client.transports = {
-      RolePub: await Transport.create(
-          role: RolePub, signal: signal, config: config ?? defaultConfig),
-      RoleSub: await Transport.create(
-          role: RoleSub, signal: signal, config: config ?? defaultConfig)
-    };
-
-    client.transports[RoleSub].pc.onTrack = (RTCTrackEvent ev) {
-      var remote = makeRemote(ev.streams[0], client.transports[RoleSub]);
-      client.ontrack?.call(ev.track, remote);
-    };
-
-    client.signal.onnegotiate = (desc) => client.negotiate(desc);
-    client.signal.ontrickle = (trickle) => client.trickle(trickle);
+      {String sid,
+      String uid,
+      Signal signal,
+      Map<String, dynamic> config}) async {
+    var client = Client(signal, config);
     client.signal.onready = () async {
       if (!client.initialized) {
-        client.join(sid);
+        client.join(sid, uid);
         client.initialized = true;
       }
     };
+    signal.onnegotiate = (desc) => client.negotiate(desc);
+    signal.ontrickle = (trickle) => client.trickle(trickle);
     client.signal.connect();
     return client;
   }
+
+  Map<String, dynamic> config;
 
   static final defaultConfig = {
     'iceServers': [
@@ -116,14 +110,26 @@ class Client {
     signal.close();
   }
 
-  void join(String sid) async {
+  void join(String sid, String uid) async {
     try {
+      transports = {
+        RolePub: await Transport.create(
+            role: RolePub, signal: signal, config: config ?? defaultConfig),
+        RoleSub: await Transport.create(
+            role: RoleSub, signal: signal, config: config ?? defaultConfig)
+      };
+
+      transports[RoleSub].pc.onTrack = (RTCTrackEvent ev) {
+        var remote = makeRemote(ev.streams[0], transports[RoleSub]);
+        ontrack?.call(ev.track, remote);
+      };
+
       var pc = transports[RolePub].pc;
       var offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
-      var answer = await signal.join(sid, offer);
-
+      var answer = await signal.join(sid, uid, offer);
       await pc.setRemoteDescription(answer);
+      transports[RolePub].hasRemoteDescription = true;
       transports[RolePub].candidates.forEach((c) => pc.addCandidate(c));
       pc.onRenegotiationNeeded = () => onnegotiationneeded();
     } catch (e) {
@@ -133,7 +139,7 @@ class Client {
 
   void trickle(Trickle trickle) async {
     var pc = transports[trickle.target].pc;
-    if (pc != null) {
+    if (pc != null && transports[trickle.target].hasRemoteDescription) {
       await pc.addCandidate(trickle.candidate);
     } else {
       transports[trickle.target].candidates.add(trickle.candidate);
@@ -143,10 +149,14 @@ class Client {
   void negotiate(RTCSessionDescription description) async {
     try {
       var pc = transports[RoleSub].pc;
+      //print('sub offer ${description.sdp}');
       await pc.setRemoteDescription(description);
+      transports[RoleSub]..candidates.forEach((c) => pc.addCandidate(c));
+      transports[RoleSub].candidates = [];
       var answer = await pc.createAnswer();
       await pc.setLocalDescription(answer);
       signal.answer(answer);
+      //print('sub answer ${answer.sdp}');
     } catch (err) {
       log.error(err);
     }
@@ -158,6 +168,7 @@ class Client {
       var offer = await pc.createOffer();
       await pc.setLocalDescription(offer);
       var answer = await signal.offer(offer);
+      //print('pub answer ${answer.sdp}');
       await pc.setRemoteDescription(answer);
     } catch (err) {
       log.error(err);

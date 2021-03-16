@@ -3,16 +3,19 @@ import 'package:get/get.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
+import 'package:uuid/uuid.dart';
 
-class Participant {
-  Participant(this.title, this.renderer, this.stream);
+var url = 'http://127.0.0.1:5551';
+
+class Peer {
+  Peer(this.title, this.renderer, this.stream);
   MediaStream stream;
   String title;
   RTCVideoRenderer renderer;
 }
 
 class PubSubController extends GetxController {
-  List<Participant> plist = <Participant>[].obs;
+  Map<String, Peer> plist = <String, Peer>{}.obs;
 
   @override
   @mustCallSuper
@@ -20,14 +23,28 @@ class PubSubController extends GetxController {
     super.onInit();
   }
 
-  final ion.Signal _signal = ion.JsonRPCSignal('ws://localhost:7000');
+  final ion.BizClient _biz = ion.BizClient(url);
+  final ion.Signal _signal = ion.GRPCWebSignal(url);
   ion.Client _client;
   ion.LocalStream _localStream;
+  final String _uuid = Uuid().v4();
+  final String _room = 'test room';
 
-  void pubsub() async {
+  void join() async {
+    _biz.connect();
+    var success = await _biz.join(
+        sid: _room,
+        uid: _uuid,
+        info: <String, String>{'name': 'flutter_client'});
+    if (success) {
+      startStream();
+    }
+  }
+
+  void startStream() async {
     if (_client == null) {
-      _client = await ion.Client.create(
-          sid: 'test room', uid: 'uid001', signal: _signal);
+      _client =
+          await ion.Client.create(sid: _room, uid: _uuid, signal: _signal);
       _localStream = await ion.LocalStream.getUserMedia(
           constraints: ion.Constraints.defaults..simulcast = false);
       await _client.publish(_localStream);
@@ -38,18 +55,37 @@ class PubSubController extends GetxController {
           var renderer = RTCVideoRenderer();
           await renderer.initialize();
           renderer.srcObject = remoteStream.stream;
-          plist.add(Participant('Remote', renderer, remoteStream.stream));
+          plist[remoteStream.id] =
+              Peer('Remote', renderer, remoteStream.stream);
+        }
+      };
+
+      _biz.onStreamEvent = (state, sid, uid, streams) {
+        switch (state) {
+          case ion.StreamState.ADD:
+            var peer = plist[streams[0].id];
+            if (peer != null) {
+              //peer.title = uid;
+            }
+            break;
+          case ion.StreamState.REMOVE:
+            var peer = plist[streams[0].id];
+            if (peer != null) {
+              plist.remove(streams[0].id);
+            }
+            break;
         }
       };
 
       var renderer = RTCVideoRenderer();
       await renderer.initialize();
       renderer.srcObject = _localStream.stream;
-      plist.add(Participant('Local', renderer, _localStream.stream));
+      plist[_localStream.stream.id] =
+          Peer('Remote', renderer, _localStream.stream);
     } else {
       await _localStream.unpublish();
       _localStream.stream.getTracks().forEach((element) {
-        element.dispose();
+        element.stop();
       });
       await _localStream.stream.dispose();
       _localStream = null;
@@ -59,10 +95,10 @@ class PubSubController extends GetxController {
   }
 }
 
-class PubSubTestView extends StatelessWidget {
+class IonClusterView extends StatelessWidget {
   final PubSubController c = Get.put(PubSubController());
 
-  Widget getItemView(Participant item) {
+  Widget getItemView(Peer item) {
     return Container(
         padding: EdgeInsets.all(10.0),
         child: Column(
@@ -98,9 +134,9 @@ class PubSubTestView extends StatelessWidget {
                     crossAxisSpacing: 5.0,
                     childAspectRatio: 1.0),
                 itemBuilder: (BuildContext context, int index) {
-                  return getItemView(c.plist[index]);
+                  return getItemView(c.plist.entries.elementAt(index).value);
                 }))),
         floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.video_call), onPressed: c.pubsub));
+            onPressed: c.join, child: Icon(Icons.video_call)));
   }
 }

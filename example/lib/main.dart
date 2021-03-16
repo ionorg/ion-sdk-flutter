@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'views/echotest_view.dart';
+import 'views/ion_cluster_view.dart';
 import 'views/pubsub_view.dart';
 
 void main() {
@@ -29,6 +30,11 @@ class Home extends StatelessWidget {
               child: Text('Pub/Sub'),
               onPressed: () {
                 Get.to(PubSubTestView(), transition: Transition.rightToLeft);
+              }),
+          RaisedButton(
+              child: Text('Ion Cluster'),
+              onPressed: () {
+                Get.to(IonClusterView(), transition: Transition.rightToLeft);
               }),
         ],
       )));

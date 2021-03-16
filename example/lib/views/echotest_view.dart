@@ -35,13 +35,11 @@ class EchoTestController extends GetxController {
       if (_clientPub == null) {
         _signalLocal = ion.GRPCWebSignal('http://localhost:9090');
 
-        _clientPub =
-            await ion.Client.create(sid: 'test session', signal: _signalLocal);
+        _clientPub = await ion.Client.create(
+            sid: 'test session', uid: 'client id01', signal: _signalLocal);
 
         _localStream = await ion.LocalStream.getUserMedia(
-            constraints: ion.Constraints.defaults
-              ..simulcast = true
-              ..codec = 'h264');
+            constraints: ion.Constraints.defaults..simulcast = true);
         await _clientPub.publish(_localStream);
 
         localSrcObject = _localStream.stream;
@@ -59,8 +57,8 @@ class EchoTestController extends GetxController {
 
       if (_clientSub == null) {
         _signalRemote = ion.GRPCWebSignal('http://localhost:9090');
-        _clientSub =
-            await ion.Client.create(sid: 'test session', signal: _signalRemote);
+        _clientSub = await ion.Client.create(
+            sid: 'test session', uid: 'client id02', signal: _signalRemote);
         _clientSub.ontrack = (track, ion.RemoteStream stream) {
           if (track.kind == 'video') {
             print('ontrack: stream => ${stream.id}');

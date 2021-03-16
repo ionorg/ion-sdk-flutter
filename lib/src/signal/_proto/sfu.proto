@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-option go_package = "github.com/pion/ion-sfu/cmd/signal/grpc/proto";
+option go_package = "github.com/pion/ion/pkg/grpc/sfu";
 
 package sfu;
 
@@ -30,7 +30,8 @@ message SignalReply {
 
 message JoinRequest {
     string sid = 1;
-    bytes description = 2;
+    string uid = 2;
+    bytes description = 3;
 }
 
 message JoinReply {

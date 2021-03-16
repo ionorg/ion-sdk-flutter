@@ -75,14 +75,16 @@ class GRPCWebSignal extends Signal {
   }
 
   @override
-  Future<RTCSessionDescription> join(String sid, RTCSessionDescription offer) {
+  Future<RTCSessionDescription> join(
+      String sid, String uid, RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
     var id = _uuid.v4();
     var request = grpc.SignalRequest()
       ..id = id
       ..join = (grpc.JoinRequest()
         ..description = utf8.encode(_jsonEncoder.convert(offer.toMap()))
-        ..sid = sid);
+        ..sid = sid
+        ..uid = uid);
     _requestStream.add(request);
 
     Function(String, dynamic) handler;

@@ -1,2 +1,2 @@
 protos:
-	flutter pub global activate protoc_plugin && protoc sfu.proto --proto_path=. --dart_out=grpc:library
+	flutter pub global activate protoc_plugin && protoc *.proto --proto_path=. --dart_out=grpc:library
