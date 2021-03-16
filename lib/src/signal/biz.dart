@@ -57,6 +57,8 @@ class BizClient {
   final EventEmitter _emitter = EventEmitter();
 
   Function(Error err) onError;
+  Function(bool success, String reason) onJoin;
+  Function(String reason) onLeave;
   Function(PeerState state, Peer peer) onPeerEvent;
   Function(StreamState state, String sid, String uid, List<Stream> streams)
       onStreamEvent;
@@ -108,9 +110,11 @@ class BizClient {
       case grpc.SignalReply_Payload.joinReply:
         _emitter.emit(
             'join-reply', reply.joinReply.success, reply.joinReply.reason);
+        onJoin?.call(reply.joinReply.success, reply.joinReply.reason);
         break;
       case grpc.SignalReply_Payload.leaveReply:
         _emitter.emit('leave-reply', reply.leaveReply.reason);
+        onLeave?.call(reply.leaveReply.reason);
         break;
       case grpc.SignalReply_Payload.peerEvent:
         var event = reply.peerEvent;

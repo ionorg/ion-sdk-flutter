@@ -31,6 +31,23 @@ class PubSubController extends GetxController {
   final String _room = 'test room';
 
   void join() async {
+
+    _biz.onJoin = (success, reason) {
+      print('onJoin success = $success, reason = $reason');
+    };
+
+    _biz.onLeave = (reason) {
+      print('onLeave reason = $reason');
+    };
+
+    _biz.onPeerEvent = (ion.PeerState state, ion.Peer peer) {
+      print('onPeerEvent state = $state,  peer = ${peer.toString()}');
+    };
+
+    _biz.onMessage = (String from, String to, dynamic data) {
+      print('onPeerEvent from = $from,  to = $to, data = $data');
+    };
+
     _biz.connect();
     var success = await _biz.join(
         sid: _room,
@@ -61,6 +78,7 @@ class PubSubController extends GetxController {
       };
 
       _biz.onStreamEvent = (state, sid, uid, streams) {
+        print('onStreamEvent state = $state, sid = $sid, uid = $uid,  streams = ${streams.toString()}');
         switch (state) {
           case ion.StreamState.ADD:
             var peer = plist[streams[0].id];
