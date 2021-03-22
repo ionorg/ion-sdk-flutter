@@ -23,93 +23,91 @@ class PubSubController extends GetxController {
     super.onInit();
   }
 
-  final ion.BizClient _biz = ion.BizClient(url);
-  final ion.Signal _signal = ion.GRPCWebSignal(url);
-  ion.Client _client;
+  final ion.IonConnector _ion = ion.IonConnector(url: url);
+
   ion.LocalStream _localStream;
   final String _uuid = Uuid().v4();
   final String _room = 'test room';
 
   void join() async {
-
-    _biz.onJoin = (success, reason) {
+    _ion.onJoin = (bool success, String reason) async {
       print('onJoin success = $success, reason = $reason');
+
+      if (success) {
+        _localStream = await ion.LocalStream.getUserMedia(
+            constraints: ion.Constraints.defaults..simulcast = false);
+        await _ion.sfu.publish(_localStream);
+
+        var renderer = RTCVideoRenderer();
+        await renderer.initialize();
+        renderer.srcObject = _localStream.stream;
+        plist[_localStream.stream.id] =
+            Peer('Local Stream', renderer, _localStream.stream);
+      }
     };
 
-    _biz.onLeave = (reason) {
+    _ion.onLeave = (reason) {
       print('onLeave reason = $reason');
     };
 
-    _biz.onPeerEvent = (ion.PeerState state, ion.Peer peer) {
-      print('onPeerEvent state = $state,  peer = ${peer.toString()}');
+    _ion.onPeerEvent = (ion.PeerEvent event) {
+      print(
+          'onPeerEvent state = ${event.state},  peer uid = ${event.peer.uid}, info = ${event.peer.info.toString()}');
     };
 
-    _biz.onMessage = (String from, String to, dynamic data) {
-      print('onPeerEvent from = $from,  to = $to, data = $data');
+    _ion.onMessage = (ion.Message msg) {
+      print(
+          'onMessage from = ${msg.from},  to = ${msg.to}, data = ${msg.data}');
     };
 
-    _biz.connect();
-    var success = await _biz.join(
+    _ion.join(
         sid: _room,
         uid: _uuid,
         info: <String, String>{'name': 'flutter_client'});
-    if (success) {
-      startStream();
-    }
-  }
 
-  void startStream() async {
-    if (_client == null) {
-      _client =
-          await ion.Client.create(sid: _room, uid: _uuid, signal: _signal);
-      _localStream = await ion.LocalStream.getUserMedia(
-          constraints: ion.Constraints.defaults..simulcast = false);
-      await _client.publish(_localStream);
+    _ion.onTrack = (track, ion.RemoteStream remoteStream) async {
+      if (track.kind == 'video') {
+        print('onTrack: remote stream => ${remoteStream.id}');
+        var renderer = RTCVideoRenderer();
+        await renderer.initialize();
+        renderer.srcObject = remoteStream.stream;
+        plist[remoteStream.id] = Peer('Remote', renderer, remoteStream.stream);
+      }
+    };
 
-      _client.ontrack = (track, ion.RemoteStream remoteStream) async {
-        if (track.kind == 'video') {
-          print('ontrack: remote stream => ${remoteStream.id}');
-          var renderer = RTCVideoRenderer();
-          await renderer.initialize();
-          renderer.srcObject = remoteStream.stream;
-          plist[remoteStream.id] =
-              Peer('Remote', renderer, remoteStream.stream);
-        }
-      };
-
-      _biz.onStreamEvent = (state, sid, uid, streams) {
-        print('onStreamEvent state = $state, sid = $sid, uid = $uid,  streams = ${streams.toString()}');
-        switch (state) {
-          case ion.StreamState.ADD:
-            var peer = plist[streams[0].id];
+    _ion.onStreamEvent = (ion.StreamEvent event) {
+      print(
+          'onStreamEvent state = ${event.state}, sid = ${event.sid}, uid = ${event.uid},  streams = ${event.streams.toString()}');
+      switch (event.state) {
+        case ion.StreamState.ADD:
+          if (plist.isNotEmpty) {
+            var peer = plist[event.streams[0].id];
             if (peer != null) {
               //peer.title = uid;
             }
-            break;
-          case ion.StreamState.REMOVE:
-            var peer = plist[streams[0].id];
+          }
+          break;
+        case ion.StreamState.REMOVE:
+          if (plist.isNotEmpty) {
+            var peer = plist[event.streams[0].id];
             if (peer != null) {
-              plist.remove(streams[0].id);
+              plist.remove(event.streams[0].id);
             }
-            break;
-        }
-      };
+          }
+          break;
+        case ion.StreamState.NONE:
+          break;
+      }
+    };
+  }
 
-      var renderer = RTCVideoRenderer();
-      await renderer.initialize();
-      renderer.srcObject = _localStream.stream;
-      plist[_localStream.stream.id] =
-          Peer('Remote', renderer, _localStream.stream);
-    } else {
-      await _localStream.unpublish();
-      _localStream.stream.getTracks().forEach((element) {
-        element.stop();
-      });
-      await _localStream.stream.dispose();
-      _localStream = null;
-      _client.close();
-      _client = null;
-    }
+  void stopPublish() async {
+    await _localStream.unpublish();
+    _localStream.stream.getTracks().forEach((element) {
+      element.stop();
+    });
+    await _localStream.stream.dispose();
+    _localStream = null;
   }
 }
 
