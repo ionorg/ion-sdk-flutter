@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
+import 'package:uuid/uuid.dart';
 
 class Participant {
   Participant(this.title, this.renderer, this.stream);
@@ -20,14 +21,15 @@ class PubSubController extends GetxController {
     super.onInit();
   }
 
-  final ion.Signal _signal = ion.JsonRPCSignal('ws://localhost:7000');
+  final ion.Signal _signal = ion.GRPCWebSignal('http://localhost:9090');
   ion.Client _client;
   ion.LocalStream _localStream;
+  final String _uuid = Uuid().v4();
 
   void pubsub() async {
     if (_client == null) {
       _client = await ion.Client.create(
-          sid: 'test room', uid: 'uid001', signal: _signal);
+          sid: 'test room', uid: _uuid, signal: _signal);
       _localStream = await ion.LocalStream.getUserMedia(
           constraints: ion.Constraints.defaults..simulcast = false);
       await _client.publish(_localStream);

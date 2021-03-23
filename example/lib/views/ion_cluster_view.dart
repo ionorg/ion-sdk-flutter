@@ -5,7 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
 import 'package:uuid/uuid.dart';
 
-var url = 'http://127.0.0.1:5551';
+var url = 'http://localhost:5551';
 
 class Peer {
   Peer(this.title, this.renderer, this.stream);
@@ -37,7 +37,6 @@ class PubSubController extends GetxController {
         _localStream = await ion.LocalStream.getUserMedia(
             constraints: ion.Constraints.defaults..simulcast = false);
         await _ion.sfu.publish(_localStream);
-
         var renderer = RTCVideoRenderer();
         await renderer.initialize();
         renderer.srcObject = _localStream.stream;
@@ -101,7 +100,7 @@ class PubSubController extends GetxController {
     };
   }
 
-  void stopPublish() async {
+  void unpublish() async {
     await _localStream.unpublish();
     _localStream.stream.getTracks().forEach((element) {
       element.stop();
