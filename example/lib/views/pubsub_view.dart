@@ -29,7 +29,7 @@ class PubSubController extends GetxController {
   void pubsub() async {
     if (_client == null) {
       _client = await ion.Client.create(
-          sid: 'test room', uid: _uuid, signal: _signal);
+          sid: 'test session', uid: _uuid, signal: _signal);
       _localStream = await ion.LocalStream.getUserMedia(
           constraints: ion.Constraints.defaults..simulcast = false);
       await _client.publish(_localStream);
