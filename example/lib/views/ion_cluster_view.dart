@@ -43,6 +43,8 @@ class PubSubController extends GetxController {
         plist[_localStream.stream.id] =
             Peer('Local Stream', renderer, _localStream.stream);
       }
+
+      _ion.message(_uuid, "all", <String, dynamic>{"text": "hello from flutter"});
     };
 
     _ion.onLeave = (reason) {

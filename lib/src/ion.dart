@@ -16,7 +16,7 @@ enum PeerState {
 class Peer {
   String sid;
   String uid;
-  dynamic info;
+  Map<String, dynamic> info;
 }
 
 class PeerEvent {
@@ -52,7 +52,7 @@ class StreamEvent {
 class Message {
   String from;
   String to;
-  dynamic data;
+  Map<String, dynamic> data;
 }
 
 class IonConnector {
@@ -93,7 +93,7 @@ class IonConnector {
   Function(Message msg) onMessage;
   Function(MediaStreamTrack track, RemoteStream stream) onTrack;
 
-  void join({String sid, String uid, dynamic info}) {
+  void join({String sid, String uid, Map<String, dynamic> info, String token = ''}) {
     _sid = sid;
     _uid = uid;
     _biz.join(sid: sid, uid: uid, info: info);
@@ -101,7 +101,7 @@ class IonConnector {
 
   void leave(String uid) => _biz.leave(uid);
 
-  void message(String from, String to, dynamic data) =>
+  void message(String from, String to, Map<String, dynamic> data) =>
       _biz.sendMessage(from, to, data);
 
   void close() {}

@@ -23,6 +23,7 @@ class BizClient extends EventEmitter {
   StreamController<grpc.SignalRequest> _requestStream;
   ResponseStream<grpc.SignalReply> _replyStream;
   final JsonEncoder _jsonEncoder = JsonEncoder();
+  final JsonDecoder _jsonDecoder = JsonDecoder();
 
   void connect() {
     _replyStream = _client.signal(_requestStream.stream);
@@ -35,10 +36,11 @@ class BizClient extends EventEmitter {
     _replyStream?.cancel();
   }
 
-  Future<bool> join({String sid, String uid, dynamic info}) async {
+  Future<bool> join({String sid, String uid, Map<String, dynamic> info, String token}) async {
     Completer completer = Completer<bool>();
     var request = grpc.SignalRequest()
       ..join = grpc.Join(
+          token: token,
           peer: ion.Peer(
               sid: sid,
               uid: uid,
@@ -63,9 +65,9 @@ class BizClient extends EventEmitter {
     once('leave-reply', handler);
   }
 
-  void sendMessage(String from, String to, dynamic data) async {
+  void sendMessage(String from, String to, Map<String, dynamic> data) async {
     var request = grpc.SignalRequest()
-      ..msg = ion.Message(from: from, to: to, data: data);
+      ..msg = ion.Message(from: from, to: to, data: utf8.encode(_jsonEncoder.convert(data)));
     _requestStream.add(request);
   }
 
@@ -79,23 +81,25 @@ class BizClient extends EventEmitter {
         break;
       case grpc.SignalReply_Payload.peerEvent:
         var event = reply.peerEvent;
-        var peer = Peer()
-          ..sid = event.peer.sid
-          ..uid = event.peer.uid
-          ..info = event.peer.info;
-
+        Map<String, dynamic> info = <String, dynamic>{};
         var state = PeerState.NONE;
         switch (event.state) {
           case ion.PeerEvent_State.JOIN:
             state = PeerState.JOIN;
+            info = _jsonDecoder.convert(String.fromCharCodes(event.peer.info));
             break;
           case ion.PeerEvent_State.UPDATE:
             state = PeerState.UPDATE;
+            info = _jsonDecoder.convert(String.fromCharCodes(event.peer.info));
             break;
           case ion.PeerEvent_State.LEAVE:
             state = PeerState.LEAVE;
             break;
         }
+        var peer = Peer()
+          ..sid = event.peer.sid
+          ..uid = event.peer.uid
+          ..info = info;
         emit(
             'peer-event',
             PeerEvent()
@@ -132,12 +136,13 @@ class BizClient extends EventEmitter {
                   .toList());
         break;
       case grpc.SignalReply_Payload.msg:
+        var data = _jsonDecoder.convert(String.fromCharCodes(reply.msg.data));
         emit(
             'message',
             Message()
               ..from = reply.msg.from
               ..to = reply.msg.to
-              ..data = reply.msg.data);
+              ..data = data);
         break;
       default:
         break;
