@@ -62,12 +62,13 @@ class JsonRPCSignal extends Signal {
   }
 
   @override
-  Future<RTCSessionDescription> join(String sid, RTCSessionDescription offer) {
+  Future<RTCSessionDescription> join(
+      String sid, String uid, RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
     var id = _uuid.v4();
     _socket.send(_jsonEncoder.convert(<String, dynamic>{
       'method': 'join',
-      'params': {'sid': sid, 'offer': offer.toMap()},
+      'params': {'sid': sid, 'uid': uid, 'offer': offer.toMap()},
       'id': id
     }));
 

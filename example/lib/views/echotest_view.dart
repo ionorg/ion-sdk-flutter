@@ -15,6 +15,7 @@ class EchoTestController extends GetxController {
   ion.Client _clientSub;
   ion.LocalStream _localStream;
   ion.RemoteStream _remoteStream;
+  Timer _timer;
 
   RxInt subBitrate = 0.obs;
 
@@ -35,13 +36,11 @@ class EchoTestController extends GetxController {
       if (_clientPub == null) {
         _signalLocal = ion.GRPCWebSignal('http://localhost:9090');
 
-        _clientPub =
-            await ion.Client.create(sid: 'test session', signal: _signalLocal);
+        _clientPub = await ion.Client.create(
+            sid: 'test session', uid: 'client id01', signal: _signalLocal);
 
         _localStream = await ion.LocalStream.getUserMedia(
-            constraints: ion.Constraints.defaults
-              ..simulcast = true
-              ..codec = 'h264');
+            constraints: ion.Constraints.defaults..simulcast = true);
         await _clientPub.publish(_localStream);
 
         localSrcObject = _localStream.stream;
@@ -59,20 +58,25 @@ class EchoTestController extends GetxController {
 
       if (_clientSub == null) {
         _signalRemote = ion.GRPCWebSignal('http://localhost:9090');
-        _clientSub =
-            await ion.Client.create(sid: 'test session', signal: _signalRemote);
+        _clientSub = await ion.Client.create(
+            sid: 'test session', uid: 'client id02', signal: _signalRemote);
         _clientSub.ontrack = (track, ion.RemoteStream stream) {
           if (track.kind == 'video') {
             print('ontrack: stream => ${stream.id}');
             remoteSrcObject = stream.stream;
             _remoteStream = stream;
-            getStats();
+            var bytesPrev;
+            var timestampPrev;
+            _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+              getStats(bytesPrev, timestampPrev);
+            });
           }
         };
       } else {
         _clientSub.close();
         _clientSub = null;
         remoteSrcObject = null;
+        _timer.cancel();
       }
     } catch (e) {
       print(e);
@@ -89,33 +93,29 @@ class EchoTestController extends GetxController {
     remoteRenderer.refresh();
   }
 
-  void getStats() async {
-    var bytesPrev;
-    var timestampPrev;
-    Timer.periodic(Duration(seconds: 1), (timer) async {
-      var results = await _clientSub.getSubStats(null);
-      results.forEach((report) {
-        var now = report.timestamp;
-        var bitrate;
-        if ((report.type == 'ssrc' || report.type == 'inbound-rtp') &&
-            report.values['mediaType'] == 'video') {
-          var bytes = report.values['bytesReceived'];
-          if (timestampPrev != null) {
-            bitrate = (8 *
-                    (WebRTC.platformIsWeb
-                        ? bytes - bytesPrev
-                        : (int.tryParse(bytes) - int.tryParse(bytesPrev)))) /
-                (now - timestampPrev);
-            bitrate = bitrate.floor();
-          }
-          bytesPrev = bytes;
-          timestampPrev = now;
+  void getStats(bytesPrev, timestampPrev) async {
+    var results = await _clientSub.getSubStats(null);
+    results.forEach((report) {
+      var now = report.timestamp;
+      var bitrate;
+      if ((report.type == 'ssrc' || report.type == 'inbound-rtp') &&
+          report.values['mediaType'] == 'video') {
+        var bytes = report.values['bytesReceived'];
+        if (timestampPrev != null) {
+          bitrate = (8 *
+                  (WebRTC.platformIsWeb
+                      ? bytes - bytesPrev
+                      : (int.tryParse(bytes) - int.tryParse(bytesPrev)))) /
+              (now - timestampPrev);
+          bitrate = bitrate.floor();
         }
-        if (bitrate != null) {
-          subBitrate.value = bitrate;
-          //print('$bitrate kbps');
-        }
-      });
+        bytesPrev = bytes;
+        timestampPrev = now;
+      }
+      if (bitrate != null) {
+        subBitrate.value = bitrate;
+        //print('$bitrate kbps');
+      }
     });
   }
 }
