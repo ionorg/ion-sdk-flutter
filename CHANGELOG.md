@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[0.3.0] - 2020.11.22
+
+* Add IonConnector for new ion.
+
 [0.2.2] - 2020.11.22
 
 * Get more pub scores.

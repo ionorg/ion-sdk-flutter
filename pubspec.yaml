@@ -1,9 +1,9 @@
 name: flutter_ion
-version: 0.2.2
+version: 0.3.0
 description: Ion SDK for flutter, For live broadcast, video conference, etc., support mobile/deskop/web.
 homepage: https://github.com/pion/ion-sdk-flutter
 environment:
-  sdk: '>=2.2.2 <3.0.0'
+  sdk: '>=2.12.0 <3.0.0'
 
 dependencies:
   events2: ^0.1.3
