@@ -1,5 +1,7 @@
 # Flutter sdk for ion
 
+[![pub package](https://img.shields.io/pub/v/flutter_ion.svg)](https://pub.dartlang.org/packages/flutter_ion) 
+
 Flutter sdk for the Ion backend.
 
 ## Installation
