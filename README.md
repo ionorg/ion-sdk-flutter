@@ -25,11 +25,14 @@ Add
 
 ```dart
 import 'package:flutter_ion/flutter_ion.dart' as ion;
+import 'package:uuid/uuid.dart';
 
 // Connect to ion-sfu.
 final signal = ion.JsonRPCSignal("ws://ion-sfu:7000/ws");
 
-ion.Client client = await ion.Client.create(sid: "test session", signal: signal);
+final String _uuid = Uuid().v4();
+
+ion.Client client = await ion.Client.create(sid: "test session", uid: _uuid, signal: signal);
 
 client.ontrack = (track, ion.RemoteStream stream) {
     /// mute a remote stream

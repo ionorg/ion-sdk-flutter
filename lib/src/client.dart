@@ -63,6 +63,14 @@ class Client {
       Signal signal,
       Map<String, dynamic> config}) async {
     var client = Client(signal, config);
+
+    client.transports = {
+      RolePub: await Transport.create(
+          role: RolePub, signal: signal, config: config ?? defaultConfig),
+      RoleSub: await Transport.create(
+          role: RoleSub, signal: signal, config: config ?? defaultConfig)
+    };
+
     client.signal.onready = () async {
       if (!client.initialized) {
         client.join(sid, uid);
@@ -112,13 +120,6 @@ class Client {
 
   void join(String sid, String uid) async {
     try {
-      transports = {
-        RolePub: await Transport.create(
-            role: RolePub, signal: signal, config: config ?? defaultConfig),
-        RoleSub: await Transport.create(
-            role: RoleSub, signal: signal, config: config ?? defaultConfig)
-      };
-
       transports[RoleSub].pc.onTrack = (RTCTrackEvent ev) {
         var remote = makeRemote(ev.streams[0], transports[RoleSub]);
         ontrack?.call(ev.track, remote);
