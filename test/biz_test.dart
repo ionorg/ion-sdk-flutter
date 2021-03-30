@@ -12,12 +12,12 @@ void main() async {
   var sid = 'test room1';
 
   test('test join', () async {
-    // biz.onPeerEvent = (state, peer) {
-    //   print(
-    //       'sid ${peer.sid}, peer ${peer.uid} info ${peer.info}, state $state');
-    //   //expect(peer.uid, uid);
-    //   //expect(peer.sid, sid);
-    // };
+    biz.on('peer-event', (evt) {
+      print(
+          'sid ${evt.peer.sid}, peer ${evt.peer.uid} info ${evt.peer.info}, state ${evt.state}');
+      //expect(peer.uid, uid);
+      //expect(peer.sid, sid);
+    });
     var success = await biz.join(
         sid: sid, uid: uid, info: <String, String>{'name': 'flutter_client'});
 

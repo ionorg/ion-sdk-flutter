@@ -1,11 +1,15 @@
 # Changelog
 
 --------------------------------------------
-[0.3.0] - 2020.11.22
+[0.3.1] - 2020.11.22
+
+* Fixed null transports issue.
+
+[0.3.0] - 2021.03.30
 
 * Add IonConnector for new ion.
 
-[0.2.2] - 2020.11.22
+[0.2.2] - 2020.03.28
 
 * Get more pub scores.
 
