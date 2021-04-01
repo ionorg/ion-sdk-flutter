@@ -19,9 +19,9 @@ class BizClient extends EventEmitter {
   }
 
   final String _uri;
-  grpc.BizClient _client;
-  StreamController<grpc.SignalRequest> _requestStream;
-  ResponseStream<grpc.SignalReply> _replyStream;
+  late grpc.BizClient _client;
+  late StreamController<grpc.SignalRequest> _requestStream;
+  late ResponseStream<grpc.SignalReply> _replyStream;
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final JsonDecoder _jsonDecoder = JsonDecoder();
 
@@ -32,11 +32,15 @@ class BizClient extends EventEmitter {
   }
 
   void close() {
-    _requestStream?.close();
-    _replyStream?.cancel();
+    _requestStream.close();
+    _replyStream.cancel();
   }
 
-  Future<bool> join({String sid, String uid, Map<String, dynamic> info, String token}) async {
+  Future<bool> join(
+      {required String sid,
+      required String uid,
+      required Map<String, dynamic> info,
+      String? token}) async {
     Completer completer = Completer<bool>();
     var request = grpc.SignalRequest()
       ..join = grpc.Join(
@@ -51,7 +55,7 @@ class BizClient extends EventEmitter {
       completer.complete(success);
     };
     once('join-reply', handler);
-    return completer.future;
+    return completer.future as Future<bool>;
   }
 
   Future<void> leave(String uid) async {
@@ -67,7 +71,8 @@ class BizClient extends EventEmitter {
 
   void sendMessage(String from, String to, Map<String, dynamic> data) async {
     var request = grpc.SignalRequest()
-      ..msg = ion.Message(from: from, to: to, data: utf8.encode(_jsonEncoder.convert(data)));
+      ..msg = ion.Message(
+          from: from, to: to, data: utf8.encode(_jsonEncoder.convert(data)));
     _requestStream.add(request);
   }
 
@@ -81,7 +86,7 @@ class BizClient extends EventEmitter {
         break;
       case grpc.SignalReply_Payload.peerEvent:
         var event = reply.peerEvent;
-        Map<String, dynamic> info = <String, dynamic>{};
+        var info = <String, dynamic>{};
         var state = PeerState.NONE;
         switch (event.state) {
           case ion.PeerEvent_State.JOIN:

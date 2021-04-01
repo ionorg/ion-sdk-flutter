@@ -17,7 +17,7 @@ class WebSocketTransportStream implements GrpcTransportStream {
   final StreamController<ByteBuffer> _incomingProcessor = StreamController();
   final StreamController<GrpcMessage> _incomingMessages = StreamController();
   final StreamController<List<int>> _outgoingMessages = StreamController();
-  HtmlWebSocketChannel _channel;
+  late HtmlWebSocketChannel _channel;
   final Map<String, String> _metadata;
   final Completer<bool> _firstMessageReceived = Completer();
   final Uri _uri;
@@ -113,12 +113,12 @@ class WebSocketTransportStream implements GrpcTransportStream {
 
 class WebSocketClientConnection extends ClientConnection {
   final String host;
-  final int port;
+  final int? port;
   final ChannelOptions options;
   final Set<WebSocketTransportStream> _requests = <WebSocketTransportStream>{};
 
-  WebSocketClientConnection(this.host, this.port, {this.options})
-      : assert(host?.isNotEmpty == true),
+  WebSocketClientConnection(this.host, this.port, {required this.options})
+      : assert(host.isNotEmpty == true),
         assert(port == null || port > 0);
 
   @override
@@ -141,12 +141,12 @@ class WebSocketClientConnection extends ClientConnection {
 */
 
   @override
-  GrpcTransportStream makeRequest(String path, Duration timeout,
-      Map<String, String> metadata, ErrorHandler onError,
-      {CallOptions callOptions}) {
+  GrpcTransportStream makeRequest(String path, Duration? timeout,
+      Map<String, String> metadata, ErrorHandler onRequestFailure,
+      {required CallOptions callOptions}) {
     final uri = Uri.parse('$scheme://$host:$port$path');
     final transportStream = WebSocketTransportStream(uri, metadata,
-        onError: onError, onDone: _removeStream);
+        onError: onRequestFailure, onDone: _removeStream);
     _requests.add(transportStream);
     return transportStream;
   }

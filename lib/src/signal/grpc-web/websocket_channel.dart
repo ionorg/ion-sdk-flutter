@@ -10,8 +10,8 @@ class WebSocketClientChannel extends ClientChannel {
   @override
   final ChannelOptions options;
 
-  WebSocketClientChannel(this.host, {this.port, this.options})
-      : assert(host?.isNotEmpty == true),
+  WebSocketClientChannel(this.host, {required this.port, required this.options})
+      : assert(host.isNotEmpty == true),
         super(host, port: port, options: options);
 
   @override

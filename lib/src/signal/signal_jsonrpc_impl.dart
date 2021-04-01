@@ -26,7 +26,7 @@ class JsonRPCSignal extends Signal {
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final Uuid _uuid = Uuid();
   final EventEmitter _emitter = EventEmitter();
-  SimpleWebSocket _socket;
+  late SimpleWebSocket _socket;
 
   void _onmessage(msg) {
     log.debug('msg: $msg');
@@ -80,7 +80,7 @@ class JsonRPCSignal extends Signal {
       }
     };
     _emitter.once('message', handler);
-    return completer.future;
+    return completer.future as Future<RTCSessionDescription>;
   }
 
   @override
@@ -101,7 +101,7 @@ class JsonRPCSignal extends Signal {
       }
     };
     _emitter.once('message', handler);
-    return completer.future;
+    return completer.future as Future<RTCSessionDescription>;
   }
 
   @override

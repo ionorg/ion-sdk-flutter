@@ -1,7 +1,7 @@
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class Trickle {
-  Trickle({this.target, this.candidate});
+  Trickle({required this.target, required this.candidate});
   factory Trickle.fromMap(Map<String, dynamic> map) => Trickle(
       candidate: RTCIceCandidate(
         map['candidate']['candidate'],
@@ -23,15 +23,16 @@ typedef OnTrickleCallback = Function(Trickle trickle);
 typedef OnCloseCallback = Function(int code, String reason);
 
 abstract class Signal {
-  OnNegotiateCallback onnegotiate;
+  OnNegotiateCallback? onnegotiate;
 
-  OnReadyCallback onready;
+  OnReadyCallback? onready;
 
-  OnCloseCallback onclose;
+  OnCloseCallback? onclose;
 
-  OnTrickleCallback ontrickle;
+  OnTrickleCallback? ontrickle;
 
-  Future<RTCSessionDescription> join(String sid, String uid, RTCSessionDescription offer);
+  Future<RTCSessionDescription> join(
+      String sid, String uid, RTCSessionDescription offer);
 
   Future<RTCSessionDescription> offer(RTCSessionDescription offer);
 

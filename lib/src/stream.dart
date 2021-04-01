@@ -7,7 +7,7 @@ import 'client.dart';
 import 'logger.dart';
 
 class FrameRate {
-  FrameRate({this.ideal, this.max});
+  FrameRate({required this.ideal, required this.max});
   int ideal;
   int max;
   Map<String, dynamic> toMap() => {
@@ -17,7 +17,8 @@ class FrameRate {
 }
 
 class MediaTrackConstraints {
-  MediaTrackConstraints({this.frameRate, this.height, this.width});
+  MediaTrackConstraints(
+      {required this.frameRate, required this.height, required this.width});
 
   /// Properties of video tracks
   FrameRate frameRate;
@@ -32,9 +33,9 @@ class MediaTrackConstraints {
 }
 
 class VideoConstraints {
-  VideoConstraints({this.constraints, this.encodings});
-  MediaTrackConstraints constraints;
-  RTCRtpEncoding encodings;
+  VideoConstraints({required this.constraints, required this.encodings});
+  final MediaTrackConstraints constraints;
+  final RTCRtpEncoding encodings;
 }
 
 var resolutions = ['qvga', 'vga', 'shd', 'hd', 'fhd', 'qhd'];
@@ -76,9 +77,9 @@ Map<Layer, String> layerStringType = {
 };
 
 class Encoding {
-  Layer layer;
-  int maxBitrate;
-  int maxFramerate;
+  Layer? layer;
+  int? maxBitrate;
+  int? maxFramerate;
 }
 
 class Constraints {
@@ -89,12 +90,12 @@ class Constraints {
       this.audio,
       this.video,
       this.simulcast});
-  String resolution;
-  String codec;
-  bool simulcast;
-  bool audio;
-  bool video;
-  String deviceId;
+  String? resolution;
+  String? codec;
+  bool? simulcast;
+  bool? audio;
+  bool? video;
+  String? deviceId;
 
   static final defaults = Constraints(
       resolution: 'hd',
@@ -107,12 +108,12 @@ class Constraints {
 class LocalStream {
   LocalStream(this._stream, this._constraints);
   final Constraints _constraints;
-  RTCPeerConnection _pc;
+  RTCPeerConnection? _pc;
   final MediaStream _stream;
 
   MediaStream get stream => _stream;
 
-  static Future<LocalStream> getUserMedia({Constraints constraints}) async {
+  static Future<LocalStream> getUserMedia({Constraints? constraints}) async {
     var stream = await navigator.mediaDevices.getUserMedia({
       'audio': LocalStream.computeAudioConstraints(
           constraints ?? Constraints.defaults),
@@ -122,7 +123,7 @@ class LocalStream {
     return LocalStream(stream, constraints ?? Constraints.defaults);
   }
 
-  static Future<LocalStream> getDisplayMedia({Constraints constraints}) async {
+  static Future<LocalStream> getDisplayMedia({Constraints? constraints}) async {
     var stream = await navigator.mediaDevices.getDisplayMedia({
       'video': true,
     });
@@ -130,19 +131,19 @@ class LocalStream {
   }
 
   static dynamic computeAudioConstraints(Constraints constraints) {
-    if (constraints.audio) {
+    if (constraints.audio != null) {
       return true;
-    } else if (constraints.video && constraints.resolution != null) {
+    } else if (constraints.video! && constraints.resolution != null) {
       return {'deviceId': constraints.deviceId};
     }
     return false;
   }
 
   static dynamic computeVideoConstraints(Constraints constraints) {
-    if (constraints.video && constraints.resolution == null) {
+    if (constraints.video! && constraints.resolution == null) {
       return true;
-    } else if (constraints.video && constraints.resolution != null) {
-      var resolution = videoConstraints[constraints.resolution].constraints;
+    } else if (constraints.video! && constraints.resolution != null) {
+      var resolution = videoConstraints[constraints.resolution]!.constraints;
       var mobileConstraints = WebRTC.platformIsWeb
           ? {}
           : {
@@ -160,7 +161,7 @@ class LocalStream {
   }
 
   /// 'audio' | 'video'
-  MediaStreamTrack getTrack(String kind) {
+  MediaStreamTrack? getTrack(String kind) {
     var tracks;
     if (kind == 'video') {
       tracks = _stream.getVideoTracks();
@@ -180,19 +181,20 @@ class LocalStream {
     return stream.getTracks()[0];
   }
 
-  void publishTrack({MediaStreamTrack track}) async {
+  void publishTrack({required MediaStreamTrack track}) async {
     if (_pc != null) {
-      if (track.kind == 'video' && _constraints.simulcast) {
-        var idx = resolutions.indexOf(_constraints.resolution);
+      if (track.kind == 'video' && _constraints.simulcast!) {
+        var idx = resolutions.indexOf(_constraints.resolution!);
         var encodings = <RTCRtpEncoding>[
           RTCRtpEncoding(
             rid: 'f',
             active: true,
-            maxBitrate: videoConstraints[resolutions[idx]].encodings.maxBitrate,
+            maxBitrate:
+                videoConstraints[resolutions[idx]]!.encodings.maxBitrate,
             minBitrate: 256000,
             scaleResolutionDownBy: 1.0,
             maxFramerate:
-                videoConstraints[resolutions[idx]].encodings.maxFramerate,
+                videoConstraints[resolutions[idx]]!.encodings.maxFramerate,
           )
         ];
 
@@ -202,10 +204,10 @@ class LocalStream {
             active: true,
             scaleResolutionDownBy: 2.0,
             maxBitrate:
-                videoConstraints[resolutions[idx - 1]].encodings.maxBitrate,
+                videoConstraints[resolutions[idx - 1]]!.encodings.maxBitrate,
             minBitrate: 128000,
             maxFramerate:
-                videoConstraints[resolutions[idx - 1]].encodings.maxFramerate,
+                videoConstraints[resolutions[idx - 1]]!.encodings.maxFramerate,
           ));
         }
 
@@ -216,13 +218,13 @@ class LocalStream {
             minBitrate: 64000,
             scaleResolutionDownBy: 4.0,
             maxBitrate:
-                videoConstraints[resolutions[idx - 2]].encodings.maxBitrate,
+                videoConstraints[resolutions[idx - 2]]!.encodings.maxBitrate,
             maxFramerate:
-                videoConstraints[resolutions[idx - 2]].encodings.maxFramerate,
+                videoConstraints[resolutions[idx - 2]]!.encodings.maxFramerate,
           ));
         }
 
-        var transceiver = await _pc.addTransceiver(
+        var transceiver = await _pc?.addTransceiver(
             track: track,
             init: RTCRtpTransceiverInit(
               streams: [_stream],
@@ -231,13 +233,13 @@ class LocalStream {
             ));
         setPreferredCodec(transceiver);
       } else {
-        var transceiver = await _pc.addTransceiver(
+        var transceiver = await _pc?.addTransceiver(
             track: track,
             init: RTCRtpTransceiverInit(
               streams: [_stream],
               direction: TransceiverDirection.SendOnly,
               sendEncodings: track.kind == 'video'
-                  ? [videoConstraints[_constraints.resolution].encodings]
+                  ? [videoConstraints[_constraints.resolution]!.encodings]
                   : [],
             ));
         if (track.kind == 'video') {
@@ -247,7 +249,7 @@ class LocalStream {
     }
   }
 
-  void setPreferredCodec(RTCRtpTransceiver transceiver) {
+  void setPreferredCodec(RTCRtpTransceiver? transceiver) {
     // TODO(cloudwebrtc): need to add implementation in flutter-webrtc.
     /*
     if ('setCodecPreferences' in transceiver) {
@@ -264,21 +266,21 @@ class LocalStream {
   }
 
   Future<void> updateTrack(
-      {MediaStreamTrack next, MediaStreamTrack prev}) async {
+      {required MediaStreamTrack next, MediaStreamTrack? prev}) async {
     await _stream.addTrack(next);
     // If published, replace published track with track from new device
     if (prev != null && prev.enabled) {
       await _stream.removeTrack(prev);
       await prev.dispose();
       if (_pc != null) {
-        var senders = await _pc.getSenders();
-
-        senders.forEach((RTCRtpSender sender) {
-          if (sender?.track?.kind == next.kind) {
-            sender.track?.dispose();
-            sender.replaceTrack(next);
-          }
-        });
+        await _pc!
+            .getSenders()
+            .then((senders) => senders.forEach((RTCRtpSender sender) {
+                  if (sender.track.kind == next.kind) {
+                    sender.track.dispose();
+                    sender.replaceTrack(next);
+                  }
+                }));
       }
     } else {
       await _stream.addTrack(next);
@@ -297,17 +299,18 @@ class LocalStream {
   Future<void> unpublish() async {
     if (_pc != null) {
       var tracks = _stream.getTracks();
-      var senders = await _pc.getSenders();
-      senders.forEach((RTCRtpSender s) async {
-        if (s.track != null && tracks.contains((e) => s.track.id == e.id)) {
-          await _pc?.removeTrack(s);
-        }
-      });
+      await _pc!
+          .getSenders()
+          .then((senders) => senders.forEach((RTCRtpSender s) async {
+                if (tracks.contains((e) => s.track.id == e.id)) {
+                  await _pc?.removeTrack(s);
+                }
+              }));
     }
   }
 
   /// 'audio' | 'video'
-  Future<void> switchDevice(String kind, {String deviceId}) async {
+  Future<void> switchDevice(String kind, {required String deviceId}) async {
     _constraints.deviceId = deviceId;
     var prev = getTrack(kind);
     var next = await getNewTrack(kind);
@@ -331,16 +334,16 @@ class LocalStream {
 }
 
 class RemoteStream {
-  RTCDataChannel api;
-  MediaStream stream;
-  bool audio;
-  Layer video;
-  Layer _videoPreMute;
+  RTCDataChannel? api;
+  late MediaStream stream;
+  late bool audio;
+  late Layer video;
+  late Layer _videoPreMute;
   String get id => stream.id;
 
-  Function(Layer layer) preferLayer;
-  Function(String kind) mute;
-  Function(String kind) unmute;
+  Function(Layer layer)? preferLayer;
+  Function(String kind)? mute;
+  Function(String kind)? unmute;
 }
 
 final jsonEncoder = JsonEncoder();

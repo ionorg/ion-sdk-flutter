@@ -24,9 +24,9 @@ class GRPCWebSignal extends Signal {
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final Uuid _uuid = Uuid();
   final EventEmitter _emitter = EventEmitter();
-  grpc.SFUClient _client;
-  StreamController<grpc.SignalRequest> _requestStream;
-  ResponseStream<grpc.SignalReply> _replyStream;
+  late grpc.SFUClient _client;
+  late StreamController<grpc.SignalRequest> _requestStream;
+  late ResponseStream<grpc.SignalReply> _replyStream;
 
   void _onSignalReply(grpc.SignalReply reply) {
     switch (reply.whichPayload()) {
@@ -70,8 +70,8 @@ class GRPCWebSignal extends Signal {
 
   @override
   void close() {
-    _requestStream?.close();
-    _replyStream?.cancel();
+    _requestStream.close();
+    _replyStream.cancel();
   }
 
   @override
@@ -94,7 +94,7 @@ class GRPCWebSignal extends Signal {
       }
     };
     _emitter.once('description', handler);
-    return completer.future;
+    return completer.future as Future<RTCSessionDescription>;
   }
 
   @override
@@ -112,7 +112,7 @@ class GRPCWebSignal extends Signal {
       }
     };
     _emitter.once('description', handler);
-    return completer.future;
+    return completer.future as Future<RTCSessionDescription>;
   }
 
   @override
@@ -126,7 +126,7 @@ class GRPCWebSignal extends Signal {
   void trickle(Trickle trickle) {
     var reply = grpc.SignalRequest()
       ..trickle = (grpc.Trickle()
-        ..target = grpc.Trickle_Target.valueOf(trickle.target)
+        ..target = grpc.Trickle_Target.valueOf(trickle.target)!
         ..init = _jsonEncoder.convert(trickle.candidate.toMap()));
     _requestStream.add(reply);
   }

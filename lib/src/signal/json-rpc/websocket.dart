@@ -12,9 +12,9 @@ class SimpleWebSocket {
   final String _url;
   var _socket;
 
-  OnOpenCallback onOpen;
-  OnMessageCallback onMessage;
-  OnCloseCallback onClose;
+  OnOpenCallback? onOpen;
+  OnMessageCallback? onMessage;
+  OnCloseCallback? onClose;
 
   void connect() async {
     try {

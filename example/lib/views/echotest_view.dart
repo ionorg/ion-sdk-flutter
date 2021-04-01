@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:html';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -9,17 +10,17 @@ import 'package:flutter_ion/flutter_ion.dart' as ion;
 class EchoTestController extends GetxController {
   Rx<RTCVideoRenderer> localRenderer = RTCVideoRenderer().obs;
   Rx<RTCVideoRenderer> remoteRenderer = RTCVideoRenderer().obs;
-  ion.Signal _signalLocal;
-  ion.Signal _signalRemote;
-  ion.Client _clientPub;
-  ion.Client _clientSub;
-  ion.LocalStream _localStream;
-  ion.RemoteStream _remoteStream;
-  Timer _timer;
+  late ion.Signal _signalLocal;
+  late ion.Signal _signalRemote;
+  late ion.Client? _clientPub;
+  late ion.Client? _clientSub;
+  late ion.LocalStream? _localStream;
+  late ion.RemoteStream? _remoteStream;
+  late Timer _timer;
 
   RxInt subBitrate = 0.obs;
 
-  void preferLayer(ion.Layer layer) => _remoteStream.preferLayer(layer);
+  void preferLayer(ion.Layer layer) => _remoteStream?.preferLayer!(layer);
 
   @override
   @mustCallSuper
@@ -41,17 +42,17 @@ class EchoTestController extends GetxController {
 
         _localStream = await ion.LocalStream.getUserMedia(
             constraints: ion.Constraints.defaults..simulcast = true);
-        await _clientPub.publish(_localStream);
+        await _clientPub?.publish(_localStream!);
 
-        localSrcObject = _localStream.stream;
+        localSrcObject = _localStream!.stream;
       } else {
-        await _localStream.unpublish();
-        _localStream.stream.getTracks().forEach((element) {
+        await _localStream!.unpublish();
+        _localStream!.stream.getTracks().forEach((element) {
           element.dispose();
         });
-        await _localStream.stream.dispose();
+        await _localStream!.stream.dispose();
         _localStream = null;
-        _clientPub.close();
+        _clientPub!.close();
         _clientPub = null;
         localSrcObject = null;
       }
@@ -60,7 +61,7 @@ class EchoTestController extends GetxController {
         _signalRemote = ion.GRPCWebSignal('http://localhost:9090');
         _clientSub = await ion.Client.create(
             sid: 'test session', uid: 'client id02', signal: _signalRemote);
-        _clientSub.ontrack = (track, ion.RemoteStream stream) {
+        _clientSub?.ontrack = (track, ion.RemoteStream stream) {
           if (track.kind == 'video') {
             print('ontrack: stream => ${stream.id}');
             remoteSrcObject = stream.stream;
@@ -68,12 +69,12 @@ class EchoTestController extends GetxController {
             var bytesPrev;
             var timestampPrev;
             _timer = Timer.periodic(Duration(seconds: 1), (timer) {
-              getStats(bytesPrev, timestampPrev);
+              getStats(track, bytesPrev, timestampPrev);
             });
           }
         };
       } else {
-        _clientSub.close();
+        _clientSub?.close();
         _clientSub = null;
         remoteSrcObject = null;
         _timer.cancel();
@@ -83,19 +84,19 @@ class EchoTestController extends GetxController {
     }
   }
 
-  set localSrcObject(MediaStream stream) {
+  set localSrcObject(MediaStream? stream) {
     localRenderer.value.srcObject = stream;
     localRenderer.refresh();
   }
 
-  set remoteSrcObject(MediaStream stream) {
+  set remoteSrcObject(MediaStream? stream) {
     remoteRenderer.value.srcObject = stream;
     remoteRenderer.refresh();
   }
 
-  void getStats(bytesPrev, timestampPrev) async {
-    var results = await _clientSub.getSubStats(null);
-    results.forEach((report) {
+  void getStats(MediaStreamTrack track, bytesPrev, timestampPrev) async {
+    var results = await _clientSub?.getSubStats(track);
+    results!.forEach((report) {
       var now = report.timestamp;
       var bitrate;
       if ((report.type == 'ssrc' || report.type == 'inbound-rtp') &&
@@ -105,7 +106,7 @@ class EchoTestController extends GetxController {
           bitrate = (8 *
                   (WebRTC.platformIsWeb
                       ? bytes - bytesPrev
-                      : (int.tryParse(bytes) - int.tryParse(bytesPrev)))) /
+                      : (int.tryParse(bytes)! - int.tryParse(bytesPrev)!))) /
               (now - timestampPrev);
           bitrate = bitrate.floor();
         }

@@ -7,7 +7,7 @@ import 'package:uuid/uuid.dart';
 
 class Participant {
   Participant(this.title, this.renderer, this.stream);
-  MediaStream stream;
+  MediaStream? stream;
   String title;
   RTCVideoRenderer renderer;
 }
@@ -22,8 +22,8 @@ class PubSubController extends GetxController {
   }
 
   final ion.Signal _signal = ion.GRPCWebSignal('http://localhost:9090');
-  ion.Client _client;
-  ion.LocalStream _localStream;
+  ion.Client? _client;
+  ion.LocalStream? _localStream;
   final String _uuid = Uuid().v4();
 
   void pubsub() async {
@@ -32,9 +32,9 @@ class PubSubController extends GetxController {
           sid: 'test session', uid: _uuid, signal: _signal);
       _localStream = await ion.LocalStream.getUserMedia(
           constraints: ion.Constraints.defaults..simulcast = false);
-      await _client.publish(_localStream);
+      await _client?.publish(_localStream!);
 
-      _client.ontrack = (track, ion.RemoteStream remoteStream) async {
+      _client?.ontrack = (track, ion.RemoteStream remoteStream) async {
         if (track.kind == 'video') {
           print('ontrack: remote stream => ${remoteStream.id}');
           var renderer = RTCVideoRenderer();
@@ -46,16 +46,16 @@ class PubSubController extends GetxController {
 
       var renderer = RTCVideoRenderer();
       await renderer.initialize();
-      renderer.srcObject = _localStream.stream;
-      plist.add(Participant('Local', renderer, _localStream.stream));
+      renderer.srcObject = _localStream?.stream;
+      plist.add(Participant('Local', renderer, _localStream?.stream));
     } else {
-      await _localStream.unpublish();
-      _localStream.stream.getTracks().forEach((element) {
+      await _localStream?.unpublish();
+      _localStream?.stream.getTracks().forEach((element) {
         element.dispose();
       });
-      await _localStream.stream.dispose();
+      await _localStream?.stream.dispose();
       _localStream = null;
-      _client.close();
+      _client?.close();
       _client = null;
     }
   }
@@ -72,7 +72,7 @@ class PubSubTestView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '${item.title}:\n${item.stream.id}',
+                '${item.title}:\n${item.stream!.id}',
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
             ),

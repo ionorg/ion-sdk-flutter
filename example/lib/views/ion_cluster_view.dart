@@ -24,8 +24,7 @@ class PubSubController extends GetxController {
   }
 
   final ion.IonConnector _ion = ion.IonConnector(url: url);
-
-  ion.LocalStream _localStream;
+  late ion.LocalStream? _localStream;
   final String _uuid = Uuid().v4();
   final String _room = 'test room';
 
@@ -36,15 +35,16 @@ class PubSubController extends GetxController {
       if (success) {
         _localStream = await ion.LocalStream.getUserMedia(
             constraints: ion.Constraints.defaults..simulcast = false);
-        await _ion.sfu.publish(_localStream);
+        await _ion.sfu!.publish(_localStream!);
         var renderer = RTCVideoRenderer();
         await renderer.initialize();
-        renderer.srcObject = _localStream.stream;
-        plist[_localStream.stream.id] =
-            Peer('Local Stream', renderer, _localStream.stream);
+        renderer.srcObject = _localStream!.stream;
+        plist[_localStream!.stream.id] =
+            Peer('Local Stream', renderer, _localStream!.stream);
       }
 
-      _ion.message(_uuid, "all", <String, dynamic>{"text": "hello from flutter"});
+      _ion.message(
+          _uuid, 'all', <String, dynamic>{'text': 'hello from flutter'});
     };
 
     _ion.onLeave = (reason) {
@@ -103,11 +103,11 @@ class PubSubController extends GetxController {
   }
 
   void unpublish() async {
-    await _localStream.unpublish();
-    _localStream.stream.getTracks().forEach((element) {
+    await _localStream!.unpublish();
+    _localStream!.stream.getTracks().forEach((element) {
       element.stop();
     });
-    await _localStream.stream.dispose();
+    await _localStream!.stream.dispose();
     _localStream = null;
   }
 }

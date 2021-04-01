@@ -15,14 +15,16 @@ abstract class Sender {
 
 class RTCConfiguration {
   /// 'vp8' | 'vp9' | 'h264'
-  String codec;
+  late String codec;
 }
 
 class Transport {
   Transport(this.signal);
 
   static Future<Transport> create(
-      {int role, Signal signal, Map<String, dynamic> config}) async {
+      {required int role,
+      required Signal signal,
+      required Map<String, dynamic> config}) async {
     var transport = Transport(signal);
     var pc = await createPeerConnection(config);
 
@@ -48,21 +50,21 @@ class Transport {
   }
 
   bool hasRemoteDescription = false;
-  Function() onapiopen;
-  RTCDataChannel api;
+  Function()? onapiopen;
+  RTCDataChannel? api;
   Signal signal;
-  RTCPeerConnection pc;
+  RTCPeerConnection? pc;
   List<RTCIceCandidate> candidates = [];
 }
 
 class Client {
   Client(this.signal, this.config);
   static Future<Client> create(
-      {String sid,
-      String uid,
-      Signal signal,
-      Map<String, dynamic> config}) async {
-    var client = Client(signal, config);
+      {required String sid,
+      required String uid,
+      required Signal signal,
+      Map<String, dynamic>? config}) async {
+    var client = Client(signal, config ?? defaultConfig);
 
     client.transports = {
       RolePub: await Transport.create(
@@ -95,69 +97,73 @@ class Client {
   bool initialized = false;
   Signal signal;
   Map<int, Transport> transports = {};
-  Function(MediaStreamTrack track, RemoteStream stream) ontrack;
+  Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
 
   Future<List<StatsReport>> getPubStats(MediaStreamTrack selector) {
-    return transports[RolePub].pc.getStats(selector);
+    return transports[RolePub]!.pc!.getStats(selector);
   }
 
   Future<List<StatsReport>> getSubStats(MediaStreamTrack selector) {
-    return transports[RoleSub].pc.getStats(selector);
+    return transports[RoleSub]!.pc!.getStats(selector);
   }
 
   Future<void> publish(LocalStream stream) async {
-    await stream.publish(transports[RolePub].pc);
+    await stream.publish(transports[RolePub]!.pc!);
     await onnegotiationneeded();
   }
 
   void close() {
     transports.forEach((key, element) {
-      element.pc.close();
-      element.pc.dispose();
+      element.pc!.close();
+      element.pc!.dispose();
     });
     signal.close();
   }
 
   void join(String sid, String uid) async {
     try {
-      transports[RoleSub].pc.onTrack = (RTCTrackEvent ev) {
-        var remote = makeRemote(ev.streams[0], transports[RoleSub]);
+      transports[RoleSub]!.pc!.onTrack = (RTCTrackEvent ev) {
+        var remote = makeRemote(ev.streams[0], transports[RoleSub]!);
         ontrack?.call(ev.track, remote);
       };
 
-      var pc = transports[RolePub].pc;
-      var offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      var answer = await signal.join(sid, uid, offer);
-      await pc.setRemoteDescription(answer);
-      transports[RolePub].hasRemoteDescription = true;
-      transports[RolePub].candidates.forEach((c) => pc.addCandidate(c));
-      pc.onRenegotiationNeeded = () => onnegotiationneeded();
+      var pc = transports[RolePub]!.pc;
+      if (pc != null) {
+        var offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        var answer = await signal.join(sid, uid, offer);
+        await pc.setRemoteDescription(answer);
+        transports[RolePub]!.hasRemoteDescription = true;
+        transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
+        pc.onRenegotiationNeeded = () => onnegotiationneeded();
+      }
     } catch (e) {
       print('join: e => $e');
     }
   }
 
   void trickle(Trickle trickle) async {
-    var pc = transports[trickle.target].pc;
-    if (pc != null && transports[trickle.target].hasRemoteDescription) {
+    var pc = transports[trickle.target]!.pc;
+    if (pc != null && transports[trickle.target]!.hasRemoteDescription) {
       await pc.addCandidate(trickle.candidate);
     } else {
-      transports[trickle.target].candidates.add(trickle.candidate);
+      transports[trickle.target]!.candidates.add(trickle.candidate);
     }
   }
 
   void negotiate(RTCSessionDescription description) async {
     try {
-      var pc = transports[RoleSub].pc;
-      //print('sub offer ${description.sdp}');
-      await pc.setRemoteDescription(description);
-      transports[RoleSub]..candidates.forEach((c) => pc.addCandidate(c));
-      transports[RoleSub].candidates = [];
-      var answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-      signal.answer(answer);
-      //print('sub answer ${answer.sdp}');
+      var pc = transports[RoleSub]!.pc;
+      if (pc != null) {
+        //print('sub offer ${description.sdp}');
+        await pc.setRemoteDescription(description);
+        transports[RoleSub]!.candidates.forEach((c) => pc.addCandidate(c));
+        transports[RoleSub]!.candidates = [];
+        var answer = await pc.createAnswer();
+        await pc.setLocalDescription(answer);
+        signal.answer(answer);
+        //print('sub answer ${answer.sdp}');
+      }
     } catch (err) {
       log.error(err);
     }
@@ -165,12 +171,14 @@ class Client {
 
   Future<void> onnegotiationneeded() async {
     try {
-      var pc = transports[RolePub].pc;
-      var offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      var answer = await signal.offer(offer);
-      //print('pub answer ${answer.sdp}');
-      await pc.setRemoteDescription(answer);
+      var pc = transports[RolePub]!.pc;
+      if (pc != null) {
+        var offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+        var answer = await signal.offer(offer);
+        //print('pub answer ${answer.sdp}');
+        await pc.setRemoteDescription(answer);
+      }
     } catch (err) {
       log.error(err);
     }
