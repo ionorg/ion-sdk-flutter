@@ -59,7 +59,7 @@ class BizClient extends EventEmitter {
   }
 
   Future<void> leave(String uid) async {
-    Completer completer = Completer<bool>();
+    Completer completer = Completer<void>();
     var request = grpc.SignalRequest()..leave = grpc.Leave(uid: uid);
     _requestStream.add(request);
     Function() handler;

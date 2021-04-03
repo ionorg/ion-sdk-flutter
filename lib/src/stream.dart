@@ -276,8 +276,8 @@ class LocalStream {
         await _pc!
             .getSenders()
             .then((senders) => senders.forEach((RTCRtpSender sender) {
-                  if (sender.track.kind == next.kind) {
-                    sender.track.dispose();
+                  if (sender.track?.kind == next.kind) {
+                    sender.track?.dispose();
                     sender.replaceTrack(next);
                   }
                 }));
@@ -302,7 +302,7 @@ class LocalStream {
       await _pc!
           .getSenders()
           .then((senders) => senders.forEach((RTCRtpSender s) async {
-                if (tracks.contains((e) => s.track.id == e.id)) {
+                if (tracks.contains((e) => s.track?.id == e.id)) {
                   await _pc?.removeTrack(s);
                 }
               }));

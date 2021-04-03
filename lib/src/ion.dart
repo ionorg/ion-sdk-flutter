@@ -61,12 +61,12 @@ class IonConnector {
     _signal = GRPCWebSignal(url);
     //bind internal events.
     _biz.on('join-reply', (bool success, String reason) async {
-      onJoin?.call(success, reason);
       if (success && _sfu == null) {
         _sfu = await Client.create(sid: _sid, uid: _uid, signal: _signal);
         _sfu?.ontrack = (MediaStreamTrack track, RemoteStream stream) {
           onTrack?.call(track, stream);
         };
+        onJoin?.call(success, reason);
       }
     });
     _biz.on('leave-reply', (String reason) => onLeave?.call(reason));

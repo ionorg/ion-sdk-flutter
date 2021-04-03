@@ -5,7 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
 import 'package:uuid/uuid.dart';
 
-var url = 'http://localhost:5551';
+var url = 'http://127.0.0.1:5551';
 
 class Peer {
   Peer(this.title, this.renderer, this.stream);

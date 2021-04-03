@@ -1,6 +1,11 @@
 # Changelog
 
 --------------------------------------------
+[0.4.2] - 2020.04.03
+
+* Upgrade flutter-webrtc to 0.6.2.
+* Fix publish for Android/iOS.
+
 [0.4.1] - 2020.04.03
 
 * upgrade to flutter-webrtc 0.6.2.
