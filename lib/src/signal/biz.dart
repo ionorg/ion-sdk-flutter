@@ -28,7 +28,11 @@ class BizClient extends EventEmitter {
   void connect() {
     _replyStream = _client.signal(_requestStream.stream);
     _replyStream.listen(_onSignalReply,
-        onDone: () => emit('error', Error()), onError: (e) => emit('error', e));
+        onDone: () => emit('error', Error()),
+        onError: (e) {
+          print('grpc err ${e.toString()}');
+          emit('error', Error());
+        });
   }
 
   void close() {

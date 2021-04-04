@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[0.4.3] - 2020.04.05
+
+* Fix publish for macOS.
+
 [0.4.2] - 2020.04.03
 
 * Upgrade flutter-webrtc to 0.6.2.

@@ -5,7 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
 import 'package:uuid/uuid.dart';
 
-var url = 'http://127.0.0.1:5551';
+var url = 'http://192.168.43.68:5551';
 
 class Peer {
   Peer(this.title, this.renderer, this.stream);
@@ -72,7 +72,8 @@ class PubSubController extends GetxController {
         var renderer = RTCVideoRenderer();
         await renderer.initialize();
         renderer.srcObject = remoteStream.stream;
-        plist[remoteStream.id] = Peer('Remote', renderer, remoteStream.stream);
+        plist[remoteStream.stream.id] =
+            Peer('Remote', renderer, remoteStream.stream);
       }
     };
 
@@ -90,10 +91,7 @@ class PubSubController extends GetxController {
           break;
         case ion.StreamState.REMOVE:
           if (plist.isNotEmpty) {
-            var peer = plist[event.streams[0].id];
-            if (peer != null) {
-              plist.remove(event.streams[0].id);
-            }
+            plist.remove(event.streams[0].id);
           }
           break;
         case ion.StreamState.NONE:

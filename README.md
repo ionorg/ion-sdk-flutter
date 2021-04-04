@@ -11,7 +11,7 @@ Edit `pubspec.yaml` in your flutter projects.
 Add
 
 ```yml
-    flutter_ion: ^0.3.1
+    flutter_ion:
 ```
 
 ## Platform Support

@@ -5,6 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'logger.dart';
 import 'signal/signal.dart';
 import 'stream.dart';
+import 'utils.dart';
 
 abstract class Sender {
   MediaStream get stream;
@@ -129,7 +130,7 @@ class Client {
 
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
-        var offer = await pc.createOffer();
+        var offer = await pc.createOffer({});
         await pc.setLocalDescription(offer);
         var answer = await signal.join(sid, uid, offer);
         await pc.setRemoteDescription(answer);
@@ -138,7 +139,7 @@ class Client {
         pc.onRenegotiationNeeded = () => onnegotiationneeded();
       }
     } catch (e) {
-      print('join: e => $e');
+      print('join: e => ${e.toString()}');
     }
   }
 
@@ -155,17 +156,23 @@ class Client {
     try {
       var pc = transports[RoleSub]!.pc;
       if (pc != null) {
-        //print('sub offer ${description.sdp}');
+        if (WebRTC.platformIsWeb || WebRTC.platformIsAndroid) {
+          //description.sdp = description.sdp?.replaceAll('640c1f', '42e01f');
+        }
+        print('sub offer ${description.sdp}');
         await pc.setRemoteDescription(description);
         transports[RoleSub]!.candidates.forEach((c) => pc.addCandidate(c));
         transports[RoleSub]!.candidates = [];
-        var answer = await pc.createAnswer();
+        var answer = await pc.createAnswer({});
         await pc.setLocalDescription(answer);
+        if (WebRTC.platformIsWeb || WebRTC.platformIsAndroid) {
+          //answer.sdp = answer.sdp?.replaceAll('42e01f', '640c1f');
+        }
         signal.answer(answer);
-        //print('sub answer ${answer.sdp}');
+        print('sub answer ${answer.sdp}');
       }
     } catch (err) {
-      log.error(err);
+      log.error('negotiate: e => ${err.toString()}');
     }
   }
 
@@ -173,14 +180,34 @@ class Client {
     try {
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
-        var offer = await pc.createOffer();
+        var offer = await pc.createOffer({});
+        setPreferredCodec(offer);
+        print('pub offer ${offer.sdp}');
         await pc.setLocalDescription(offer);
         var answer = await signal.offer(offer);
-        //print('pub answer ${answer.sdp}');
+        print('pub answer ${answer.sdp}');
         await pc.setRemoteDescription(answer);
       }
     } catch (err) {
-      log.error(err);
+      log.error('onnegotiationneeded: e => ${err.toString()}');
     }
+  }
+
+  void setPreferredCodec(RTCSessionDescription description) {
+    var capSel = CodecCapabilitySelector(description.sdp!);
+    var acaps = capSel.getCapabilities('audio');
+    acaps!.codecs = acaps.codecs
+        .where((e) => (e['codec'] as String).toLowerCase() == 'opus')
+        .toList();
+    acaps.setCodecPreferences('audio', acaps.codecs);
+    capSel.setCapabilities(acaps);
+
+    var vcaps = capSel.getCapabilities('video');
+    vcaps!.codecs = vcaps.codecs
+        .where((e) => (e['codec'] as String).toLowerCase() == 'vp8')
+        .toList();
+    vcaps.setCodecPreferences('audio', vcaps.codecs);
+    capSel.setCapabilities(vcaps);
+    description.sdp = capSel.sdp();
   }
 }
