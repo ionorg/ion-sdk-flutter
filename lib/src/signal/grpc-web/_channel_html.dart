@@ -1,9 +1,11 @@
 import 'package:grpc/grpc.dart';
 import 'websocket_channel.dart';
 
-ClientChannel createChannel(String host, int port) {
+ClientChannel createChannel(String host, int port, bool secure) {
   return WebSocketClientChannel(host,
       port: port,
-      options:
-          const ChannelOptions(credentials: ChannelCredentials.insecure()));
+      options: ChannelOptions(
+          credentials: secure
+              ? ChannelCredentials.secure()
+              : ChannelCredentials.insecure()));
 }

@@ -34,7 +34,7 @@ class EchoTestController extends GetxController {
   Future<void> echotest() async {
     try {
       if (_clientPub == null) {
-        _signalLocal = ion.GRPCWebSignal('http://localhost:9090');
+        _signalLocal = ion.GRPCWebSignal('http://127.0.0.1:9090');
 
         _clientPub = await ion.Client.create(
             sid: 'test session', uid: 'client id01', signal: _signalLocal);
@@ -57,7 +57,7 @@ class EchoTestController extends GetxController {
       }
 
       if (_clientSub == null) {
-        _signalRemote = ion.GRPCWebSignal('http://localhost:9090');
+        _signalRemote = ion.GRPCWebSignal('http://127.0.0.1:9090');
         _clientSub = await ion.Client.create(
             sid: 'test session', uid: 'client id02', signal: _signalRemote);
         _clientSub?.ontrack = (track, ion.RemoteStream stream) {

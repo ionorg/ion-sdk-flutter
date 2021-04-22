@@ -13,7 +13,7 @@ import 'grpc-web/_channel.dart'
 class BizClient extends EventEmitter {
   BizClient(this._uri) {
     var uri = Uri.parse(_uri);
-    var channel = createChannel(uri.host, uri.port);
+    var channel = createChannel(uri.host, uri.port, uri.scheme == 'https');
     _client = grpc.BizClient(channel);
     _requestStream = StreamController<grpc.SignalRequest>();
   }

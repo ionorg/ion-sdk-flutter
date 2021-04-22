@@ -21,7 +21,7 @@ class PubSubController extends GetxController {
     super.onInit();
   }
 
-  final ion.Signal _signal = ion.GRPCWebSignal('http://localhost:9090');
+  final ion.Signal _signal = ion.GRPCWebSignal('http://127.0.0.1:9090');
   ion.Client? _client;
   ion.LocalStream? _localStream;
   final String _uuid = Uuid().v4();
