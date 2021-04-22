@@ -1,6 +1,10 @@
 # Changelog
 
 --------------------------------------------
+[0.4.4] - 2020.04.22
+
+* Add support https scheme.
+
 [0.4.3] - 2020.04.05
 
 * Fix publish for macOS.
