@@ -62,7 +62,7 @@ class IonConnector {
     //bind internal events.
     _biz.on('join-reply', (bool success, String reason) async {
       if (success && _sfu == null) {
-        _sfu = await Client.create(sid: _sid, uid: _uid, signal: _signal);
+        _sfu = await Client.create(sid: _sid, uid: _uid, signal: _signal, config: config);
         _sfu?.ontrack = (MediaStreamTrack track, RemoteStream stream) {
           onTrack?.call(track, stream);
         };
