@@ -188,26 +188,30 @@ class Client {
         print('pub answer ${answer.sdp}');
         await pc.setRemoteDescription(answer);
       }
-    } catch (err) {
-      log.error('onnegotiationneeded: e => ${err.toString()}');
+    } catch (err, st) {
+      log.error('onnegotiationneeded: e => ${err.toString()} $st');
     }
   }
 
   void setPreferredCodec(RTCSessionDescription description) {
     var capSel = CodecCapabilitySelector(description.sdp!);
     var acaps = capSel.getCapabilities('audio');
-    acaps!.codecs = acaps.codecs
-        .where((e) => (e['codec'] as String).toLowerCase() == 'opus')
-        .toList();
-    acaps.setCodecPreferences('audio', acaps.codecs);
-    capSel.setCapabilities(acaps);
+    if (acaps != null) {
+      acaps.codecs = acaps.codecs
+          .where((e) => (e['codec'] as String).toLowerCase() == 'opus')
+          .toList();
+      acaps.setCodecPreferences('audio', acaps.codecs);
+      capSel.setCapabilities(acaps);
+    }
 
     var vcaps = capSel.getCapabilities('video');
-    vcaps!.codecs = vcaps.codecs
-        .where((e) => (e['codec'] as String).toLowerCase() == 'vp8')
-        .toList();
-    vcaps.setCodecPreferences('audio', vcaps.codecs);
-    capSel.setCapabilities(vcaps);
+    if (vcaps != null) {
+      vcaps.codecs = vcaps.codecs
+          .where((e) => (e['codec'] as String).toLowerCase() == 'vp8')
+          .toList();
+      vcaps.setCodecPreferences('video', vcaps.codecs);
+      capSel.setCapabilities(vcaps);
+    }
     description.sdp = capSel.sdp();
   }
 }
