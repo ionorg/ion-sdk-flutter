@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -6,6 +7,9 @@ import 'logger.dart';
 import 'signal/signal.dart';
 import 'stream.dart';
 import 'utils.dart';
+
+const API_CHANNEL = 'ion-sfu';
+const ERR_NO_SESSION = 'no active session, join first';
 
 abstract class Sender {
   MediaStream get stream;
@@ -33,18 +37,11 @@ class Transport {
 
     if (role == RolePub) {
       transport.api = await pc.createDataChannel(
-          'ion-sfu', RTCDataChannelInit()..maxRetransmits = 30);
+          API_CHANNEL, RTCDataChannelInit()..maxRetransmits = 30);
     }
 
-    pc.onDataChannel = (channel) {
-      transport.api = channel;
-      transport.onapiopen?.call();
-    };
-
     pc.onIceCandidate = (candidate) {
-      if (candidate != null) {
-        signal.trickle(Trickle(target: role, candidate: candidate));
-      }
+      signal.trickle(Trickle(target: role, candidate: candidate));
     };
 
     return transport;
@@ -76,7 +73,7 @@ class Client {
 
     client.signal.onready = () async {
       if (!client.initialized) {
-        client.join(sid, uid);
+        await client.join(sid, uid);
         client.initialized = true;
       }
     };
@@ -87,6 +84,9 @@ class Client {
   }
 
   Map<String, dynamic> config;
+  Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
+  Function(RTCDataChannel channel)? ondatachannel;
+  Function(List<String> list)? onspeaker;
 
   static final defaultConfig = {
     'iceServers': [
@@ -98,7 +98,6 @@ class Client {
   bool initialized = false;
   Signal signal;
   Map<int, Transport> transports = {};
-  Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
 
   Future<List<StatsReport>> getPubStats(MediaStreamTrack selector) {
     return transports[RolePub]!.pc!.getStats(selector);
@@ -121,11 +120,25 @@ class Client {
     signal.close();
   }
 
-  void join(String sid, String uid) async {
+  Future<void> join(String sid, String uid) async {
+    var completer = Completer<void>();
     try {
       transports[RoleSub]!.pc!.onTrack = (RTCTrackEvent ev) {
         var remote = makeRemote(ev.streams[0], transports[RoleSub]!);
         ontrack?.call(ev.track, remote);
+      };
+      transports[RoleSub]!.pc!.onDataChannel = (RTCDataChannel channel) {
+        if (true /* TODO(implement RTCDataChannel.label): channel.label == API_CHANNEL*/) {
+          transports[RoleSub]!.api = channel;
+          transports[RoleSub]!.onapiopen?.call();
+          final json = JsonDecoder();
+          channel.onMessage = (RTCDataChannelMessage msg) {
+            onspeaker?.call(json.convert(msg.text));
+          };
+          completer.complete();
+          return;
+        }
+        ondatachannel?.call(channel);
       };
 
       var pc = transports[RolePub]!.pc;
@@ -141,6 +154,7 @@ class Client {
     } catch (e) {
       print('join: e => ${e.toString()}');
     }
+    return completer.future;
   }
 
   void trickle(Trickle trickle) async {
@@ -209,5 +223,14 @@ class Client {
     vcaps.setCodecPreferences('audio', vcaps.codecs);
     capSel.setCapabilities(vcaps);
     description.sdp = capSel.sdp();
+  }
+
+  Future<RTCDataChannel> createDataChannel(String label) {
+    if (transports.isEmpty) {
+      throw AssertionError(ERR_NO_SESSION);
+    }
+    return transports[RolePub]!
+        .pc!
+        .createDataChannel(label, RTCDataChannelInit()..maxRetransmits = 30);
   }
 }
