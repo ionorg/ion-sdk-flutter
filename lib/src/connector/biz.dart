@@ -5,8 +5,8 @@ import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart' as grpc;
 
-import '../signal/_proto/library/biz.pbgrpc.dart' as pb;
-import '../signal/_proto/library/ion.pb.dart' as ion;
+import '../_library/apps/biz/proto/biz.pbgrpc.dart' as pb;
+import '../_library/proto/ion/ion.pb.dart' as ion;
 import '../stream.dart';
 import 'ion.dart';
 
@@ -60,6 +60,8 @@ class Message {
 }
 
 class IonAppBiz extends IonService {
+  @override
+  String name = 'biz';
   IonBaseConnector connector;
   _IonBizGRPCClient? _biz;
   Function(Error err)? onError;
@@ -71,12 +73,11 @@ class IonAppBiz extends IonService {
   Function(MediaStreamTrack track, RemoteStream stream)? onTrack;
 
   IonAppBiz(this.connector) {
-    name = 'biz';
     connector.registerService(this);
   }
 
   @override
-  void connect() {
+  Future<void> connect() async {
     if (_biz == null) {
       var biz = _IonBizGRPCClient(connector, this);
       biz.on('join-reply',

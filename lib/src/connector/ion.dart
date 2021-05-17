@@ -5,7 +5,7 @@ import '../signal/grpc-web/_channel.dart'
 
 abstract class IonService {
   late String name;
-  void connect();
+  Future<void> connect();
   bool connected = false;
   void close();
 }
@@ -15,12 +15,12 @@ class IonBaseConnector {
   Map<String, String> metadata = <String, String>{};
   Map<String, String> trailers = <String, String>{};
   Map<String, IonService> services = <String, IonService>{};
-  void Function(String service)? onopen;
-  void Function(String service, Error? err)? onclose;
+  void Function(IonService service)? onopen;
+  void Function(IonService service, grpc.GrpcError? err)? onclose;
 
-  IonBaseConnector(this._uri, String? token) {
+  IonBaseConnector(this._uri, {String? token}) {
     if (token != null) {
-      metadata['Authorization'] = token;
+      metadata['authorization'] = token;
     }
   }
 
@@ -31,12 +31,8 @@ class IonBaseConnector {
 
   grpc.CallOptions callOptions() {
     return grpc.CallOptions(
-      providers: [_provider],
+      metadata: metadata,
     );
-  }
-
-  FutureOr<void> _provider(Map<String, String> metadata, String uri) async {
-    metadata = this.metadata;
   }
 
   void close() {
@@ -57,7 +53,7 @@ class IonBaseConnector {
       }
     });
     service.connected = true;
-    onopen?.call(service.name);
+    onopen?.call(service);
   }
 
   void onTrailers(IonService service, Map<String, String> trailers) {
@@ -70,12 +66,12 @@ class IonBaseConnector {
 
   void onClosed(IonService service) {
     service.connected = false;
-    onclose?.call(service.name, null);
+    onclose?.call(service, null);
   }
 
-  void onError(IonService service, Error err) {
+  void onError(IonService service, grpc.GrpcError err) {
     service.connected = false;
-    onclose?.call(service.name, err);
+    onclose?.call(service, err);
   }
 
   void registerService(IonService service) {

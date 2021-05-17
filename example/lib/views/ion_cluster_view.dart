@@ -21,52 +21,13 @@ class PubSubController extends GetxController {
   @mustCallSuper
   void onInit() {
     super.onInit();
-  }
-
-  final ion.IonConnector _ion = ion.IonConnector(url: url);
-  late ion.LocalStream? _localStream;
-  final String _uuid = Uuid().v4();
-  final String _room = 'test room';
-
-  void join() async {
-    _ion.onJoin = (bool success, String reason) async {
-      print('onJoin success = $success, reason = $reason');
-
-      if (success) {
-        _localStream = await ion.LocalStream.getUserMedia(
-            constraints: ion.Constraints.defaults..simulcast = false);
-        await _ion.sfu!.publish(_localStream!);
-        var renderer = RTCVideoRenderer();
-        await renderer.initialize();
-        renderer.srcObject = _localStream!.stream;
-        plist[_localStream!.stream.id] =
-            Peer('Local Stream', renderer, _localStream!.stream);
-      }
-
-      _ion.message(
-          _uuid, 'all', <String, dynamic>{'text': 'hello from flutter'});
+    _biz = ion.IonAppBiz(_connector);
+    _sfu = ion.IonSDKSFU(_connector);
+    _sfu.onspeaker = (List<dynamic> list) {
+      print('onspeaker: $list');
     };
 
-    _ion.onLeave = (reason) {
-      print('onLeave reason = $reason');
-    };
-
-    _ion.onPeerEvent = (ion.PeerEvent event) {
-      print(
-          'onPeerEvent state = ${event.state},  peer uid = ${event.peer.uid}, info = ${event.peer.info.toString()}');
-    };
-
-    _ion.onMessage = (ion.Message msg) {
-      print(
-          'onMessage from = ${msg.from},  to = ${msg.to}, data = ${msg.data}');
-    };
-
-    _ion.join(
-        sid: _room,
-        uid: _uuid,
-        info: <String, String>{'name': 'flutter_client'});
-
-    _ion.onTrack = (track, ion.RemoteStream remoteStream) async {
+    _sfu.ontrack = (track, ion.RemoteStream remoteStream) async {
       if (track.kind == 'video') {
         print('onTrack: remote stream => ${remoteStream.id}');
         var renderer = RTCVideoRenderer();
@@ -76,8 +37,60 @@ class PubSubController extends GetxController {
             Peer('Remote', renderer, remoteStream.stream);
       }
     };
+  }
 
-    _ion.onStreamEvent = (ion.StreamEvent event) {
+  final ion.IonBaseConnector _connector =
+      ion.IonBaseConnector(url, token: 'token123123123');
+  late ion.IonAppBiz _biz;
+  late ion.IonSDKSFU _sfu;
+  late ion.LocalStream? _localStream;
+  final String _uuid = Uuid().v4();
+  final String _room = 'test room';
+
+  void join() async {
+    await _biz.connect();
+
+    _biz.onJoin = (bool success, String reason) async {
+      print('onJoin success = $success, reason = $reason');
+
+      if (success) {
+        await _sfu.connect();
+        await _sfu.join(_room, _uuid);
+
+        _localStream = await ion.LocalStream.getUserMedia(
+            constraints: ion.Constraints.defaults..simulcast = false);
+        await _sfu.publish(_localStream!);
+        var renderer = RTCVideoRenderer();
+        await renderer.initialize();
+        renderer.srcObject = _localStream!.stream;
+        plist[_localStream!.stream.id] =
+            Peer('Local Stream', renderer, _localStream!.stream);
+      }
+
+      _biz.message(
+          _uuid, 'all', <String, dynamic>{'text': 'hello from flutter'});
+    };
+
+    _biz.onLeave = (reason) {
+      print('onLeave reason = $reason');
+    };
+
+    _biz.onPeerEvent = (ion.PeerEvent event) {
+      print(
+          'onPeerEvent state = ${event.state},  peer uid = ${event.peer.uid}, info = ${event.peer.info.toString()}');
+    };
+
+    _biz.onMessage = (ion.Message msg) {
+      print(
+          'onMessage from = ${msg.from},  to = ${msg.to}, data = ${msg.data}');
+    };
+
+    _biz.join(
+        sid: _room,
+        uid: _uuid,
+        info: <String, String>{'name': 'flutter_client'});
+
+    _biz.onStreamEvent = (ion.StreamEvent event) {
       print(
           'onStreamEvent state = ${event.state}, sid = ${event.sid}, uid = ${event.uid},  streams = ${event.streams.toString()}');
       switch (event.state) {

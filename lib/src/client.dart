@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:pedantic/pedantic.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -44,6 +45,16 @@ class Transport {
       signal.trickle(Trickle(target: role, candidate: candidate));
     };
 
+    pc.onIceConnectionState =  (state) => {
+      if (pc.iceConnectionState == RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+        /* TODO: implement pc.restartIce for flutter_webrtc.
+        if (pc.restartIce) {
+          // this will trigger onNegotiationNeeded
+          pc.restartIce();
+        }*/
+      }
+    };
+
     return transport;
   }
 
@@ -56,7 +67,10 @@ class Transport {
 }
 
 class Client {
-  Client(this.signal, this.config);
+  Client(this.signal, this.config) {
+    signal.onnegotiate = negotiate;
+    signal.ontrickle = trickle;
+  }
   static Future<Client> create(
       {required String sid,
       required String uid,
@@ -77,8 +91,7 @@ class Client {
         client.initialized = true;
       }
     };
-    signal.onnegotiate = (desc) => client.negotiate(desc);
-    signal.ontrickle = (trickle) => client.trickle(trickle);
+
     client.signal.connect();
     return client;
   }
@@ -86,7 +99,7 @@ class Client {
   Map<String, dynamic> config;
   Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
   Function(RTCDataChannel channel)? ondatachannel;
-  Function(List<String> list)? onspeaker;
+  Function(List<dynamic> list)? onspeaker;
 
   static final defaultConfig = {
     'iceServers': [
@@ -136,23 +149,27 @@ class Client {
             onspeaker?.call(json.convert(msg.text));
           };
           completer.complete();
-          return;
         }
         ondatachannel?.call(channel);
       };
 
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
-        var offer = await pc.createOffer({});
-        await pc.setLocalDescription(offer);
-        var answer = await signal.join(sid, uid, offer);
-        await pc.setRemoteDescription(answer);
-        transports[RolePub]!.hasRemoteDescription = true;
-        transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
-        pc.onRenegotiationNeeded = () => onnegotiationneeded();
+        try {
+          unawaited(pc.createOffer({}).then((offer) async {
+            await pc.setLocalDescription(offer);
+            var answer = await signal.join(sid, uid, offer);
+            await pc.setRemoteDescription(answer);
+            transports[RolePub]!.hasRemoteDescription = true;
+            transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
+          }));
+        } catch (e) {
+          completer.completeError(e);
+        }
       }
     } catch (e) {
       print('join: e => ${e.toString()}');
+      completer.completeError(e);
     }
     return completer.future;
   }

@@ -6,64 +6,78 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart' as grpc;
 import 'package:uuid/uuid.dart';
 
+import '../_library/proto/sfu/sfu.pbgrpc.dart' as pb;
 import '../client.dart';
-import '../signal/_proto/library/sfu.pbgrpc.dart' as pb;
 import '../signal/signal.dart';
 import '../stream.dart';
 import 'ion.dart';
 
 class IonSDKSFU extends IonService {
-  Map<String, dynamic> config;
+  @override
+  String name = 'sfu';
+  Map<String, dynamic>? config;
   IonBaseConnector connector;
   _IonSFUGRPCSignal? _sig;
-  Client? _sfu;
+  late Client _sfu;
   Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
   Function(RTCDataChannel channel)? ondatachannel;
-  Function(List<String> list)? onspeaker;
+  Function(List<dynamic> list)? onspeaker;
 
-  IonSDKSFU(this.connector, this.config) {
-    name = 'sfu';
+  IonSDKSFU(this.connector, {this.config}) {
     connector.registerService(this);
   }
 
   @override
-  void connect() {
+  Future<void> connect() async {
     _sig ??= _IonSFUGRPCSignal(connector, this);
-    _sfu ??= Client(_sig!, config);
-    _sfu?.ontrack = (MediaStreamTrack track, RemoteStream stream) =>
+    await _sig?.connect();
+
+    _sfu = Client(_sig!, config ?? {});
+    _sfu.transports = {
+      RolePub: await Transport.create(
+          role: RolePub, signal: _sig!, config: config ?? {}),
+      RoleSub: await Transport.create(
+          role: RoleSub, signal: _sig!, config: config ?? {})
+    };
+
+    _sfu.signal.onready = () async {
+      if (_sfu.initialized == false) {
+        _sfu.initialized = true;
+      }
+    };
+
+    _sfu.transports[RolePub]!.pc!.onRenegotiationNeeded = () => _sfu.onnegotiationneeded();
+    _sfu.ontrack = (MediaStreamTrack track, RemoteStream stream) =>
         ontrack?.call(track, stream);
-    _sfu?.ondatachannel =
+    _sfu.ondatachannel =
         (RTCDataChannel channel) => ondatachannel?.call(channel);
-    _sfu?.onspeaker = (List<String> list) => onspeaker?.call(list);
+    _sfu.onspeaker = (List<dynamic> list) => onspeaker?.call(list);
   }
 
-  Future<void>? join(String sid, String uid) {
-    return _sfu?.join(sid, uid);
+  Future<void> join(String sid, String uid) {
+    return _sfu.join(sid, uid);
   }
 
   Future<List<StatsReport>>? getPubStats(MediaStreamTrack selector) {
-    return _sfu?.getPubStats(selector);
+    return _sfu.getPubStats(selector);
   }
 
   Future<List<StatsReport>>? getSubStats(MediaStreamTrack selector) {
-    return _sfu?.getSubStats(selector);
+    return _sfu.getSubStats(selector);
   }
 
-  Future<void>? publish(LocalStream stream) {
-    return _sfu?.publish(stream);
+  Future<void> publish(LocalStream stream) {
+    return _sfu.publish(stream);
   }
 
-  Future<RTCDataChannel>? createDataChannel(String label) {
-    return _sfu?.createDataChannel(label);
+  Future<RTCDataChannel> createDataChannel(String label) {
+    return _sfu.createDataChannel(label);
   }
 
   @override
   void close() {
-    if (_sfu != null) {
-      _sfu?.close();
-      _sfu = null;
-      _sig = null;
-    }
+    _sfu.close();
+    _sig = null;
   }
 }
 
@@ -116,7 +130,7 @@ class _IonSFUGRPCSignal extends Signal {
   }
 
   @override
-  void connect() {
+  Future<void> connect() async {
     _replyStream = _client.signal(_requestStream.stream);
     _replyStream.listen(_onSignalReply, onDone: () {
       onclose?.call(0, 'closed');
