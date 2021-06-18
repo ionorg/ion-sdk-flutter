@@ -52,7 +52,7 @@ class JsonRPCSignal extends Signal {
   }
 
   @override
-  void connect() {
+  Future<void> connect() async {
     _socket.connect();
   }
 

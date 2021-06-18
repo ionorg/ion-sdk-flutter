@@ -3,31 +3,100 @@ import 'dart:convert';
 
 import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:grpc/grpc.dart';
+import 'package:grpc/grpc.dart' as grpc;
 import 'package:uuid/uuid.dart';
 
 import '../_library/proto/sfu/sfu.pbgrpc.dart' as pb;
+import '../client.dart';
+import '../signal/signal.dart';
+import '../stream.dart';
+import 'ion.dart';
 
-import 'grpc-web/_channel.dart'
-    if (dart.library.html) 'grpc-web/_channel_html.dart';
-import 'signal.dart';
+class IonSDKSFU extends IonService {
+  @override
+  String name = 'sfu';
+  Map<String, dynamic>? config;
+  IonBaseConnector connector;
+  _IonSFUGRPCSignal? _sig;
+  late Client _sfu;
+  Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
+  Function(RTCDataChannel channel)? ondatachannel;
+  Function(List<dynamic> list)? onspeaker;
 
-class GRPCWebSignal extends Signal {
-  GRPCWebSignal(this._uri) {
-    var uri = Uri.parse(_uri);
-    var channel = createChannel(uri.host, uri.port, uri.scheme == 'https');
-    _client = pb.SFUClient(channel);
-    _requestStream = StreamController<pb.SignalRequest>();
+  IonSDKSFU(this.connector, {this.config}) {
+    connector.registerService(this);
   }
 
-  final String _uri;
+  @override
+  Future<void> connect() async {
+    _sig ??= _IonSFUGRPCSignal(connector, this);
+    await _sig?.connect();
+
+    _sfu = Client(_sig!, config ?? {});
+    _sfu.transports = {
+      RolePub: await Transport.create(
+          role: RolePub, signal: _sig!, config: config ?? {}),
+      RoleSub: await Transport.create(
+          role: RoleSub, signal: _sig!, config: config ?? {})
+    };
+
+    _sfu.signal.onready = () async {
+      if (_sfu.initialized == false) {
+        _sfu.initialized = true;
+      }
+    };
+
+    _sfu.transports[RolePub]!.pc!.onRenegotiationNeeded = () => _sfu.onnegotiationneeded();
+    _sfu.ontrack = (MediaStreamTrack track, RemoteStream stream) =>
+        ontrack?.call(track, stream);
+    _sfu.ondatachannel =
+        (RTCDataChannel channel) => ondatachannel?.call(channel);
+    _sfu.onspeaker = (List<dynamic> list) => onspeaker?.call(list);
+  }
+
+  Future<void> join(String sid, String uid) {
+    return _sfu.join(sid, uid);
+  }
+
+  Future<List<StatsReport>>? getPubStats(MediaStreamTrack selector) {
+    return _sfu.getPubStats(selector);
+  }
+
+  Future<List<StatsReport>>? getSubStats(MediaStreamTrack selector) {
+    return _sfu.getSubStats(selector);
+  }
+
+  Future<void> publish(LocalStream stream) {
+    return _sfu.publish(stream);
+  }
+
+  Future<RTCDataChannel> createDataChannel(String label) {
+    return _sfu.createDataChannel(label);
+  }
+
+  @override
+  void close() {
+    _sfu.close();
+    _sig = null;
+  }
+}
+
+class _IonSFUGRPCSignal extends Signal {
+  IonService service;
+  IonBaseConnector connector;
   final JsonDecoder _jsonDecoder = JsonDecoder();
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final Uuid _uuid = Uuid();
   final EventEmitter _emitter = EventEmitter();
   late pb.SFUClient _client;
   late StreamController<pb.SignalRequest> _requestStream;
-  late ResponseStream<pb.SignalReply> _replyStream;
+  late grpc.ResponseStream<pb.SignalReply> _replyStream;
+
+  _IonSFUGRPCSignal(this.connector, this.service) {
+    _client = pb.SFUClient(connector.grpcClientChannel(),
+        options: connector.callOptions());
+    _requestStream = StreamController<pb.SignalRequest>();
+  }
 
   void _onSignalReply(pb.SignalReply reply) {
     switch (reply.whichPayload()) {
@@ -63,9 +132,19 @@ class GRPCWebSignal extends Signal {
   @override
   Future<void> connect() async {
     _replyStream = _client.signal(_requestStream.stream);
-    _replyStream.listen(_onSignalReply,
-        onDone: () => onclose?.call(0, 'closed'),
-        onError: (e) => onclose?.call(500, '$e'));
+    _replyStream.listen(_onSignalReply, onDone: () {
+      onclose?.call(0, 'closed');
+      _replyStream.trailers
+          .then((trailers) => connector.onTrailers(service, trailers));
+      connector.onClosed(service);
+    }, onError: (e) {
+      onclose?.call(500, '$e');
+      _replyStream.trailers
+          .then((trailers) => connector.onTrailers(service, trailers));
+      connector.onError(service, e);
+    });
+    _replyStream.headers
+        .then((headers) => connector.onHeaders(service, headers));
     onready?.call();
   }
 

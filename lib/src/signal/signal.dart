@@ -40,7 +40,7 @@ abstract class Signal {
 
   void trickle(Trickle trickle);
 
-  void connect();
+  Future<void> connect();
 
   void close();
 }

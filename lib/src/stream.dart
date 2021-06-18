@@ -364,7 +364,9 @@ RemoteStream makeRemote(MediaStream stream, Transport transport) {
       log.warn('api datachannel not ready yet');
     }
 
-    if (transport.api == null) {
+    if (transport.api == null ||
+        (transport.api != null &&
+            transport.api?.state != RTCDataChannelState.RTCDataChannelOpen)) {
       /// queue call if we aren't open yet
       transport.onapiopen = () {
         transport.api?.send(RTCDataChannelMessage(jsonEncoder.convert(call)));

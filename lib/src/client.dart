@@ -1,4 +1,6 @@
 import 'dart:async';
+import 'dart:convert';
+import 'package:pedantic/pedantic.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -6,6 +8,9 @@ import 'logger.dart';
 import 'signal/signal.dart';
 import 'stream.dart';
 import 'utils.dart';
+
+const API_CHANNEL = 'ion-sfu';
+const ERR_NO_SESSION = 'no active session, join first';
 
 abstract class Sender {
   MediaStream get stream;
@@ -33,17 +38,20 @@ class Transport {
 
     if (role == RolePub) {
       transport.api = await pc.createDataChannel(
-          'ion-sfu', RTCDataChannelInit()..maxRetransmits = 30);
+          API_CHANNEL, RTCDataChannelInit()..maxRetransmits = 30);
     }
 
-    pc.onDataChannel = (channel) {
-      transport.api = channel;
-      transport.onapiopen?.call();
+    pc.onIceCandidate = (candidate) {
+      signal.trickle(Trickle(target: role, candidate: candidate));
     };
 
-    pc.onIceCandidate = (candidate) {
-      if (candidate != null) {
-        signal.trickle(Trickle(target: role, candidate: candidate));
+    pc.onIceConnectionState =  (state) => {
+      if (pc.iceConnectionState == RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
+        /* TODO: implement pc.restartIce for flutter_webrtc.
+        if (pc.restartIce) {
+          // this will trigger onNegotiationNeeded
+          pc.restartIce();
+        }*/
       }
     };
 
@@ -59,7 +67,10 @@ class Transport {
 }
 
 class Client {
-  Client(this.signal, this.config);
+  Client(this.signal, this.config) {
+    signal.onnegotiate = negotiate;
+    signal.ontrickle = trickle;
+  }
   static Future<Client> create(
       {required String sid,
       required String uid,
@@ -76,17 +87,19 @@ class Client {
 
     client.signal.onready = () async {
       if (!client.initialized) {
-        client.join(sid, uid);
+        await client.join(sid, uid);
         client.initialized = true;
       }
     };
-    signal.onnegotiate = (desc) => client.negotiate(desc);
-    signal.ontrickle = (trickle) => client.trickle(trickle);
+
     client.signal.connect();
     return client;
   }
 
   Map<String, dynamic> config;
+  Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
+  Function(RTCDataChannel channel)? ondatachannel;
+  Function(List<dynamic> list)? onspeaker;
 
   static final defaultConfig = {
     'iceServers': [
@@ -98,7 +111,6 @@ class Client {
   bool initialized = false;
   Signal signal;
   Map<int, Transport> transports = {};
-  Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
 
   Future<List<StatsReport>> getPubStats(MediaStreamTrack selector) {
     return transports[RolePub]!.pc!.getStats(selector);
@@ -121,26 +133,45 @@ class Client {
     signal.close();
   }
 
-  void join(String sid, String uid) async {
+  Future<void> join(String sid, String uid) async {
+    var completer = Completer<void>();
     try {
       transports[RoleSub]!.pc!.onTrack = (RTCTrackEvent ev) {
         var remote = makeRemote(ev.streams[0], transports[RoleSub]!);
         ontrack?.call(ev.track, remote);
       };
+      transports[RoleSub]!.pc!.onDataChannel = (RTCDataChannel channel) {
+        if (true /* TODO(implement RTCDataChannel.label): channel.label == API_CHANNEL*/) {
+          transports[RoleSub]!.api = channel;
+          transports[RoleSub]!.onapiopen?.call();
+          final json = JsonDecoder();
+          channel.onMessage = (RTCDataChannelMessage msg) {
+            onspeaker?.call(json.convert(msg.text));
+          };
+          completer.complete();
+        }
+        ondatachannel?.call(channel);
+      };
 
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
-        var offer = await pc.createOffer({});
-        await pc.setLocalDescription(offer);
-        var answer = await signal.join(sid, uid, offer);
-        await pc.setRemoteDescription(answer);
-        transports[RolePub]!.hasRemoteDescription = true;
-        transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
-        pc.onRenegotiationNeeded = () => onnegotiationneeded();
+        try {
+          unawaited(pc.createOffer({}).then((offer) async {
+            await pc.setLocalDescription(offer);
+            var answer = await signal.join(sid, uid, offer);
+            await pc.setRemoteDescription(answer);
+            transports[RolePub]!.hasRemoteDescription = true;
+            transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
+          }));
+        } catch (e) {
+          completer.completeError(e);
+        }
       }
     } catch (e) {
       print('join: e => ${e.toString()}');
+      completer.completeError(e);
     }
+    return completer.future;
   }
 
   void trickle(Trickle trickle) async {
@@ -213,5 +244,14 @@ class Client {
       capSel.setCapabilities(vcaps);
     }
     description.sdp = capSel.sdp();
+  }
+
+  Future<RTCDataChannel> createDataChannel(String label) {
+    if (transports.isEmpty) {
+      throw AssertionError(ERR_NO_SESSION);
+    }
+    return transports[RolePub]!
+        .pc!
+        .createDataChannel(label, RTCDataChannelInit()..maxRetransmits = 30);
   }
 }

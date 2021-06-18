@@ -1,6 +1,6 @@
 ///
 //  Generated code. Do not modify.
-//  source: biz.proto
+//  source: proto/sfu/sfu.proto
 //
 // @dart = 2.12
 // ignore_for_file: annotate_overrides,camel_case_types,unnecessary_const,non_constant_identifier_names,library_prefixes,unused_import,unused_shown_name,return_of_invalid_type,unnecessary_this,prefer_final_fields
@@ -10,16 +10,16 @@ import 'dart:async' as $async;
 import 'dart:core' as $core;
 
 import 'package:grpc/service_api.dart' as $grpc;
-import 'biz.pb.dart' as $0;
-export 'biz.pb.dart';
+import 'sfu.pb.dart' as $0;
+export 'sfu.pb.dart';
 
-class BizClient extends $grpc.Client {
+class SFUClient extends $grpc.Client {
   static final _$signal = $grpc.ClientMethod<$0.SignalRequest, $0.SignalReply>(
-      '/biz.Biz/Signal',
+      '/sfu.SFU/Signal',
       ($0.SignalRequest value) => value.writeToBuffer(),
       ($core.List<$core.int> value) => $0.SignalReply.fromBuffer(value));
 
-  BizClient($grpc.ClientChannel channel,
+  SFUClient($grpc.ClientChannel channel,
       {$grpc.CallOptions? options,
       $core.Iterable<$grpc.ClientInterceptor>? interceptors})
       : super(channel, options: options, interceptors: interceptors);
@@ -31,10 +31,10 @@ class BizClient extends $grpc.Client {
   }
 }
 
-abstract class BizServiceBase extends $grpc.Service {
-  $core.String get $name => 'biz.Biz';
+abstract class SFUServiceBase extends $grpc.Service {
+  $core.String get $name => 'sfu.SFU';
 
-  BizServiceBase() {
+  SFUServiceBase() {
     $addMethod($grpc.ServiceMethod<$0.SignalRequest, $0.SignalReply>(
         'Signal',
         signal,
