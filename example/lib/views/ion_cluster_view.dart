@@ -8,12 +8,11 @@ import 'package:uuid/uuid.dart';
 import 'common.dart';
 
 class PubSubController extends GetxController {
-  Map<String, Participant> plist = <String, Participant>{}.obs;
+  Map<String, Participant> participants = <String, Participant>{}.obs;
   Rx<bool> connected = Rx(false);
   ion.IonBaseConnector? _connector;
   ion.IonAppBiz? _biz;
   ion.IonSDKSFU? _sfu;
-  ion.LocalStream? _localStream;
 
   final String _uuid = Uuid().v4();
   final String _room = 'test room';
@@ -35,11 +34,8 @@ class PubSubController extends GetxController {
     _sfu?.ontrack = (track, ion.RemoteStream remoteStream) async {
       if (track.kind == 'video') {
         print('onTrack: remote stream => ${remoteStream.id}');
-        var renderer = RTCVideoRenderer();
-        await renderer.initialize();
-        renderer.srcObject = remoteStream.stream;
-        plist[remoteStream.stream.id] =
-            Participant('Remote', renderer, remoteStream.stream);
+        participants[remoteStream.stream.id] = Participant(remoteStream, true)
+          ..initialize();
       }
     };
 
@@ -50,15 +46,13 @@ class PubSubController extends GetxController {
         await _sfu?.connect();
         await _sfu?.join(_room, _uuid);
 
-        _localStream = await ion.LocalStream.getUserMedia(
+        var localStream = await ion.LocalStream.getUserMedia(
             constraints: Config.defaultConstraints);
 
-        await _sfu?.publish(_localStream!);
-        var renderer = RTCVideoRenderer();
-        await renderer.initialize();
-        renderer.srcObject = _localStream!.stream;
-        plist[_localStream!.stream.id] =
-            Participant('Local Stream', renderer, _localStream!.stream);
+        await _sfu?.publish(localStream);
+
+        participants[localStream.stream.id] = Participant(localStream, false)
+          ..initialize();
       }
 
       _biz?.message(
@@ -84,16 +78,16 @@ class PubSubController extends GetxController {
           'onStreamEvent state = ${event.state}, sid = ${event.sid}, uid = ${event.uid},  streams = ${event.streams.toString()}');
       switch (event.state) {
         case ion.StreamState.ADD:
-          if (plist.isNotEmpty) {
-            var peer = plist[event.streams[0].id];
+          if (participants.isNotEmpty) {
+            var peer = participants[event.streams[0].id];
             if (peer != null) {
               //peer.title = uid;
             }
           }
           break;
         case ion.StreamState.REMOVE:
-          if (plist.isNotEmpty && event.streams.isNotEmpty) {
-            plist.remove(event.streams[0].id);
+          if (participants.isNotEmpty && event.streams.isNotEmpty) {
+            participants.remove(event.streams[0].id);
           }
           break;
         case ion.StreamState.NONE:
@@ -112,18 +106,10 @@ class PubSubController extends GetxController {
     if (_connector == null && _biz == null && _sfu == null) {
       return;
     }
-
-    await _localStream!.unpublish();
-    _localStream!.stream.getTracks().forEach((element) {
-      element.stop();
+    participants.forEach((title, element) {
+      element.dispose();
     });
-    await _localStream!.stream.dispose();
-    _localStream = null;
-
-    plist.forEach((title, element) {
-      element.renderer.srcObject = null;
-    });
-    plist.clear();
+    participants.clear();
     _connector?.close();
     _biz = null;
     _sfu = null;
@@ -143,7 +129,7 @@ class IonClusterView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '${item.title}: ${item.stream.id.substring(0, 8)}',
+                item.title,
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
             ),
@@ -164,14 +150,15 @@ class IonClusterView extends StatelessWidget {
             padding: EdgeInsets.all(10.0),
             child: Obx(() => GridView.builder(
                 shrinkWrap: true,
-                itemCount: c.plist.length,
+                itemCount: c.participants.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     mainAxisSpacing: 5.0,
                     crossAxisSpacing: 5.0,
                     childAspectRatio: 1.0),
                 itemBuilder: (BuildContext context, int index) {
-                  return getItemView(c.plist.entries.elementAt(index).value);
+                  return getItemView(
+                      c.participants.entries.elementAt(index).value);
                 }))),
         floatingActionButton: FloatingActionButton(
             onPressed: () {

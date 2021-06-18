@@ -8,7 +8,7 @@ import 'package:uuid/uuid.dart';
 import 'common.dart';
 
 class PubSubController extends GetxController {
-  List<Participant> plist = <Participant>[].obs;
+  List<Participant> participants = <Participant>[].obs;
 
   @override
   @mustCallSuper
@@ -18,7 +18,6 @@ class PubSubController extends GetxController {
 
   ion.Signal? _signal;
   ion.Client? _client;
-  ion.LocalStream? _localStream;
   final String _uuid = Uuid().v4();
 
   void pubsub() async {
@@ -26,38 +25,27 @@ class PubSubController extends GetxController {
       _signal ??= ion.GRPCWebSignal(Config.ion_cluster_url);
       _client = await ion.Client.create(
           sid: 'test session', uid: _uuid, signal: _signal!);
-      _localStream = await ion.LocalStream.getUserMedia(
+      var localStream = await ion.LocalStream.getUserMedia(
           constraints: Config.defaultConstraints);
-      await _client?.publish(_localStream!);
-
+      await _client?.publish(localStream);
       _client?.ontrack = (track, ion.RemoteStream remoteStream) async {
         if (track.kind == 'video') {
           print('ontrack: remote stream => ${remoteStream.id}');
-          var renderer = RTCVideoRenderer();
-          await renderer.initialize();
-          renderer.srcObject = remoteStream.stream;
-          plist.add(Participant('Remote', renderer, remoteStream.stream));
+          participants
+              .add(Participant(remoteStream.stream, true)..initialize());
         }
       };
-
-      var renderer = RTCVideoRenderer();
-      await renderer.initialize();
-      renderer.srcObject = _localStream!.stream;
-      plist.add(Participant('Local', renderer, _localStream!.stream));
+      participants.add(Participant(localStream, false)..initialize());
     } else {
-      await _localStream?.unpublish();
-      _localStream?.stream.getTracks().forEach((element) {
-        element.stop();
-      });
-      await _localStream?.stream.dispose();
-      _localStream = null;
       _client?.close();
+
+      participants.forEach((element) {
+        element.dispose();
+      });
+
+      participants.clear();
       _client = null;
       _signal = null;
-      plist.forEach((element) {
-        element.renderer.srcObject = null;
-      });
-      plist.clear();
     }
   }
 }
@@ -73,7 +61,7 @@ class PubSubTestView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '${item.title}: ${item.stream.id.substring(0, 8)}',
+                item.title,
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
             ),
@@ -94,14 +82,14 @@ class PubSubTestView extends StatelessWidget {
             padding: EdgeInsets.all(10.0),
             child: Obx(() => GridView.builder(
                 shrinkWrap: true,
-                itemCount: c.plist.length,
+                itemCount: c.participants.length,
                 gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 3,
                     mainAxisSpacing: 5.0,
                     crossAxisSpacing: 5.0,
                     childAspectRatio: 1.0),
                 itemBuilder: (BuildContext context, int index) {
-                  return getItemView(c.plist[index]);
+                  return getItemView(c.participants[index]);
                 }))),
         floatingActionButton: FloatingActionButton(
             onPressed: c.pubsub, child: Icon(Icons.video_call)));
