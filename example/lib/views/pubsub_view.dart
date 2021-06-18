@@ -89,7 +89,7 @@ class PubSubTestView extends StatelessWidget {
   @override
   Widget build(context) {
     return Scaffold(
-        appBar: AppBar(title: Text('pub sub test')),
+        appBar: AppBar(title: Text('ion-sfu pub/sub test')),
         body: Container(
             padding: EdgeInsets.all(10.0),
             child: Obx(() => GridView.builder(

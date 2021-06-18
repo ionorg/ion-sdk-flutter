@@ -175,7 +175,7 @@ class EchoTestView extends StatelessWidget {
 
   @override
   Widget build(context) => Scaffold(
-      appBar: AppBar(title: Text('echotest')),
+      appBar: AppBar(title: Text('ion-sfu echo test')),
       body: Center(
           child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -190,8 +190,8 @@ class EchoTestView extends StatelessWidget {
             height: 10,
           ),
           RaisedButton(
-            child: Text('Simulcast'),
             onPressed: _showBottomSheet,
+            child: Text('Simulcast'),
           ),
           SizedBox(
             height: 10,
@@ -199,5 +199,5 @@ class EchoTestView extends StatelessWidget {
         ],
       )),
       floatingActionButton: FloatingActionButton(
-          child: Icon(Icons.phone), onPressed: c.echotest));
+          onPressed: c.echotest, child: Icon(Icons.phone)));
 }
