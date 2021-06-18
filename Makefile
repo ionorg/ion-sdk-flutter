@@ -10,7 +10,7 @@ proto:
 	protoc ./ion/proto/sfu/sfu.proto -I./ion --dart_out=grpc:./lib/src/_library
 	protoc ./ion/apps/biz/proto/biz.proto -I./ion --dart_out=grpc:./lib/src/_library
 
-	dartfmt -w lib/src/_library
+	dart format lib/src/_library
 
 download:
 	git clone https://github.com/pion/ion -b refactor-business-logic --depth=1
