@@ -45,15 +45,17 @@ class Transport {
       signal.trickle(Trickle(target: role, candidate: candidate));
     };
 
-    pc.onIceConnectionState =  (state) => {
-      if (pc.iceConnectionState == RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
-        /* TODO: implement pc.restartIce for flutter_webrtc.
+    pc.onIceConnectionState = (state) => {
+          if (pc.iceConnectionState ==
+              RTCIceConnectionState.RTCIceConnectionStateDisconnected)
+            {
+              /* TODO: implement pc.restartIce for flutter_webrtc.
         if (pc.restartIce) {
           // this will trigger onNegotiationNeeded
           pc.restartIce();
         }*/
-      }
-    };
+            }
+        };
 
     return transport;
   }
@@ -99,7 +101,7 @@ class Client {
   Map<String, dynamic> config;
   Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
   Function(RTCDataChannel channel)? ondatachannel;
-  Function(List<dynamic> list)? onspeaker;
+  Function(Map<String, dynamic> speakers)? onspeaker;
 
   static final defaultConfig = {
     'iceServers': [

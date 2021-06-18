@@ -5,92 +5,81 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
 import 'package:uuid/uuid.dart';
 
-var url = 'http://127.0.0.1:5551';
-
-class Peer {
-  Peer(this.title, this.renderer, this.stream);
-  MediaStream stream;
-  String title;
-  RTCVideoRenderer renderer;
-}
+import 'common.dart';
 
 class PubSubController extends GetxController {
-  Map<String, Peer> plist = <String, Peer>{}.obs;
+  Map<String, Participant> plist = <String, Participant>{}.obs;
+  Rx<bool> connected = Rx(false);
+  ion.IonBaseConnector? _connector;
+  ion.IonAppBiz? _biz;
+  ion.IonSDKSFU? _sfu;
+  ion.LocalStream? _localStream;
 
-  @override
-  @mustCallSuper
-  void onInit() {
-    super.onInit();
-    _biz = ion.IonAppBiz(_connector);
-    _sfu = ion.IonSDKSFU(_connector);
-    _sfu.onspeaker = (List<dynamic> list) {
+  final String _uuid = Uuid().v4();
+  final String _room = 'test room';
+  final Map<String, String> _info = {'name': 'flutter_client'};
+  final String _token = 'token123123123';
+
+  void join() async {
+    if (_biz != null || _sfu != null) {
+      return;
+    }
+    _connector ??= ion.IonBaseConnector(Config.ion_cluster_url, token: _token);
+    _biz = ion.IonAppBiz(_connector!);
+    _sfu = ion.IonSDKSFU(_connector!);
+
+    _sfu?.onspeaker = (Map<String, dynamic> list) {
       print('onspeaker: $list');
     };
 
-    _sfu.ontrack = (track, ion.RemoteStream remoteStream) async {
+    _sfu?.ontrack = (track, ion.RemoteStream remoteStream) async {
       if (track.kind == 'video') {
         print('onTrack: remote stream => ${remoteStream.id}');
         var renderer = RTCVideoRenderer();
         await renderer.initialize();
         renderer.srcObject = remoteStream.stream;
         plist[remoteStream.stream.id] =
-            Peer('Remote', renderer, remoteStream.stream);
+            Participant('Remote', renderer, remoteStream.stream);
       }
     };
-  }
 
-  final ion.IonBaseConnector _connector =
-      ion.IonBaseConnector(url, token: 'token123123123');
-  late ion.IonAppBiz _biz;
-  late ion.IonSDKSFU _sfu;
-  late ion.LocalStream? _localStream;
-  final String _uuid = Uuid().v4();
-  final String _room = 'test room';
-
-  void join() async {
-    await _biz.connect();
-
-    _biz.onJoin = (bool success, String reason) async {
+    _biz?.onJoin = (bool success, String reason) async {
       print('onJoin success = $success, reason = $reason');
 
       if (success) {
-        await _sfu.connect();
-        await _sfu.join(_room, _uuid);
+        await _sfu?.connect();
+        await _sfu?.join(_room, _uuid);
 
         _localStream = await ion.LocalStream.getUserMedia(
-            constraints: ion.Constraints.defaults..simulcast = false);
-        await _sfu.publish(_localStream!);
+            constraints: Config.defaultConstraints);
+
+        await _sfu?.publish(_localStream!);
         var renderer = RTCVideoRenderer();
         await renderer.initialize();
         renderer.srcObject = _localStream!.stream;
         plist[_localStream!.stream.id] =
-            Peer('Local Stream', renderer, _localStream!.stream);
+            Participant('Local Stream', renderer, _localStream!.stream);
       }
 
-      _biz.message(
+      _biz?.message(
           _uuid, 'all', <String, dynamic>{'text': 'hello from flutter'});
     };
 
-    _biz.onLeave = (reason) {
+    _biz?.onLeave = (reason) {
       print('onLeave reason = $reason');
     };
 
-    _biz.onPeerEvent = (ion.PeerEvent event) {
+    _biz?.onPeerEvent = (ion.PeerEvent event) {
       print(
           'onPeerEvent state = ${event.state},  peer uid = ${event.peer.uid}, info = ${event.peer.info.toString()}');
     };
 
-    _biz.onMessage = (ion.Message msg) {
+    _biz?.onMessage = (ion.Message msg) {
       print(
           'onMessage from = ${msg.from},  to = ${msg.to}, data = ${msg.data}');
     };
 
-    _biz.join(
-        sid: _room,
-        uid: _uuid,
-        info: <String, String>{'name': 'flutter_client'});
-
-    _biz.onStreamEvent = (ion.StreamEvent event) {
+    _biz?.onStreamEvent = (ion.StreamEvent event) {
       print(
           'onStreamEvent state = ${event.state}, sid = ${event.sid}, uid = ${event.uid},  streams = ${event.streams.toString()}');
       switch (event.state) {
@@ -103,7 +92,7 @@ class PubSubController extends GetxController {
           }
           break;
         case ion.StreamState.REMOVE:
-          if (plist.isNotEmpty) {
+          if (plist.isNotEmpty && event.streams.isNotEmpty) {
             plist.remove(event.streams[0].id);
           }
           break;
@@ -111,22 +100,42 @@ class PubSubController extends GetxController {
           break;
       }
     };
+
+    await _biz?.connect();
+
+    _biz?.join(sid: _room, uid: _uuid, info: _info);
+
+    connected.value = true;
   }
 
-  void unpublish() async {
+  void leave() async {
+    if (_connector == null && _biz == null && _sfu == null) {
+      return;
+    }
+
     await _localStream!.unpublish();
     _localStream!.stream.getTracks().forEach((element) {
       element.stop();
     });
     await _localStream!.stream.dispose();
     _localStream = null;
+
+    plist.forEach((title, element) {
+      element.renderer.srcObject = null;
+    });
+    plist.clear();
+    _connector?.close();
+    _biz = null;
+    _sfu = null;
+    _connector = null;
+    connected.value = false;
   }
 }
 
 class IonClusterView extends StatelessWidget {
   final PubSubController c = Get.put(PubSubController());
 
-  Widget getItemView(Peer item) {
+  Widget getItemView(Participant item) {
     return Container(
         padding: EdgeInsets.all(10.0),
         child: Column(
@@ -134,7 +143,7 @@ class IonClusterView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '${item.title}:\n${item.stream.id}',
+                '${item.title}: ${item.stream.id.substring(0, 8)}',
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
             ),
@@ -150,7 +159,7 @@ class IonClusterView extends StatelessWidget {
   @override
   Widget build(context) {
     return Scaffold(
-        appBar: AppBar(title: Text('pub sub test')),
+        appBar: AppBar(title: Text('ion cluster pub/sub test')),
         body: Container(
             padding: EdgeInsets.all(10.0),
             child: Obx(() => GridView.builder(
@@ -165,6 +174,13 @@ class IonClusterView extends StatelessWidget {
                   return getItemView(c.plist.entries.elementAt(index).value);
                 }))),
         floatingActionButton: FloatingActionButton(
-            onPressed: c.join, child: Icon(Icons.video_call)));
+            onPressed: () {
+              if (!c.connected.value) {
+                c.join();
+              } else {
+                c.leave();
+              }
+            },
+            child: Icon(Icons.video_call)));
   }
 }

@@ -5,12 +5,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart' as ion;
 import 'package:uuid/uuid.dart';
 
-class Participant {
-  Participant(this.title, this.renderer, this.stream);
-  MediaStream? stream;
-  String title;
-  RTCVideoRenderer renderer;
-}
+import 'common.dart';
 
 class PubSubController extends GetxController {
   List<Participant> plist = <Participant>[].obs;
@@ -21,17 +16,18 @@ class PubSubController extends GetxController {
     super.onInit();
   }
 
-  final ion.Signal _signal = ion.GRPCWebSignal('http://127.0.0.1:9090');
+  ion.Signal? _signal;
   ion.Client? _client;
   ion.LocalStream? _localStream;
   final String _uuid = Uuid().v4();
 
   void pubsub() async {
     if (_client == null) {
+      _signal ??= ion.GRPCWebSignal(Config.ion_cluster_url);
       _client = await ion.Client.create(
-          sid: 'test session', uid: _uuid, signal: _signal);
+          sid: 'test session', uid: _uuid, signal: _signal!);
       _localStream = await ion.LocalStream.getUserMedia(
-          constraints: ion.Constraints.defaults..simulcast = false);
+          constraints: Config.defaultConstraints);
       await _client?.publish(_localStream!);
 
       _client?.ontrack = (track, ion.RemoteStream remoteStream) async {
@@ -46,17 +42,22 @@ class PubSubController extends GetxController {
 
       var renderer = RTCVideoRenderer();
       await renderer.initialize();
-      renderer.srcObject = _localStream?.stream;
-      plist.add(Participant('Local', renderer, _localStream?.stream));
+      renderer.srcObject = _localStream!.stream;
+      plist.add(Participant('Local', renderer, _localStream!.stream));
     } else {
       await _localStream?.unpublish();
       _localStream?.stream.getTracks().forEach((element) {
-        element.dispose();
+        element.stop();
       });
       await _localStream?.stream.dispose();
       _localStream = null;
       _client?.close();
       _client = null;
+      _signal = null;
+      plist.forEach((element) {
+        element.renderer.srcObject = null;
+      });
+      plist.clear();
     }
   }
 }
@@ -72,7 +73,7 @@ class PubSubTestView extends StatelessWidget {
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
-                '${item.title}:\n${item.stream!.id}',
+                '${item.title}: ${item.stream.id.substring(0, 8)}',
                 style: TextStyle(fontSize: 14, color: Colors.black54),
               ),
             ),
@@ -103,6 +104,6 @@ class PubSubTestView extends StatelessWidget {
                   return getItemView(c.plist[index]);
                 }))),
         floatingActionButton: FloatingActionButton(
-            child: Icon(Icons.video_call), onPressed: c.pubsub));
+            onPressed: c.pubsub, child: Icon(Icons.video_call)));
   }
 }

@@ -15,15 +15,18 @@ import 'ion.dart';
 class IonSDKSFU extends IonService {
   @override
   String name = 'sfu';
-  Map<String, dynamic>? config;
+  Map<String, dynamic> config = Client.defaultConfig;
   IonBaseConnector connector;
   _IonSFUGRPCSignal? _sig;
   late Client _sfu;
   Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
   Function(RTCDataChannel channel)? ondatachannel;
-  Function(List<dynamic> list)? onspeaker;
+  Function(Map<String, dynamic> list)? onspeaker;
 
-  IonSDKSFU(this.connector, {this.config}) {
+  IonSDKSFU(this.connector, {Map<String, dynamic>? cfg}) {
+    if (cfg != null) {
+      config.addAll(cfg);
+    }
     connector.registerService(this);
   }
 
@@ -32,12 +35,12 @@ class IonSDKSFU extends IonService {
     _sig ??= _IonSFUGRPCSignal(connector, this);
     await _sig?.connect();
 
-    _sfu = Client(_sig!, config ?? {});
+    _sfu = Client(_sig!, config);
     _sfu.transports = {
-      RolePub: await Transport.create(
-          role: RolePub, signal: _sig!, config: config ?? {}),
-      RoleSub: await Transport.create(
-          role: RoleSub, signal: _sig!, config: config ?? {})
+      RolePub:
+          await Transport.create(role: RolePub, signal: _sig!, config: config),
+      RoleSub:
+          await Transport.create(role: RoleSub, signal: _sig!, config: config)
     };
 
     _sfu.signal.onready = () async {
@@ -46,12 +49,13 @@ class IonSDKSFU extends IonService {
       }
     };
 
-    _sfu.transports[RolePub]!.pc!.onRenegotiationNeeded = () => _sfu.onnegotiationneeded();
+    _sfu.transports[RolePub]!.pc!.onRenegotiationNeeded =
+        () => _sfu.onnegotiationneeded();
     _sfu.ontrack = (MediaStreamTrack track, RemoteStream stream) =>
         ontrack?.call(track, stream);
     _sfu.ondatachannel =
         (RTCDataChannel channel) => ondatachannel?.call(channel);
-    _sfu.onspeaker = (List<dynamic> list) => onspeaker?.call(list);
+    _sfu.onspeaker = (list) => onspeaker?.call(list);
   }
 
   Future<void> join(String sid, String uid) {
