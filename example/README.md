@@ -4,10 +4,8 @@ A new Flutter project.
 
 ## Getting Started
 
-Make sure your flutter is using the `dev` channel.
+Make sure your flutter is using `flutter 2.x`.
 
-- `flutter channel dev`
-- `flutter upgrade`
 - `./scripts/project_tools.sh create`
 
 ## For Android/iOS
