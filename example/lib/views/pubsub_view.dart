@@ -22,19 +22,18 @@ class PubSubController extends GetxController {
 
   void pubsub() async {
     if (_client == null) {
-      _signal ??= ion.GRPCWebSignal(Config.ion_cluster_url);
+      _signal ??= ion.GRPCWebSignal(Config.ion_sfu_url);
       _client = await ion.Client.create(
           sid: 'test session', uid: _uuid, signal: _signal!);
-      var localStream = await ion.LocalStream.getUserMedia(
-          constraints: Config.defaultConstraints);
-      await _client?.publish(localStream);
       _client?.ontrack = (track, ion.RemoteStream remoteStream) async {
         if (track.kind == 'video') {
           print('ontrack: remote stream => ${remoteStream.id}');
-          participants
-              .add(Participant(remoteStream.stream, true)..initialize());
+          participants.add(Participant(remoteStream, true)..initialize());
         }
       };
+      var localStream = await ion.LocalStream.getUserMedia(
+          constraints: Config.defaultConstraints);
+      await _client?.publish(localStream);
       participants.add(Participant(localStream, false)..initialize());
     } else {
       _client?.close();
