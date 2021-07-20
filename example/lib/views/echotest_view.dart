@@ -189,7 +189,7 @@ class EchoTestView extends StatelessWidget {
           SizedBox(
             height: 10,
           ),
-          RaisedButton(
+          ElevatedButton(
             onPressed: _showBottomSheet,
             child: Text('Simulcast'),
           ),
