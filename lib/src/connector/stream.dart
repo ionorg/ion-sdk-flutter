@@ -1,9 +1,8 @@
 import 'dart:convert';
-
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
+import '../logger.dart';
 import 'client.dart';
-import 'logger.dart';
 
 class FrameRate {
   FrameRate({required this.ideal, required this.max});
@@ -270,13 +269,13 @@ class LocalStream {
     // If published, replace published track with track from new device
     if (prev != null && prev.enabled) {
       await _stream.removeTrack(prev);
-      await prev.dispose();
+      await prev.stop();
       if (_pc != null) {
         await _pc!
             .getSenders()
             .then((senders) => senders.forEach((RTCRtpSender sender) {
                   if (sender.track?.kind == next.kind) {
-                    sender.track?.dispose();
+                    sender.track?.stop();
                     sender.replaceTrack(next);
                   }
                 }));
@@ -320,7 +319,7 @@ class LocalStream {
   Future<void> mute(String kind) async {
     var track = getTrack(kind);
     if (track != null) {
-      await track.dispose();
+      await track.stop();
     }
   }
 

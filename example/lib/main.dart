@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
-import 'views/echotest_view.dart';
+//import 'views/echotest_view.dart';
 import 'views/ion_cluster_view.dart';
-import 'views/pubsub_view.dart';
+//import 'views/pubsub_view.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +21,7 @@ class Home extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
+          /*
           RaisedButton(
               onPressed: () {
                 Get.to(EchoTestView(), transition: Transition.rightToLeft);
@@ -31,6 +32,7 @@ class Home extends StatelessWidget {
                 Get.to(PubSubTestView(), transition: Transition.rightToLeft);
               },
               child: Text('Pub/Sub (ion-sfu)')),
+          */
           RaisedButton(
               onPressed: () {
                 Get.to(IonClusterView(), transition: Transition.rightToLeft);

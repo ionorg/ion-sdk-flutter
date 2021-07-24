@@ -1,13 +1,13 @@
 import 'dart:async';
 
-import 'package:flutter_ion/flutter_ion.dart' as ion;
+import 'package:flutter_ion/src/connector/connector.dart' as ion;
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class Config {
   static bool simulcast = true;
   static String resolution = 'hd';
   static String codec = 'vp8';
-  static String host = 'localhost';
+  static String host = '192.168.124.4';
   static String get ion_cluster_url => 'http://' + host + ':5551';
   static String get ion_sfu_url => 'http://' + host + ':9090';
   static ion.Constraints get defaultConstraints => ion.Constraints.defaults

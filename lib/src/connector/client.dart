@@ -1,28 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:pedantic/pedantic.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
+import 'package:pedantic/pedantic.dart';
 
-import 'logger.dart';
-import 'signal/signal.dart';
+import '../logger.dart';
+import '../utils.dart';
+import 'signal.dart';
 import 'stream.dart';
-import 'utils.dart';
 
 const API_CHANNEL = 'ion-sfu';
 const ERR_NO_SESSION = 'no active session, join first';
-
-abstract class Sender {
-  MediaStream get stream;
-
-  /// [kind in 'video' | 'audio']
-  RTCRtpTransceiver get transceivers;
-}
-
-class RTCConfiguration {
-  /// 'vp8' | 'vp9' | 'h264'
-  late String codec;
-}
 
 class Transport {
   Transport(this.signal);
@@ -47,8 +35,7 @@ class Transport {
 
     pc.onIceConnectionState = (state) => {
           if (pc.iceConnectionState ==
-              RTCIceConnectionState.RTCIceConnectionStateDisconnected)
-            {
+              RTCIceConnectionState.RTCIceConnectionStateDisconnected) {
               /* TODO: implement pc.restartIce for flutter_webrtc.
               if (pc.restartIce) {
                 // this will trigger onNegotiationNeeded
@@ -89,12 +76,11 @@ class Client {
 
     client.signal.onready = () async {
       if (!client.initialized) {
-        await client.join(sid, uid);
         client.initialized = true;
       }
     };
 
-    client.signal.connect();
+    unawaited(client.signal.connect());
     return client;
   }
 
@@ -104,9 +90,7 @@ class Client {
   Function(Map<String, dynamic> speakers)? onspeaker;
 
   static final defaultConfig = {
-    'iceServers': [
-      //{'urls': 'stun:stun.stunprotocol.org:3478'}
-    ],
+    'iceServers': [],
     'sdpSemantics': 'unified-plan'
   };
 
@@ -135,7 +119,7 @@ class Client {
     signal.close();
   }
 
-  Future<void> join(String sid, String uid) async {
+  Future<void> join(String sid, String uid, Map<String, String> parameters) async {
     var completer = Completer<void>();
     try {
       transports[RoleSub]!.pc!.onTrack = (RTCTrackEvent ev) {
@@ -158,13 +142,9 @@ class Client {
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
         try {
-          unawaited(pc.createOffer({}).then((offer) async {
-            await pc.setLocalDescription(offer);
-            var answer = await signal.join(sid, uid, offer);
-            await pc.setRemoteDescription(answer);
-            transports[RolePub]!.hasRemoteDescription = true;
-            transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
-          }));
+          await signal.join(sid, uid, parameters);
+          transports[RolePub]!.hasRemoteDescription = true;
+          transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
         } catch (e) {
           completer.completeError(e);
         }

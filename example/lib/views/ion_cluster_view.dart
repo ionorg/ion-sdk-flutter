@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:flutter_ion/flutter_ion.dart' as ion;
+import 'package:flutter_ion/src/connector/connector.dart' as ion;
 import 'package:uuid/uuid.dart';
 
 import 'common.dart';
@@ -11,21 +11,18 @@ class PubSubController extends GetxController {
   Map<String, Participant> participants = <String, Participant>{}.obs;
   Rx<bool> connected = Rx(false);
   ion.IonBaseConnector? _connector;
-  ion.IonAppBiz? _biz;
-  ion.IonSDKSFU? _sfu;
+  ion.IonSDKRTC? _sfu;
 
   final String _uuid = Uuid().v4();
   final String _room = 'test room';
-  final Map<String, String> _info = {'name': 'flutter_client'};
   final String _token = 'token123123123';
 
   void join() async {
-    if (_biz != null || _sfu != null) {
+    if (_sfu != null) {
       return;
     }
     _connector ??= ion.IonBaseConnector(Config.ion_cluster_url, token: _token);
-    _biz = ion.IonAppBiz(_connector!);
-    _sfu = ion.IonSDKSFU(_connector!);
+    _sfu = ion.IonSDKRTC(_connector!);
 
     _sfu?.onspeaker = (Map<String, dynamic> list) {
       print('onspeaker: $list');
@@ -39,71 +36,34 @@ class PubSubController extends GetxController {
       }
     };
 
-    _biz?.onJoin = (bool success, String reason) async {
-      print('onJoin success = $success, reason = $reason');
-
-      if (success) {
-        await _sfu?.connect();
-        await _sfu?.join(_room, _uuid);
-
-        var localStream = await ion.LocalStream.getUserMedia(
-            constraints: Config.defaultConstraints);
-
-        await _sfu?.publish(localStream);
-
-        participants[localStream.stream.id] = Participant(localStream, false)
-          ..initialize();
-      }
-
-      _biz?.message(
-          _uuid, 'all', <String, dynamic>{'text': 'hello from flutter'});
-    };
-
-    _biz?.onLeave = (reason) {
-      print('onLeave reason = $reason');
-    };
-
-    _biz?.onPeerEvent = (ion.PeerEvent event) {
+    _sfu?.ontrackevent = (ion.TrackEvent event) {
       print(
-          'onPeerEvent state = ${event.state},  peer uid = ${event.peer.uid}, info = ${event.peer.info.toString()}');
-    };
-
-    _biz?.onMessage = (ion.Message msg) {
-      print(
-          'onMessage from = ${msg.from},  to = ${msg.to}, data = ${msg.data}');
-    };
-
-    _biz?.onStreamEvent = (ion.StreamEvent event) {
-      print(
-          'onStreamEvent state = ${event.state}, sid = ${event.sid}, uid = ${event.uid},  streams = ${event.streams.toString()}');
+          'ontrackevent state = ${event.state},  uid = ${event.uid},  tracks = ${event.tracks}');
       switch (event.state) {
-        case ion.StreamState.ADD:
-          if (participants.isNotEmpty) {
-            var peer = participants[event.streams[0].id];
-            if (peer != null) {
-              //peer.title = uid;
-            }
+        case ion.TrackState.REMOVE:
+          if (event.tracks.isNotEmpty) {
+            participants.remove(event.tracks[0].stream_id);
           }
           break;
-        case ion.StreamState.REMOVE:
-          if (participants.isNotEmpty && event.streams.isNotEmpty) {
-            participants.remove(event.streams[0].id);
-          }
-          break;
-        case ion.StreamState.NONE:
+        case ion.TrackState.ADD:
+        case ion.TrackState.NONE:
           break;
       }
     };
 
-    await _biz?.connect();
+    await _sfu?.connect();
+    await _sfu?.join(_room, _uuid, {});
+    var localStream = await ion.LocalStream.getUserMedia(
+            constraints: Config.defaultConstraints);
+    await _sfu?.publish(localStream);
 
-    _biz?.join(sid: _room, uid: _uuid, info: _info);
-
+    participants[localStream.stream.id] = Participant(localStream, false)
+          ..initialize();
     connected.value = true;
   }
 
   void leave() async {
-    if (_connector == null && _biz == null && _sfu == null) {
+    if (_connector == null && _sfu == null) {
       return;
     }
     participants.forEach((title, element) {
@@ -111,7 +71,6 @@ class PubSubController extends GetxController {
     });
     participants.clear();
     _connector?.close();
-    _biz = null;
     _sfu = null;
     _connector = null;
     connected.value = false;
