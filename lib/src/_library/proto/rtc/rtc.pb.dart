@@ -18,10 +18,9 @@ class JoinRequest extends $pb.GeneratedMessage {
       const $core.bool.fromEnvironment('protobuf.omit_message_names')
           ? ''
           : 'JoinRequest',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names')
-              ? ''
-              : 'rtc'),
+      package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'rtc'),
       createEmptyInstance: create)
     ..aOS(
         1,
@@ -34,21 +33,22 @@ class JoinRequest extends $pb.GeneratedMessage {
             ? ''
             : 'uid')
     ..m<$core.String, $core.String>(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'parameters',
-        entryClassName: 'JoinRequest.ParametersEntry',
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'config',
+        entryClassName: 'JoinRequest.ConfigEntry',
         keyFieldType: $pb.PbFieldType.OS,
         valueFieldType: $pb.PbFieldType.OS,
         packageName: const $pb.PackageName('rtc'))
+    ..aOM<SessionDescription>(
+        4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description',
+        subBuilder: SessionDescription.create)
     ..hasRequiredFields = false;
 
   JoinRequest._() : super();
   factory JoinRequest({
     $core.String? sid,
     $core.String? uid,
-    $core.Map<$core.String, $core.String>? parameters,
+    $core.Map<$core.String, $core.String>? config,
+    SessionDescription? description,
   }) {
     final _result = create();
     if (sid != null) {
@@ -57,8 +57,11 @@ class JoinRequest extends $pb.GeneratedMessage {
     if (uid != null) {
       _result.uid = uid;
     }
-    if (parameters != null) {
-      _result.parameters.addAll(parameters);
+    if (config != null) {
+      _result.config.addAll(config);
+    }
+    if (description != null) {
+      _result.description = description;
     }
     return _result;
   }
@@ -113,7 +116,21 @@ class JoinRequest extends $pb.GeneratedMessage {
   void clearUid() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.Map<$core.String, $core.String> get parameters => $_getMap(2);
+  $core.Map<$core.String, $core.String> get config => $_getMap(2);
+
+  @$pb.TagNumber(4)
+  SessionDescription get description => $_getN(3);
+  @$pb.TagNumber(4)
+  set description(SessionDescription v) {
+    setField(4, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasDescription() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDescription() => clearField(4);
+  @$pb.TagNumber(4)
+  SessionDescription ensureDescription() => $_ensure(3);
 }
 
 class JoinReply extends $pb.GeneratedMessage {
@@ -132,17 +149,18 @@ class JoinReply extends $pb.GeneratedMessage {
             ? ''
             : 'success')
     ..aOM<Error>(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'error',
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error',
         subBuilder: Error.create)
+    ..aOM<SessionDescription>(3,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description',
+        subBuilder: SessionDescription.create)
     ..hasRequiredFields = false;
 
   JoinReply._() : super();
   factory JoinReply({
     $core.bool? success,
     Error? error,
+    SessionDescription? description,
   }) {
     final _result = create();
     if (success != null) {
@@ -150,6 +168,9 @@ class JoinReply extends $pb.GeneratedMessage {
     }
     if (error != null) {
       _result.error = error;
+    }
+    if (description != null) {
+      _result.description = description;
     }
     return _result;
   }
@@ -204,6 +225,20 @@ class JoinReply extends $pb.GeneratedMessage {
   void clearError() => clearField(2);
   @$pb.TagNumber(2)
   Error ensureError() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  SessionDescription get description => $_getN(2);
+  @$pb.TagNumber(3)
+  set description(SessionDescription v) {
+    setField(3, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasDescription() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearDescription() => clearField(3);
+  @$pb.TagNumber(3)
+  SessionDescription ensureDescription() => $_ensure(2);
 }
 
 class SessionDescription extends $pb.GeneratedMessage {

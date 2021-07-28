@@ -7,10 +7,10 @@ import 'package:grpc/grpc.dart' as grpc;
 import 'package:uuid/uuid.dart';
 
 import '../_library/proto/rtc/rtc.pbgrpc.dart' as pb;
-import 'client.dart';
+import '../client.dart';
 import 'ion.dart';
-import 'signal.dart';
-import 'stream.dart';
+import '../signal/signal.dart';
+import '../stream.dart';
 
 class Track {
   late String id;
@@ -31,6 +31,16 @@ class TrackEvent {
   late TrackState state;
   late String uid;
   late List<Track> tracks;
+}
+
+class JoinConfig {
+  late bool no_publish;
+  late bool no_subscribe;
+  late bool no_auto_subscribe;
+  JoinConfig(
+      {this.no_publish = false,
+      this.no_subscribe = false,
+      this.no_auto_subscribe = false});
 }
 
 class IonSDKRTC extends IonService {
@@ -83,8 +93,9 @@ class IonSDKRTC extends IonService {
     _client.onspeaker = (list) => onspeaker?.call(list);
   }
 
-  Future<void> join(String sid, String uid, Map<String, String> parameters) {
-    return _client.join(sid, uid, parameters);
+  Future<void> join(String sid, String uid, JoinConfig config) {
+    _sig?.config = config;
+    return _client.join(sid, uid);
   }
 
   Future<List<StatsReport>>? getPubStats(MediaStreamTrack selector) {
@@ -124,6 +135,7 @@ class _IonSFUGRPCSignal extends Signal {
   late pb.RTCClient _client;
   late StreamController<pb.Signalling> _requestStream;
   late grpc.ResponseStream<pb.Signalling> _replyStream;
+  JoinConfig? config;
   Function(TrackEvent event)? ontrackevent;
 
   _IonSFUGRPCSignal(this.connector, this.service) {
@@ -135,10 +147,11 @@ class _IonSFUGRPCSignal extends Signal {
   void _onSignalReply(pb.Signalling reply) {
     switch (reply.whichPayload()) {
       case pb.Signalling_Payload.reply:
-        _emitter.emit('join-reply', reply.reply.success, reply.reply.error);
+        _emitter.emit('join-reply', reply.reply);
         break;
       case pb.Signalling_Payload.description:
-        var desc = RTCSessionDescription(reply.description.sdp, reply.description.type);
+        var desc = RTCSessionDescription(
+            reply.description.sdp, reply.description.type);
         if (desc.type == 'offer') {
           onnegotiate?.call(desc);
         } else {
@@ -163,18 +176,18 @@ class _IonSFUGRPCSignal extends Signal {
             break;
         }
         var event = TrackEvent()
-        ..uid = reply.trackEvent.uid
-        ..state = state;
-        event.tracks = reply.trackEvent.tracks.map((e) => 
-        Track()
-        ..id = e.id
-        ..stream_id = e.streamId
-        ..kind = e.kind
-        ..muted = e.muted
-        ..rid = e.rid
-        ).toList();
+          ..uid = reply.trackEvent.uid
+          ..state = state;
+        event.tracks = reply.trackEvent.tracks
+            .map((e) => Track()
+              ..id = e.id
+              ..stream_id = e.streamId
+              ..kind = e.kind
+              ..muted = e.muted
+              ..rid = e.rid)
+            .toList();
         ontrackevent?.call(event);
-      break;
+        break;
       case pb.Signalling_Payload.error:
       case pb.Signalling_Payload.notSet:
         break;
@@ -208,25 +221,40 @@ class _IonSFUGRPCSignal extends Signal {
   }
 
   @override
-  Future<bool> join(
-      String sid, String uid, Map<String, String> parameters) {
-    Completer completer = Completer<bool>();
+  Future<RTCSessionDescription> join(
+      String sid, String uid, RTCSessionDescription offer) {
+    Completer completer = Completer<RTCSessionDescription>();
+    var description = pb.SessionDescription(sdp: offer.sdp, type: offer.type);
+
+    var cfg = <String, String>{};
+
+    if (config != null) {
+      cfg['NoPublish'] = config!.no_publish ? 'true' : 'false';
+      cfg['NoSubscribe'] = config!.no_subscribe ? 'true' : 'false';
+      cfg['NoAutoSubscribe'] = config!.no_auto_subscribe ? 'true' : 'false';
+    }
+
     var request = pb.Signalling()
-      ..join = (pb.JoinRequest()
-        ..parameters.addAll(parameters)
-        ..sid = sid
-        ..uid = uid);
+      ..join = (pb.JoinRequest(
+        sid: sid,
+        uid: uid,
+        config: cfg,
+        description: description,
+      ));
+
     _requestStream.add(request);
-    Function(bool, Object) handler;
-    handler = (bool success, Object error) {
-      if (success) {
-        completer.complete(success);
+    Function(pb.JoinReply) handler;
+    handler = (pb.JoinReply reply) {
+      if (reply.success) {
+        var desc = RTCSessionDescription(
+            reply.description.sdp, reply.description.type);
+        completer.complete(desc);
       } else {
-        completer.completeError(error);
+        completer.completeError(reply.error);
       }
     };
     _emitter.once('join-reply', handler);
-    return completer.future as Future<bool>;
+    return completer.future as Future<RTCSessionDescription>;
   }
 
   @override
@@ -237,7 +265,7 @@ class _IonSFUGRPCSignal extends Signal {
     _requestStream.add(sig);
     Function(RTCSessionDescription) handler;
     handler = (desc) {
-     completer.complete(desc);
+      completer.complete(desc);
     };
     _emitter.once('description', handler);
     return completer.future as Future<RTCSessionDescription>;
@@ -259,7 +287,5 @@ class _IonSFUGRPCSignal extends Signal {
     _requestStream.add(sig);
   }
 
-  Future<void> subscribe(List<String> trackIds, bool enabled) async {
-    
-  }
+  Future<void> subscribe(List<String> trackIds, bool enabled) async {}
 }

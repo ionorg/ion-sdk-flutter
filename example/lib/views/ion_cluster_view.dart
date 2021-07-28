@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
-import 'package:flutter_ion/src/connector/connector.dart' as ion;
+import 'package:flutter_ion/flutter_ion.dart' as ion;
 import 'package:uuid/uuid.dart';
 
 import 'common.dart';
@@ -52,7 +52,7 @@ class PubSubController extends GetxController {
     };
 
     await _sfu?.connect();
-    await _sfu?.join(_room, _uuid, {});
+    await _sfu?.join(_room, _uuid, ion.JoinConfig());
     var localStream = await ion.LocalStream.getUserMedia(
             constraints: Config.defaultConstraints);
     await _sfu?.publish(localStream);

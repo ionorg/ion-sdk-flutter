@@ -28,20 +28,28 @@ const JoinRequest$json = const {
     const {'1': 'sid', '3': 1, '4': 1, '5': 9, '10': 'sid'},
     const {'1': 'uid', '3': 2, '4': 1, '5': 9, '10': 'uid'},
     const {
-      '1': 'parameters',
+      '1': 'config',
       '3': 3,
       '4': 3,
       '5': 11,
-      '6': '.rtc.JoinRequest.ParametersEntry',
-      '10': 'parameters'
+      '6': '.rtc.JoinRequest.ConfigEntry',
+      '10': 'config'
+    },
+    const {
+      '1': 'description',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.rtc.SessionDescription',
+      '10': 'description'
     },
   ],
-  '3': const [JoinRequest_ParametersEntry$json],
+  '3': const [JoinRequest_ConfigEntry$json],
 };
 
 @$core.Deprecated('Use joinRequestDescriptor instead')
-const JoinRequest_ParametersEntry$json = const {
-  '1': 'ParametersEntry',
+const JoinRequest_ConfigEntry$json = const {
+  '1': 'ConfigEntry',
   '2': const [
     const {'1': 'key', '3': 1, '4': 1, '5': 9, '10': 'key'},
     const {'1': 'value', '3': 2, '4': 1, '5': 9, '10': 'value'},
@@ -51,7 +59,7 @@ const JoinRequest_ParametersEntry$json = const {
 
 /// Descriptor for `JoinRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List joinRequestDescriptor = $convert.base64Decode(
-    'CgtKb2luUmVxdWVzdBIQCgNzaWQYASABKAlSA3NpZBIQCgN1aWQYAiABKAlSA3VpZBJACgpwYXJhbWV0ZXJzGAMgAygLMiAucnRjLkpvaW5SZXF1ZXN0LlBhcmFtZXRlcnNFbnRyeVIKcGFyYW1ldGVycxo9Cg9QYXJhbWV0ZXJzRW50cnkSEAoDa2V5GAEgASgJUgNrZXkSFAoFdmFsdWUYAiABKAlSBXZhbHVlOgI4AQ==');
+    'CgtKb2luUmVxdWVzdBIQCgNzaWQYASABKAlSA3NpZBIQCgN1aWQYAiABKAlSA3VpZBI0CgZjb25maWcYAyADKAsyHC5ydGMuSm9pblJlcXVlc3QuQ29uZmlnRW50cnlSBmNvbmZpZxI5CgtkZXNjcmlwdGlvbhgEIAEoCzIXLnJ0Yy5TZXNzaW9uRGVzY3JpcHRpb25SC2Rlc2NyaXB0aW9uGjkKC0NvbmZpZ0VudHJ5EhAKA2tleRgBIAEoCVIDa2V5EhQKBXZhbHVlGAIgASgJUgV2YWx1ZToCOAE=');
 @$core.Deprecated('Use joinReplyDescriptor instead')
 const JoinReply$json = const {
   '1': 'JoinReply',
@@ -65,12 +73,20 @@ const JoinReply$json = const {
       '6': '.rtc.Error',
       '10': 'error'
     },
+    const {
+      '1': 'description',
+      '3': 3,
+      '4': 1,
+      '5': 11,
+      '6': '.rtc.SessionDescription',
+      '10': 'description'
+    },
   ],
 };
 
 /// Descriptor for `JoinReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List joinReplyDescriptor = $convert.base64Decode(
-    'CglKb2luUmVwbHkSGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIgCgVlcnJvchgCIAEoCzIKLnJ0Yy5FcnJvclIFZXJyb3I=');
+    'CglKb2luUmVwbHkSGAoHc3VjY2VzcxgBIAEoCFIHc3VjY2VzcxIgCgVlcnJvchgCIAEoCzIKLnJ0Yy5FcnJvclIFZXJyb3ISOQoLZGVzY3JpcHRpb24YAyABKAsyFy5ydGMuU2Vzc2lvbkRlc2NyaXB0aW9uUgtkZXNjcmlwdGlvbg==');
 @$core.Deprecated('Use sessionDescriptionDescriptor instead')
 const SessionDescription$json = const {
   '1': 'SessionDescription',

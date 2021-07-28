@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter_ion/src/connector/connector.dart' as ion;
+import 'package:flutter_ion/flutter_ion.dart' as ion;
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 class Config {
