@@ -287,5 +287,11 @@ class _IonSFUGRPCSignal extends Signal {
     _requestStream.add(sig);
   }
 
-  Future<void> subscribe(List<String> trackIds, bool enabled) async {}
+  Future<void> subscribe(List<String> trackIds, bool enabled) async {
+        var sig = pb.Signalling()
+      ..updateSettings = (pb.UpdateSettings(
+        subscription: pb.Subscription(trackIds: trackIds, subscribe: enabled),
+      ));
+    _requestStream.add(sig);
+  }
 }

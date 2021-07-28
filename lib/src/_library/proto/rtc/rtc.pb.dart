@@ -1141,12 +1141,12 @@ class SwitchScalabilityLayer extends $pb.GeneratedMessage {
   void clearTemporalLayer() => clearField(3);
 }
 
-enum UpdateSettings_Command { subcription, switchLayer, muteTrack, notSet }
+enum UpdateSettings_Command { subscription, switchLayer, muteTrack, notSet }
 
 class UpdateSettings extends $pb.GeneratedMessage {
   static const $core.Map<$core.int, UpdateSettings_Command>
       _UpdateSettings_CommandByTag = {
-    1: UpdateSettings_Command.subcription,
+    1: UpdateSettings_Command.subscription,
     2: UpdateSettings_Command.switchLayer,
     3: UpdateSettings_Command.muteTrack,
     0: UpdateSettings_Command.notSet
@@ -1162,7 +1162,7 @@ class UpdateSettings extends $pb.GeneratedMessage {
       createEmptyInstance: create)
     ..oo(0, [1, 2, 3])
     ..aOM<Subscription>(
-        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subcription',
+        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscription',
         subBuilder: Subscription.create)
     ..aOM<SwitchScalabilityLayer>(
         2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'switchLayer',
@@ -1173,13 +1173,13 @@ class UpdateSettings extends $pb.GeneratedMessage {
 
   UpdateSettings._() : super();
   factory UpdateSettings({
-    Subscription? subcription,
+    Subscription? subscription,
     SwitchScalabilityLayer? switchLayer,
     MuteTrack? muteTrack,
   }) {
     final _result = create();
-    if (subcription != null) {
-      _result.subcription = subcription;
+    if (subscription != null) {
+      _result.subscription = subscription;
     }
     if (switchLayer != null) {
       _result.switchLayer = switchLayer;
@@ -1221,18 +1221,18 @@ class UpdateSettings extends $pb.GeneratedMessage {
   void clearCommand() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
-  Subscription get subcription => $_getN(0);
+  Subscription get subscription => $_getN(0);
   @$pb.TagNumber(1)
-  set subcription(Subscription v) {
+  set subscription(Subscription v) {
     setField(1, v);
   }
 
   @$pb.TagNumber(1)
-  $core.bool hasSubcription() => $_has(0);
+  $core.bool hasSubscription() => $_has(0);
   @$pb.TagNumber(1)
-  void clearSubcription() => clearField(1);
+  void clearSubscription() => clearField(1);
   @$pb.TagNumber(1)
-  Subscription ensureSubcription() => $_ensure(0);
+  Subscription ensureSubscription() => $_ensure(0);
 
   @$pb.TagNumber(2)
   SwitchScalabilityLayer get switchLayer => $_getN(1);

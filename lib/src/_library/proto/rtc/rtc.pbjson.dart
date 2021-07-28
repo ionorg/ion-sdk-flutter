@@ -260,13 +260,13 @@ const UpdateSettings$json = const {
   '1': 'UpdateSettings',
   '2': const [
     const {
-      '1': 'subcription',
+      '1': 'subscription',
       '3': 1,
       '4': 1,
       '5': 11,
       '6': '.rtc.Subscription',
       '9': 0,
-      '10': 'subcription'
+      '10': 'subscription'
     },
     const {
       '1': 'switchLayer',
@@ -294,7 +294,7 @@ const UpdateSettings$json = const {
 
 /// Descriptor for `UpdateSettings`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List updateSettingsDescriptor = $convert.base64Decode(
-    'Cg5VcGRhdGVTZXR0aW5ncxI1CgtzdWJjcmlwdGlvbhgBIAEoCzIRLnJ0Yy5TdWJzY3JpcHRpb25IAFILc3ViY3JpcHRpb24SPwoLc3dpdGNoTGF5ZXIYAiABKAsyGy5ydGMuU3dpdGNoU2NhbGFiaWxpdHlMYXllckgAUgtzd2l0Y2hMYXllchIuCgltdXRlVHJhY2sYAyABKAsyDi5ydGMuTXV0ZVRyYWNrSABSCW11dGVUcmFja0IJCgdjb21tYW5k');
+    'Cg5VcGRhdGVTZXR0aW5ncxI3CgxzdWJzY3JpcHRpb24YASABKAsyES5ydGMuU3Vic2NyaXB0aW9uSABSDHN1YnNjcmlwdGlvbhI/Cgtzd2l0Y2hMYXllchgCIAEoCzIbLnJ0Yy5Td2l0Y2hTY2FsYWJpbGl0eUxheWVySABSC3N3aXRjaExheWVyEi4KCW11dGVUcmFjaxgDIAEoCzIOLnJ0Yy5NdXRlVHJhY2tIAFIJbXV0ZVRyYWNrQgkKB2NvbW1hbmQ=');
 @$core.Deprecated('Use signallingDescriptor instead')
 const Signalling$json = const {
   '1': 'Signalling',
