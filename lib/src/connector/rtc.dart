@@ -8,9 +8,9 @@ import 'package:uuid/uuid.dart';
 
 import '../_library/proto/rtc/rtc.pbgrpc.dart' as pb;
 import '../client.dart';
-import 'ion.dart';
 import '../signal/signal.dart';
 import '../stream.dart';
+import 'ion.dart';
 
 class Track {
   late String id;
@@ -130,7 +130,6 @@ class _IonSFUGRPCSignal extends Signal {
   IonBaseConnector connector;
   final JsonDecoder _jsonDecoder = JsonDecoder();
   final JsonEncoder _jsonEncoder = JsonEncoder();
-  final Uuid _uuid = Uuid();
   final EventEmitter _emitter = EventEmitter();
   late pb.RTCClient _client;
   late StreamController<pb.Signalling> _requestStream;
