@@ -11,13 +11,38 @@ import '../signal/signal.dart';
 import '../stream.dart';
 import 'ion.dart';
 
-class Track {
+class RtcError {
+  final int code;
+  final String reason;
+  RtcError(this.code, this.reason);
+}
+
+class Result {
+  final bool success;
+  RtcError? error;
+  Result(this.success, this.error);
+}
+
+enum MediaType {
+  MEDIAUNKNOWN,
+  USERMEDIA,
+  SCREENCAPTURE,
+  CAVANS,
+  STREAMING,
+  VOIP,
+}
+
+class TrackInfo {
   late String id;
   late String stream_id;
   late String kind;
   late bool muted;
-  late String rid;
-  late Map<String, String> simulcast;
+  late String label;
+  late MediaType type;
+  late String layer;
+  late int width;
+  late int height;
+  late int frame_rate;
 }
 
 enum TrackState {
@@ -29,7 +54,7 @@ enum TrackState {
 class TrackEvent {
   late TrackState state;
   late String uid;
-  late List<Track> tracks;
+  late List<TrackInfo> tracks;
 }
 
 class JoinConfig {
@@ -118,10 +143,11 @@ class IonSDKRTC extends IonService {
   }
 
   Future<void> publish(LocalStream stream) {
+    _sig?._buildTrackInfos(stream.stream);
     return _client.publish(stream);
   }
 
-  Future<void>? subscribe(List<Subscription> infos) {
+  Future<Result>? subscribe(List<Subscription> infos) {
     return _sig?.subscribe(infos);
   }
 
@@ -146,6 +172,7 @@ class _IonSFUGRPCSignal extends Signal {
   late StreamController<pb.Request> _requestStream;
   late grpc.ResponseStream<pb.Reply> _replyStream;
   JoinConfig? config;
+  List<pb.TrackInfo> _tracksInfos = [];
   Function(TrackEvent event)? ontrackevent;
 
   _IonSFUGRPCSignal(this.connector, this.service) {
@@ -188,16 +215,55 @@ class _IonSFUGRPCSignal extends Signal {
         var event = TrackEvent()
           ..uid = reply.trackEvent.uid
           ..state = state;
+
+        Function(pb.MediaType ptype) convMediaType = (pb.MediaType ptype) {
+          var type = MediaType.MEDIAUNKNOWN;
+          switch (ptype) {
+            case pb.MediaType.UserMedia:
+              type = MediaType.USERMEDIA;
+              break;
+            case pb.MediaType.ScreenCapture:
+              type = MediaType.SCREENCAPTURE;
+              break;
+            case pb.MediaType.Cavans:
+              type = MediaType.CAVANS;
+              break;
+            case pb.MediaType.Streaming:
+              type = MediaType.STREAMING;
+              break;
+            case pb.MediaType.VoIP:
+              type = MediaType.VOIP;
+              break;
+          }
+          return type;
+        };
+
         event.tracks = reply.trackEvent.tracks
-            .map((e) => Track()
+            .map((e) => TrackInfo()
               ..id = e.id
               ..stream_id = e.streamId
               ..kind = e.kind
-              ..muted = e.muted)
+              ..muted = e.muted
+              ..label = e.label
+              ..layer = e.layer
+              ..frame_rate = e.frameRate
+              ..width = e.width
+              ..height = e.height
+              ..type = convMediaType(e.type))
             .toList();
         ontrackevent?.call(event);
         break;
+      case pb.Reply_Payload.subscription:
+        RtcError? err;
+        if (reply.subscription.error != null) {
+          err = RtcError(
+              reply.subscription.error.code, reply.subscription.error.reason);
+        }
+        _emitter.emit('subscription', Result(reply.subscription.success, err));
+        break;
       case pb.Reply_Payload.error:
+        _emitter.emit('error', RtcError(reply.error.code, reply.error.reason));
+        break;
       case pb.Reply_Payload.notSet:
         break;
     }
@@ -233,7 +299,8 @@ class _IonSFUGRPCSignal extends Signal {
   Future<RTCSessionDescription> join(
       String sid, String uid, RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
-    var description = pb.SessionDescription(sdp: offer.sdp, type: offer.type);
+    var description = pb.SessionDescription(
+        sdp: offer.sdp, type: offer.type, trackInfos: _tracksInfos);
 
     var cfg = <String, String>{};
 
@@ -250,7 +317,6 @@ class _IonSFUGRPCSignal extends Signal {
         config: cfg,
         description: description,
       ));
-
     _requestStream.add(request);
     Function(pb.JoinReply) handler;
     handler = (pb.JoinReply reply) {
@@ -269,7 +335,8 @@ class _IonSFUGRPCSignal extends Signal {
   @override
   Future<RTCSessionDescription> offer(RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
-    var description = pb.SessionDescription(sdp: offer.sdp, type: offer.type);
+    var description = pb.SessionDescription(
+        sdp: offer.sdp, type: offer.type, trackInfos: _tracksInfos);
     var req = pb.Request(description: description);
     _requestStream.add(req);
     Function(RTCSessionDescription) handler;
@@ -296,7 +363,7 @@ class _IonSFUGRPCSignal extends Signal {
     _requestStream.add(req);
   }
 
-  Future<void> subscribe(List<Subscription> infos) async {
+  Future<Result> subscribe(List<Subscription> infos) async {
     final subscription = pb.SubscriptionRequest()
       ..subscriptions.addAll(infos.map((e) => pb.Subscription()
         ..layer = e.layer
@@ -306,5 +373,27 @@ class _IonSFUGRPCSignal extends Signal {
     var req = pb.Request();
     req.subscription = subscription;
     _requestStream.add(req);
+    Completer completer = Completer<Result>();
+    Function(Result) handler;
+    handler = (ret) {
+      completer.complete(ret);
+    };
+    _emitter.once('subscription', handler);
+    return completer.future as Future<Result>;
+  }
+
+  void _buildTrackInfos(MediaStream stream) {
+    final tracks = stream.getTracks();
+    var trackInfos = <pb.TrackInfo>[];
+    for (var track in tracks) {
+      trackInfos.add(pb.TrackInfo()
+        ..type = pb.MediaType.UserMedia
+        ..id = track.id!
+        ..kind = track.kind!
+        ..muted = track.muted!
+        ..muted = !track.enabled!
+        ..streamId = stream.id!);
+    }
+    _tracksInfos = trackInfos;
   }
 }

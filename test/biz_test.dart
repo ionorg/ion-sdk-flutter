@@ -14,18 +14,18 @@ void main() async {
   var sid = 'test room1';
 
   test('test join', () async {
-    biz.onJoin = (bool success, String reason) {
+    biz.onJoin = (ion.JoinResult result) {
       //expect(peer.uid, uid);
       //expect(peer.sid, sid);
     };
 
     biz.onPeerEvent = (ion.PeerEvent evt) {
       print(
-          'sid ${evt.peer.sid}, peer ${evt.peer.uid} info ${evt.peer.info}, state ${evt.state}');
+          'sid ${evt.peer.sid}, peer ${evt.peer.uid} info ${evt.peer.extrainfo}, state ${evt.state}');
     };
 
-    biz.join(
-        sid: sid, uid: uid, info: <String, String>{'name': 'flutter_client'});
+    //biz.join(
+    //    sid: sid, uid: uid, info: <String, String>{'name': 'flutter_client'});
 
     //expect(success, true);
   });

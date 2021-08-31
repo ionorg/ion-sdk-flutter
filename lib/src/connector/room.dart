@@ -1,13 +1,10 @@
 import 'dart:async';
-import 'dart:convert';
 
 import 'package:events2/events2.dart';
-import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart' as grpc;
 
 import '../_library/apps/room/proto/room.pb.dart' as pb;
 import '../_library/apps/room/proto/room.pbgrpc.dart' as room;
-import '../stream.dart';
 import 'ion.dart';
 
 enum PeerState {
@@ -17,10 +14,59 @@ enum PeerState {
   LEAVE,
 }
 
+enum Role { HOST, GUEST }
+
+enum Protocol {
+  PROTOCOL_UNKNOWN,
+  WEBRTC,
+  SIP,
+  RTMP,
+  RTSP,
+}
+
+enum ErrorType {
+  NONE,
+  UNKOWNERROR,
+  PERMISSIONDENIED,
+  SERVICEUNAVAILABLE,
+  ROOMLOCKED,
+  PASSWORDREQUIRED,
+  ROOMALREADYEXIST,
+  ROOMNOTEXIST,
+  INVALIDPARAMS,
+  PEERALREADYEXIST,
+  PEERNOTEXIST,
+}
+
+class RoomError {
+  late ErrorType code;
+  late String reason;
+}
+
+class JoinResult {
+  late bool success;
+  late RoomError? error;
+  late Role role;
+  late RoomInfo room;
+}
+
+enum Direction {
+  INCOMING,
+  OUTGOING,
+  BILATERAL,
+}
+
 class Peer {
   late String sid;
   late String uid;
-  late Map<String, dynamic> info;
+  late String displayname;
+  late List<int> extrainfo;
+  late String destination;
+  late Role role;
+  late Protocol protocol;
+  late String avatar;
+  late Direction direction;
+  late String vendor;
 }
 
 class PeerEvent {
@@ -31,20 +77,36 @@ class PeerEvent {
 class Message {
   late String from;
   late String to;
-  late Map<String, dynamic> data;
+  late String type;
+  late List<int> payload;
+}
+
+class RoomInfo {
+  late String sid;
+  late String name;
+  late bool lock;
+  late String password;
+  late String description;
+  late int maxpeers;
+}
+
+class Disconnect {
+  late String sid;
+  late String reason;
 }
 
 class IonAppRoom extends IonService {
   @override
   String name = 'room';
   IonBaseConnector connector;
-  _IonBizGRPCClient? _biz;
+  _IonAppRoomGRPCClient? _sig;
   Function(Error err)? onError;
-  Function(bool success, String reason)? onJoin;
+  Function(JoinResult result)? onJoin;
   Function(String reason)? onLeave;
   Function(PeerEvent event)? onPeerEvent;
   Function(Message msg)? onMessage;
-  Function(MediaStreamTrack track, RemoteStream stream)? onTrack;
+  Function(RoomInfo info)? onRoomInfo;
+  Function(Disconnect discon)? onDisconnect;
 
   IonAppRoom(this.connector) {
     connector.registerService(this);
@@ -52,41 +114,38 @@ class IonAppRoom extends IonService {
 
   @override
   Future<void> connect() async {
-    if (_biz == null) {
-      var biz = _IonBizGRPCClient(connector, this);
-      biz.on('join-reply',
-          (bool success, String reason) => onJoin?.call(success, reason));
-      biz.on('leave-reply', (String reason) => onLeave?.call(reason));
-      biz.on('peer-event', (PeerEvent event) => onPeerEvent?.call(event));
-      biz.on('message', (Message msg) => onMessage?.call(msg));
-      biz.on('error', (Error err) => onError?.call(err));
-      biz.connect();
-      _biz = biz;
+    if (_sig == null) {
+      var sig = _IonAppRoomGRPCClient(connector, this);
+      sig.on('join-reply', (JoinResult result) => onJoin?.call(result));
+      sig.on('leave-reply', (String reason) => onLeave?.call(reason));
+      sig.on('peer-event', (PeerEvent event) => onPeerEvent?.call(event));
+      sig.on('message', (Message msg) => onMessage?.call(msg));
+      sig.on('room-info', (RoomInfo info) => onRoomInfo?.call(info));
+      sig.on('disconnect', (Disconnect disc) => onDisconnect?.call(disc));
+      sig.on('error', (Error err) => onError?.call(err));
+      sig.connect();
+      _sig = sig;
     }
   }
 
-  void join(
-      {required String sid,
-      required String uid,
-      required Map<String, dynamic> info}) {
-    _biz?.join(sid: sid, uid: uid, info: info);
+  Future<JoinResult>? join({required Peer peer, String? password}) {
+    _sig?.join(peer: peer, password: password);
   }
 
-  void leave(String uid) => _biz?.leave(uid);
+  void leave(String uid) => _sig?.leave(uid);
 
-  void message(String from, String to, Map<String, dynamic> data) =>
-      _biz?.sendMessage(from, to, data);
+  void message(Message message) => _sig?.sendMessage(message);
 
   @override
   void close() {
-    _biz?.close();
+    _sig?.close();
   }
 }
 
-class _IonBizGRPCClient extends EventEmitter {
+class _IonAppRoomGRPCClient extends EventEmitter {
   IonService service;
   IonBaseConnector connector;
-  _IonBizGRPCClient(this.connector, this.service) {
+  _IonAppRoomGRPCClient(this.connector, this.service) {
     _client = room.RoomSignalClient(connector.grpcClientChannel(),
         options: connector.callOptions());
     _requestStream = StreamController<pb.Request>();
@@ -95,8 +154,6 @@ class _IonBizGRPCClient extends EventEmitter {
   late room.RoomSignalClient _client;
   late StreamController<pb.Request> _requestStream;
   late grpc.ResponseStream<pb.Reply> _replyStream;
-  final JsonEncoder _jsonEncoder = JsonEncoder();
-  final JsonDecoder _jsonDecoder = JsonDecoder();
 
   void connect() {
     _replyStream = _client.signal(_requestStream.stream);
@@ -118,25 +175,29 @@ class _IonBizGRPCClient extends EventEmitter {
     _replyStream.cancel();
   }
 
-  Future<bool> join(
-      {required String sid,
-      required String uid,
-      required Map<String, dynamic> info,
-      String? token}) async {
-    Completer completer = Completer<bool>();
+  Future<JoinResult>? join({required Peer peer, String? password}) async {
+    Completer completer = Completer<JoinResult>();
     var request = pb.Request()
       ..join = pb.JoinRequest(
-          peer: pb.Peer(
-        sid: sid,
-        uid: uid,
-      ));
+        peer: pb.Peer()
+          ..uid = peer.uid
+          ..sid = peer.sid
+          ..displayName = peer.displayname
+          ..extraInfo = peer.extrainfo
+          ..role = pb.Role.values[peer.role.index]
+          ..protocol = pb.Protocol.values[peer.protocol.index]
+          ..avatar = peer.avatar
+          ..vendor = peer.vendor
+          ..direction = pb.Peer_Direction.values[peer.direction.index],
+        password: password,
+      );
     _requestStream.add(request);
-    Function(bool, String) handler;
-    handler = (success, reason) {
-      completer.complete(success);
+    Function(JoinResult) handler;
+    handler = (result) {
+      completer.complete(result);
     };
     once('join-reply', handler);
-    return completer.future as Future<bool>;
+    return completer.future as Future<JoinResult>;
   }
 
   Future<void> leave(String uid) async {
@@ -150,38 +211,54 @@ class _IonBizGRPCClient extends EventEmitter {
     once('leave-reply', handler);
   }
 
-  void sendMessage(String from, String to, Map<String, dynamic> data) async {
+  void sendMessage(Message msg) async {
     var request = pb.Request()
       ..sendMessage = pb.SendMessageRequest(
           message: pb.Message(
-              from: from,
-              to: to,
-              payload: utf8.encode(_jsonEncoder.convert(data))));
+        from: msg.from,
+        to: msg.to,
+        type: msg.type,
+        payload: msg.payload,
+      ));
     _requestStream.add(request);
   }
 
   void _onSignalReply(pb.Reply reply) {
     switch (reply.whichPayload()) {
       case pb.Reply_Payload.join:
-        emit('join-reply', reply.join.success, reply.join);
+        RoomError? err;
+        if (reply.join.error != null) {
+          err = RoomError()
+            ..code = ErrorType.values[reply.join.error.code.value]
+            ..reason = reply.join.error.reason;
+        }
+        var room = RoomInfo()
+          ..sid = reply.join.room.sid
+          ..name = reply.join.room.name
+          ..lock = reply.join.room.lock
+          ..password = reply.join.room.password
+          ..description = reply.join.room.description
+          ..maxpeers = reply.join.room.maxPeers;
+        emit(
+            'join-reply',
+            JoinResult()
+              ..success = reply.join.success
+              ..role = Role.values[reply.join.role.value]
+              ..error = err
+              ..room = room);
         break;
       case pb.Reply_Payload.leave:
         emit('leave-reply', reply.leave);
         break;
       case pb.Reply_Payload.peer:
         var event = reply.peer;
-        var info = <String, dynamic>{};
         var state = PeerState.NONE;
         switch (event.state) {
           case pb.PeerState.JOIN:
             state = PeerState.JOIN;
-            info = _jsonDecoder
-                .convert(String.fromCharCodes(event.peer.extraInfo));
             break;
           case pb.PeerState.UPDATE:
             state = PeerState.UPDATE;
-            info = _jsonDecoder
-                .convert(String.fromCharCodes(event.peer.extraInfo));
             break;
           case pb.PeerState.LEAVE:
             state = PeerState.LEAVE;
@@ -190,7 +267,14 @@ class _IonBizGRPCClient extends EventEmitter {
         var peer = Peer()
           ..sid = event.peer.sid
           ..uid = event.peer.uid
-          ..info = info;
+          ..displayname = event.peer.displayName
+          ..extrainfo = event.peer.extraInfo
+          ..role = Role.values[event.peer.role.value]
+          ..protocol = Protocol.values[event.peer.protocol.value]
+          ..avatar = event.peer.avatar
+          ..vendor = event.peer.vendor
+          ..destination = event.peer.destination
+          ..direction = Direction.values[event.peer.direction.value];
         emit(
             'peer-event',
             PeerEvent()
@@ -198,14 +282,30 @@ class _IonBizGRPCClient extends EventEmitter {
               ..peer = peer);
         break;
       case pb.Reply_Payload.message:
-        var data =
-            _jsonDecoder.convert(String.fromCharCodes(reply.message.payload));
         emit(
             'message',
             Message()
               ..from = reply.message.from
               ..to = reply.message.to
-              ..data = data);
+              ..type = reply.message.type
+              ..payload = reply.message.payload);
+        break;
+      case pb.Reply_Payload.room:
+        var room = RoomInfo()
+          ..sid = reply.room.sid
+          ..name = reply.room.name
+          ..lock = reply.room.lock
+          ..password = reply.room.password
+          ..description = reply.room.description
+          ..maxpeers = reply.room.maxPeers;
+        emit('room-info', room);
+        break;
+      case pb.Reply_Payload.disconnect:
+        emit(
+            'disconnect',
+            Disconnect()
+              ..sid = reply.disconnect.sid
+              ..reason = reply.disconnect.reason);
         break;
       default:
         break;
