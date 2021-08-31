@@ -5,8 +5,8 @@ import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart' as grpc;
 
-import '../_library/apps/biz/proto/biz.pbgrpc.dart' as pb;
-import '../_library/proto/ion/ion.pb.dart' as ion;
+import '../_library/apps/room/proto/room.pb.dart' as pb;
+import '../_library/apps/room/proto/room.pbgrpc.dart' as room;
 import '../stream.dart';
 import 'ion.dart';
 
@@ -28,51 +28,25 @@ class PeerEvent {
   late Peer peer;
 }
 
-enum StreamState {
-  NONE,
-  ADD,
-  REMOVE,
-}
-
-class Track {
-  late String id;
-  late String label;
-  late String kind;
-  late Map<String, String> simulcast;
-}
-
-class Stream {
-  late String id;
-  late List<Track> tracks;
-}
-
-class StreamEvent {
-  late StreamState state;
-  late String sid;
-  late String uid;
-  late List<Stream> streams;
-}
-
 class Message {
   late String from;
   late String to;
   late Map<String, dynamic> data;
 }
 
-class IonAppBiz extends IonService {
+class IonAppRoom extends IonService {
   @override
-  String name = 'biz';
+  String name = 'room';
   IonBaseConnector connector;
   _IonBizGRPCClient? _biz;
   Function(Error err)? onError;
   Function(bool success, String reason)? onJoin;
   Function(String reason)? onLeave;
   Function(PeerEvent event)? onPeerEvent;
-  Function(StreamEvent event)? onStreamEvent;
   Function(Message msg)? onMessage;
   Function(MediaStreamTrack track, RemoteStream stream)? onTrack;
 
-  IonAppBiz(this.connector) {
+  IonAppRoom(this.connector) {
     connector.registerService(this);
   }
 
@@ -84,7 +58,6 @@ class IonAppBiz extends IonService {
           (bool success, String reason) => onJoin?.call(success, reason));
       biz.on('leave-reply', (String reason) => onLeave?.call(reason));
       biz.on('peer-event', (PeerEvent event) => onPeerEvent?.call(event));
-      biz.on('stream-event', (StreamEvent event) => onStreamEvent?.call(event));
       biz.on('message', (Message msg) => onMessage?.call(msg));
       biz.on('error', (Error err) => onError?.call(err));
       biz.connect();
@@ -114,14 +87,14 @@ class _IonBizGRPCClient extends EventEmitter {
   IonService service;
   IonBaseConnector connector;
   _IonBizGRPCClient(this.connector, this.service) {
-    _client = pb.BizClient(connector.grpcClientChannel(),
+    _client = room.RoomSignalClient(connector.grpcClientChannel(),
         options: connector.callOptions());
-    _requestStream = StreamController<pb.SignalRequest>();
+    _requestStream = StreamController<pb.Request>();
   }
 
-  late pb.BizClient _client;
-  late StreamController<pb.SignalRequest> _requestStream;
-  late grpc.ResponseStream<pb.SignalReply> _replyStream;
+  late room.RoomSignalClient _client;
+  late StreamController<pb.Request> _requestStream;
+  late grpc.ResponseStream<pb.Reply> _replyStream;
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final JsonDecoder _jsonDecoder = JsonDecoder();
 
@@ -151,13 +124,12 @@ class _IonBizGRPCClient extends EventEmitter {
       required Map<String, dynamic> info,
       String? token}) async {
     Completer completer = Completer<bool>();
-    var request = pb.SignalRequest()
-      ..join = pb.Join(
-          token: token,
-          peer: ion.Peer(
-              sid: sid,
-              uid: uid,
-              info: utf8.encode(_jsonEncoder.convert(info))));
+    var request = pb.Request()
+      ..join = pb.JoinRequest(
+          peer: pb.Peer(
+        sid: sid,
+        uid: uid,
+      ));
     _requestStream.add(request);
     Function(bool, String) handler;
     handler = (success, reason) {
@@ -169,7 +141,7 @@ class _IonBizGRPCClient extends EventEmitter {
 
   Future<void> leave(String uid) async {
     Completer completer = Completer<void>();
-    var request = pb.SignalRequest()..leave = pb.Leave(uid: uid);
+    var request = pb.Request()..leave = pb.LeaveRequest(uid: uid);
     _requestStream.add(request);
     Function() handler;
     handler = () {
@@ -179,34 +151,39 @@ class _IonBizGRPCClient extends EventEmitter {
   }
 
   void sendMessage(String from, String to, Map<String, dynamic> data) async {
-    var request = pb.SignalRequest()
-      ..msg = ion.Message(
-          from: from, to: to, data: utf8.encode(_jsonEncoder.convert(data)));
+    var request = pb.Request()
+      ..sendMessage = pb.SendMessageRequest(
+          message: pb.Message(
+              from: from,
+              to: to,
+              payload: utf8.encode(_jsonEncoder.convert(data))));
     _requestStream.add(request);
   }
 
-  void _onSignalReply(pb.SignalReply reply) {
+  void _onSignalReply(pb.Reply reply) {
     switch (reply.whichPayload()) {
-      case pb.SignalReply_Payload.joinReply:
-        emit('join-reply', reply.joinReply.success, reply.joinReply.reason);
+      case pb.Reply_Payload.join:
+        emit('join-reply', reply.join.success, reply.join);
         break;
-      case pb.SignalReply_Payload.leaveReply:
-        emit('leave-reply', reply.leaveReply.reason);
+      case pb.Reply_Payload.leave:
+        emit('leave-reply', reply.leave);
         break;
-      case pb.SignalReply_Payload.peerEvent:
-        var event = reply.peerEvent;
+      case pb.Reply_Payload.peer:
+        var event = reply.peer;
         var info = <String, dynamic>{};
         var state = PeerState.NONE;
         switch (event.state) {
-          case ion.PeerEvent_State.JOIN:
+          case pb.PeerState.JOIN:
             state = PeerState.JOIN;
-            info = _jsonDecoder.convert(String.fromCharCodes(event.peer.info));
+            info = _jsonDecoder
+                .convert(String.fromCharCodes(event.peer.extraInfo));
             break;
-          case ion.PeerEvent_State.UPDATE:
+          case pb.PeerState.UPDATE:
             state = PeerState.UPDATE;
-            info = _jsonDecoder.convert(String.fromCharCodes(event.peer.info));
+            info = _jsonDecoder
+                .convert(String.fromCharCodes(event.peer.extraInfo));
             break;
-          case ion.PeerEvent_State.LEAVE:
+          case pb.PeerState.LEAVE:
             state = PeerState.LEAVE;
             break;
         }
@@ -220,42 +197,14 @@ class _IonBizGRPCClient extends EventEmitter {
               ..state = state
               ..peer = peer);
         break;
-      case pb.SignalReply_Payload.streamEvent:
-        var event = reply.streamEvent;
-        var state = StreamState.NONE;
-        switch (event.state) {
-          case ion.StreamEvent_State.ADD:
-            state = StreamState.ADD;
-            break;
-          case ion.StreamEvent_State.REMOVE:
-            state = StreamState.REMOVE;
-            break;
-        }
-        emit(
-            'stream-event',
-            StreamEvent()
-              ..state = state
-              ..sid = event.sid
-              ..uid = event.uid
-              ..streams = event.streams
-                  .map((e) => Stream()
-                    ..id = e.id
-                    ..tracks = e.tracks
-                        .map((e) => Track()
-                          ..id = e.id
-                          ..kind = e.kind
-                          ..label = e.label
-                          ..simulcast = e.simulcast)
-                        .toList())
-                  .toList());
-        break;
-      case pb.SignalReply_Payload.msg:
-        var data = _jsonDecoder.convert(String.fromCharCodes(reply.msg.data));
+      case pb.Reply_Payload.message:
+        var data =
+            _jsonDecoder.convert(String.fromCharCodes(reply.message.payload));
         emit(
             'message',
             Message()
-              ..from = reply.msg.from
-              ..to = reply.msg.to
+              ..from = reply.message.from
+              ..to = reply.message.to
               ..data = data);
         break;
       default:

@@ -6,7 +6,7 @@ import 'package:uuid/uuid.dart';
 
 void main() async {
   var connector = ion.IonBaseConnector('http://127.0.0.1:5551');
-  var biz = ion.IonAppBiz(connector);
+  var biz = ion.IonAppRoom(connector);
 
   await biz.connect();
 
@@ -14,13 +14,13 @@ void main() async {
   var sid = 'test room1';
 
   test('test join', () async {
-    biz.onJoin =  (bool success, String reason) {
+    biz.onJoin = (bool success, String reason) {
       //expect(peer.uid, uid);
       //expect(peer.sid, sid);
     };
 
     biz.onPeerEvent = (ion.PeerEvent evt) {
-       print(
+      print(
           'sid ${evt.peer.sid}, peer ${evt.peer.uid} info ${evt.peer.info}, state ${evt.state}');
     };
 
@@ -31,7 +31,7 @@ void main() async {
   });
 
   test('test leave', () async {
-     biz.leave(uid);
+    biz.leave(uid);
   });
 
   await Future.delayed(Duration(seconds: 10));

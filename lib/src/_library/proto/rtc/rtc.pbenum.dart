@@ -33,20 +33,74 @@ class Target extends $pb.ProtobufEnum {
   const Target._($core.int v, $core.String n) : super(v, n);
 }
 
+class MediaType extends $pb.ProtobufEnum {
+  static const MediaType MediaUnknown = MediaType._(
+      0,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'MediaUnknown');
+  static const MediaType UserMedia = MediaType._(
+      1,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'UserMedia');
+  static const MediaType ScreenCapture = MediaType._(
+      2,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'ScreenCapture');
+  static const MediaType Cavans = MediaType._(
+      3,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'Cavans');
+  static const MediaType Streaming = MediaType._(
+      4,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'Streaming');
+  static const MediaType VoIP = MediaType._(
+      5,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'VoIP');
+
+  static const $core.List<MediaType> values = <MediaType>[
+    MediaUnknown,
+    UserMedia,
+    ScreenCapture,
+    Cavans,
+    Streaming,
+    VoIP,
+  ];
+
+  static final $core.Map<$core.int, MediaType> _byValue =
+      $pb.ProtobufEnum.initByValue(values);
+  static MediaType? valueOf($core.int value) => _byValue[value];
+
+  const MediaType._($core.int v, $core.String n) : super(v, n);
+}
+
 class TrackEvent_State extends $pb.ProtobufEnum {
   static const TrackEvent_State ADD = TrackEvent_State._(
       0,
       const $core.bool.fromEnvironment('protobuf.omit_enum_names')
           ? ''
           : 'ADD');
-  static const TrackEvent_State REMOVE = TrackEvent_State._(
+  static const TrackEvent_State UPDATE = TrackEvent_State._(
       1,
+      const $core.bool.fromEnvironment('protobuf.omit_enum_names')
+          ? ''
+          : 'UPDATE');
+  static const TrackEvent_State REMOVE = TrackEvent_State._(
+      2,
       const $core.bool.fromEnvironment('protobuf.omit_enum_names')
           ? ''
           : 'REMOVE');
 
   static const $core.List<TrackEvent_State> values = <TrackEvent_State>[
     ADD,
+    UPDATE,
     REMOVE,
   ];
 

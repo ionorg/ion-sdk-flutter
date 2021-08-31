@@ -241,6 +241,236 @@ class JoinReply extends $pb.GeneratedMessage {
   SessionDescription ensureDescription() => $_ensure(2);
 }
 
+class TrackInfo extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'TrackInfo',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'rtc'),
+      createEmptyInstance: create)
+    ..aOS(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'id')
+    ..aOS(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'kind')
+    ..aOB(
+        3,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'muted')
+    ..e<MediaType>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type', $pb.PbFieldType.OE,
+        defaultOrMaker: MediaType.MediaUnknown,
+        valueOf: MediaType.valueOf,
+        enumValues: MediaType.values)
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'streamId', protoName: 'streamId')
+    ..aOS(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'label')
+    ..aOS(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'layer')
+    ..a<$core.int>(8, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'width', $pb.PbFieldType.OU3)
+    ..a<$core.int>(9, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'height', $pb.PbFieldType.OU3)
+    ..a<$core.int>(10, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'frameRate', $pb.PbFieldType.OU3, protoName: 'frameRate')
+    ..hasRequiredFields = false;
+
+  TrackInfo._() : super();
+  factory TrackInfo({
+    $core.String? id,
+    $core.String? kind,
+    $core.bool? muted,
+    MediaType? type,
+    $core.String? streamId,
+    $core.String? label,
+    $core.String? layer,
+    $core.int? width,
+    $core.int? height,
+    $core.int? frameRate,
+  }) {
+    final _result = create();
+    if (id != null) {
+      _result.id = id;
+    }
+    if (kind != null) {
+      _result.kind = kind;
+    }
+    if (muted != null) {
+      _result.muted = muted;
+    }
+    if (type != null) {
+      _result.type = type;
+    }
+    if (streamId != null) {
+      _result.streamId = streamId;
+    }
+    if (label != null) {
+      _result.label = label;
+    }
+    if (layer != null) {
+      _result.layer = layer;
+    }
+    if (width != null) {
+      _result.width = width;
+    }
+    if (height != null) {
+      _result.height = height;
+    }
+    if (frameRate != null) {
+      _result.frameRate = frameRate;
+    }
+    return _result;
+  }
+  factory TrackInfo.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory TrackInfo.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  TrackInfo clone() => TrackInfo()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  TrackInfo copyWith(void Function(TrackInfo) updates) =>
+      super.copyWith((message) => updates(message as TrackInfo))
+          as TrackInfo; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static TrackInfo create() => TrackInfo._();
+  TrackInfo createEmptyInstance() => create();
+  static $pb.PbList<TrackInfo> createRepeated() => $pb.PbList<TrackInfo>();
+  @$core.pragma('dart2js:noInline')
+  static TrackInfo getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<TrackInfo>(create);
+  static TrackInfo? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get id => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set id($core.String v) {
+    $_setString(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearId() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get kind => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set kind($core.String v) {
+    $_setString(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasKind() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearKind() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get muted => $_getBF(2);
+  @$pb.TagNumber(3)
+  set muted($core.bool v) {
+    $_setBool(2, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasMuted() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearMuted() => clearField(3);
+
+  @$pb.TagNumber(4)
+  MediaType get type => $_getN(3);
+  @$pb.TagNumber(4)
+  set type(MediaType v) {
+    setField(4, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasType() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearType() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get streamId => $_getSZ(4);
+  @$pb.TagNumber(5)
+  set streamId($core.String v) {
+    $_setString(4, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasStreamId() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearStreamId() => clearField(5);
+
+  @$pb.TagNumber(6)
+  $core.String get label => $_getSZ(5);
+  @$pb.TagNumber(6)
+  set label($core.String v) {
+    $_setString(5, v);
+  }
+
+  @$pb.TagNumber(6)
+  $core.bool hasLabel() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearLabel() => clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.String get layer => $_getSZ(6);
+  @$pb.TagNumber(7)
+  set layer($core.String v) {
+    $_setString(6, v);
+  }
+
+  @$pb.TagNumber(7)
+  $core.bool hasLayer() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearLayer() => clearField(7);
+
+  @$pb.TagNumber(8)
+  $core.int get width => $_getIZ(7);
+  @$pb.TagNumber(8)
+  set width($core.int v) {
+    $_setUnsignedInt32(7, v);
+  }
+
+  @$pb.TagNumber(8)
+  $core.bool hasWidth() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearWidth() => clearField(8);
+
+  @$pb.TagNumber(9)
+  $core.int get height => $_getIZ(8);
+  @$pb.TagNumber(9)
+  set height($core.int v) {
+    $_setUnsignedInt32(8, v);
+  }
+
+  @$pb.TagNumber(9)
+  $core.bool hasHeight() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearHeight() => clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.int get frameRate => $_getIZ(9);
+  @$pb.TagNumber(10)
+  set frameRate($core.int v) {
+    $_setUnsignedInt32(9, v);
+  }
+
+  @$pb.TagNumber(10)
+  $core.bool hasFrameRate() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearFrameRate() => clearField(10);
+}
+
 class SessionDescription extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       const $core.bool.fromEnvironment('protobuf.omit_message_names')
@@ -263,6 +493,7 @@ class SessionDescription extends $pb.GeneratedMessage {
     ..aOS(2,
         const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'type')
     ..aOS(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sdp')
+    ..pc<TrackInfo>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackInfos', $pb.PbFieldType.PM, protoName: 'trackInfos', subBuilder: TrackInfo.create)
     ..hasRequiredFields = false;
 
   SessionDescription._() : super();
@@ -270,6 +501,7 @@ class SessionDescription extends $pb.GeneratedMessage {
     Target? target,
     $core.String? type,
     $core.String? sdp,
+    $core.Iterable<TrackInfo>? trackInfos,
   }) {
     final _result = create();
     if (target != null) {
@@ -280,6 +512,9 @@ class SessionDescription extends $pb.GeneratedMessage {
     }
     if (sdp != null) {
       _result.sdp = sdp;
+    }
+    if (trackInfos != null) {
+      _result.trackInfos.addAll(trackInfos);
     }
     return _result;
   }
@@ -345,6 +580,9 @@ class SessionDescription extends $pb.GeneratedMessage {
   $core.bool hasSdp() => $_has(2);
   @$pb.TagNumber(3)
   void clearSdp() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.List<TrackInfo> get trackInfos => $_getList(3);
 }
 
 class Trickle extends $pb.GeneratedMessage {
@@ -523,265 +761,6 @@ class Error extends $pb.GeneratedMessage {
   void clearReason() => clearField(2);
 }
 
-class Simulcast extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
-          ? ''
-          : 'Simulcast',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names')
-              ? ''
-              : 'rtc'),
-      createEmptyInstance: create)
-    ..aOS(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'rid')
-    ..aOS(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'direction')
-    ..aOS(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'parameters')
-    ..hasRequiredFields = false;
-
-  Simulcast._() : super();
-  factory Simulcast({
-    $core.String? rid,
-    $core.String? direction,
-    $core.String? parameters,
-  }) {
-    final _result = create();
-    if (rid != null) {
-      _result.rid = rid;
-    }
-    if (direction != null) {
-      _result.direction = direction;
-    }
-    if (parameters != null) {
-      _result.parameters = parameters;
-    }
-    return _result;
-  }
-  factory Simulcast.fromBuffer($core.List<$core.int> i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(i, r);
-  factory Simulcast.fromJson($core.String i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(i, r);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-      'Will be removed in next major version')
-  Simulcast clone() => Simulcast()..mergeFromMessage(this);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-      'Will be removed in next major version')
-  Simulcast copyWith(void Function(Simulcast) updates) =>
-      super.copyWith((message) => updates(message as Simulcast))
-          as Simulcast; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static Simulcast create() => Simulcast._();
-  Simulcast createEmptyInstance() => create();
-  static $pb.PbList<Simulcast> createRepeated() => $pb.PbList<Simulcast>();
-  @$core.pragma('dart2js:noInline')
-  static Simulcast getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Simulcast>(create);
-  static Simulcast? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get rid => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set rid($core.String v) {
-    $_setString(0, v);
-  }
-
-  @$pb.TagNumber(1)
-  $core.bool hasRid() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearRid() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get direction => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set direction($core.String v) {
-    $_setString(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasDirection() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearDirection() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get parameters => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set parameters($core.String v) {
-    $_setString(2, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasParameters() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearParameters() => clearField(3);
-}
-
-class Track extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
-          ? ''
-          : 'Track',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names')
-              ? ''
-              : 'rtc'),
-      createEmptyInstance: create)
-    ..aOS(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'id')
-    ..aOS(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'streamId')
-    ..aOS(
-        3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'kind')
-    ..aOB(4,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'muted')
-    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'rid')
-    ..pc<Simulcast>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'simulcast', $pb.PbFieldType.PM, subBuilder: Simulcast.create)
-    ..hasRequiredFields = false;
-
-  Track._() : super();
-  factory Track({
-    $core.String? id,
-    $core.String? streamId,
-    $core.String? kind,
-    $core.bool? muted,
-    $core.String? rid,
-    $core.Iterable<Simulcast>? simulcast,
-  }) {
-    final _result = create();
-    if (id != null) {
-      _result.id = id;
-    }
-    if (streamId != null) {
-      _result.streamId = streamId;
-    }
-    if (kind != null) {
-      _result.kind = kind;
-    }
-    if (muted != null) {
-      _result.muted = muted;
-    }
-    if (rid != null) {
-      _result.rid = rid;
-    }
-    if (simulcast != null) {
-      _result.simulcast.addAll(simulcast);
-    }
-    return _result;
-  }
-  factory Track.fromBuffer($core.List<$core.int> i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(i, r);
-  factory Track.fromJson($core.String i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(i, r);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-      'Will be removed in next major version')
-  Track clone() => Track()..mergeFromMessage(this);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-      'Will be removed in next major version')
-  Track copyWith(void Function(Track) updates) =>
-      super.copyWith((message) => updates(message as Track))
-          as Track; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static Track create() => Track._();
-  Track createEmptyInstance() => create();
-  static $pb.PbList<Track> createRepeated() => $pb.PbList<Track>();
-  @$core.pragma('dart2js:noInline')
-  static Track getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Track>(create);
-  static Track? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.String get id => $_getSZ(0);
-  @$pb.TagNumber(1)
-  set id($core.String v) {
-    $_setString(0, v);
-  }
-
-  @$pb.TagNumber(1)
-  $core.bool hasId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearId() => clearField(1);
-
-  @$pb.TagNumber(2)
-  $core.String get streamId => $_getSZ(1);
-  @$pb.TagNumber(2)
-  set streamId($core.String v) {
-    $_setString(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasStreamId() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearStreamId() => clearField(2);
-
-  @$pb.TagNumber(3)
-  $core.String get kind => $_getSZ(2);
-  @$pb.TagNumber(3)
-  set kind($core.String v) {
-    $_setString(2, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasKind() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearKind() => clearField(3);
-
-  @$pb.TagNumber(4)
-  $core.bool get muted => $_getBF(3);
-  @$pb.TagNumber(4)
-  set muted($core.bool v) {
-    $_setBool(3, v);
-  }
-
-  @$pb.TagNumber(4)
-  $core.bool hasMuted() => $_has(3);
-  @$pb.TagNumber(4)
-  void clearMuted() => clearField(4);
-
-  @$pb.TagNumber(5)
-  $core.String get rid => $_getSZ(4);
-  @$pb.TagNumber(5)
-  set rid($core.String v) {
-    $_setString(4, v);
-  }
-
-  @$pb.TagNumber(5)
-  $core.bool hasRid() => $_has(4);
-  @$pb.TagNumber(5)
-  void clearRid() => clearField(5);
-
-  @$pb.TagNumber(6)
-  $core.List<Simulcast> get simulcast => $_getList(5);
-}
-
 class TrackEvent extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       const $core.bool.fromEnvironment('protobuf.omit_message_names')
@@ -793,7 +772,7 @@ class TrackEvent extends $pb.GeneratedMessage {
               : 'rtc'),
       createEmptyInstance: create)
     ..e<TrackEvent_State>(
-        2,
+        1,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
             : 'state',
@@ -801,16 +780,16 @@ class TrackEvent extends $pb.GeneratedMessage {
         defaultOrMaker: TrackEvent_State.ADD,
         valueOf: TrackEvent_State.valueOf,
         enumValues: TrackEvent_State.values)
-    ..aOS(3,
+    ..aOS(2,
         const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'uid')
-    ..pc<Track>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tracks', $pb.PbFieldType.PM, subBuilder: Track.create)
+    ..pc<TrackInfo>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'tracks', $pb.PbFieldType.PM, subBuilder: TrackInfo.create)
     ..hasRequiredFields = false;
 
   TrackEvent._() : super();
   factory TrackEvent({
     TrackEvent_State? state,
     $core.String? uid,
-    $core.Iterable<Track>? tracks,
+    $core.Iterable<TrackInfo>? tracks,
   }) {
     final _result = create();
     if (state != null) {
@@ -850,32 +829,32 @@ class TrackEvent extends $pb.GeneratedMessage {
       $pb.GeneratedMessage.$_defaultFor<TrackEvent>(create);
   static TrackEvent? _defaultInstance;
 
-  @$pb.TagNumber(2)
+  @$pb.TagNumber(1)
   TrackEvent_State get state => $_getN(0);
-  @$pb.TagNumber(2)
+  @$pb.TagNumber(1)
   set state(TrackEvent_State v) {
-    setField(2, v);
+    setField(1, v);
   }
 
-  @$pb.TagNumber(2)
+  @$pb.TagNumber(1)
   $core.bool hasState() => $_has(0);
-  @$pb.TagNumber(2)
-  void clearState() => clearField(2);
+  @$pb.TagNumber(1)
+  void clearState() => clearField(1);
 
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(2)
   $core.String get uid => $_getSZ(1);
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(2)
   set uid($core.String v) {
     $_setString(1, v);
   }
 
-  @$pb.TagNumber(3)
+  @$pb.TagNumber(2)
   $core.bool hasUid() => $_has(1);
-  @$pb.TagNumber(3)
-  void clearUid() => clearField(3);
+  @$pb.TagNumber(2)
+  void clearUid() => clearField(2);
 
-  @$pb.TagNumber(4)
-  $core.List<Track> get tracks => $_getList(2);
+  @$pb.TagNumber(3)
+  $core.List<TrackInfo> get tracks => $_getList(2);
 }
 
 class Subscription extends $pb.GeneratedMessage {
@@ -888,30 +867,40 @@ class Subscription extends $pb.GeneratedMessage {
               ? ''
               : 'rtc'),
       createEmptyInstance: create)
-    ..pPS(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'trackIds',
-        protoName: 'trackIds')
-    ..aOB(
+    ..aOS(
         2,
         const $core.bool.fromEnvironment('protobuf.omit_field_names')
             ? ''
-            : 'subscribe')
+            : 'trackId',
+        protoName: 'trackId')
+    ..aOB(
+        3,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'mute')
+    ..aOB(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscribe')
+    ..aOS(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'layer')
     ..hasRequiredFields = false;
 
   Subscription._() : super();
   factory Subscription({
-    $core.Iterable<$core.String>? trackIds,
+    $core.String? trackId,
+    $core.bool? mute,
     $core.bool? subscribe,
+    $core.String? layer,
   }) {
     final _result = create();
-    if (trackIds != null) {
-      _result.trackIds.addAll(trackIds);
+    if (trackId != null) {
+      _result.trackId = trackId;
+    }
+    if (mute != null) {
+      _result.mute = mute;
     }
     if (subscribe != null) {
       _result.subscribe = subscribe;
+    }
+    if (layer != null) {
+      _result.layer = layer;
     }
     return _result;
   }
@@ -942,393 +931,508 @@ class Subscription extends $pb.GeneratedMessage {
       $pb.GeneratedMessage.$_defaultFor<Subscription>(create);
   static Subscription? _defaultInstance;
 
-  @$pb.TagNumber(1)
-  $core.List<$core.String> get trackIds => $_getList(0);
-
   @$pb.TagNumber(2)
-  $core.bool get subscribe => $_getBF(1);
-  @$pb.TagNumber(2)
-  set subscribe($core.bool v) {
-    $_setBool(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasSubscribe() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearSubscribe() => clearField(2);
-}
-
-class MuteTrack extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
-          ? ''
-          : 'MuteTrack',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names')
-              ? ''
-              : 'rtc'),
-      createEmptyInstance: create)
-    ..pPS(
-        1,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'trackIds',
-        protoName: 'trackIds')
-    ..aOB(
-        2,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names')
-            ? ''
-            : 'muted')
-    ..hasRequiredFields = false;
-
-  MuteTrack._() : super();
-  factory MuteTrack({
-    $core.Iterable<$core.String>? trackIds,
-    $core.bool? muted,
-  }) {
-    final _result = create();
-    if (trackIds != null) {
-      _result.trackIds.addAll(trackIds);
-    }
-    if (muted != null) {
-      _result.muted = muted;
-    }
-    return _result;
-  }
-  factory MuteTrack.fromBuffer($core.List<$core.int> i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(i, r);
-  factory MuteTrack.fromJson($core.String i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(i, r);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-      'Will be removed in next major version')
-  MuteTrack clone() => MuteTrack()..mergeFromMessage(this);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-      'Will be removed in next major version')
-  MuteTrack copyWith(void Function(MuteTrack) updates) =>
-      super.copyWith((message) => updates(message as MuteTrack))
-          as MuteTrack; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static MuteTrack create() => MuteTrack._();
-  MuteTrack createEmptyInstance() => create();
-  static $pb.PbList<MuteTrack> createRepeated() => $pb.PbList<MuteTrack>();
-  @$core.pragma('dart2js:noInline')
-  static MuteTrack getDefault() =>
-      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<MuteTrack>(create);
-  static MuteTrack? _defaultInstance;
-
-  @$pb.TagNumber(1)
-  $core.List<$core.String> get trackIds => $_getList(0);
-
-  @$pb.TagNumber(2)
-  $core.bool get muted => $_getBF(1);
-  @$pb.TagNumber(2)
-  set muted($core.bool v) {
-    $_setBool(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasMuted() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearMuted() => clearField(2);
-}
-
-class SwitchScalabilityLayer extends $pb.GeneratedMessage {
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
-      const $core.bool.fromEnvironment('protobuf.omit_message_names')
-          ? ''
-          : 'SwitchScalabilityLayer',
-      package: const $pb.PackageName(
-          const $core.bool.fromEnvironment('protobuf.omit_message_names')
-              ? ''
-              : 'rtc'),
-      createEmptyInstance: create)
-    ..aOS(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackId',
-        protoName: 'trackId')
-    ..a<$core.int>(
-        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'spatialLayer', $pb.PbFieldType.OU3,
-        protoName: 'spatialLayer')
-    ..a<$core.int>(
-        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'temporalLayer', $pb.PbFieldType.OU3,
-        protoName: 'temporalLayer')
-    ..hasRequiredFields = false;
-
-  SwitchScalabilityLayer._() : super();
-  factory SwitchScalabilityLayer({
-    $core.String? trackId,
-    $core.int? spatialLayer,
-    $core.int? temporalLayer,
-  }) {
-    final _result = create();
-    if (trackId != null) {
-      _result.trackId = trackId;
-    }
-    if (spatialLayer != null) {
-      _result.spatialLayer = spatialLayer;
-    }
-    if (temporalLayer != null) {
-      _result.temporalLayer = temporalLayer;
-    }
-    return _result;
-  }
-  factory SwitchScalabilityLayer.fromBuffer($core.List<$core.int> i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromBuffer(i, r);
-  factory SwitchScalabilityLayer.fromJson($core.String i,
-          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
-      create()..mergeFromJson(i, r);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
-      'Will be removed in next major version')
-  SwitchScalabilityLayer clone() =>
-      SwitchScalabilityLayer()..mergeFromMessage(this);
-  @$core.Deprecated('Using this can add significant overhead to your binary. '
-      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
-      'Will be removed in next major version')
-  SwitchScalabilityLayer copyWith(
-          void Function(SwitchScalabilityLayer) updates) =>
-      super.copyWith((message) => updates(message as SwitchScalabilityLayer))
-          as SwitchScalabilityLayer; // ignore: deprecated_member_use
-  $pb.BuilderInfo get info_ => _i;
-  @$core.pragma('dart2js:noInline')
-  static SwitchScalabilityLayer create() => SwitchScalabilityLayer._();
-  SwitchScalabilityLayer createEmptyInstance() => create();
-  static $pb.PbList<SwitchScalabilityLayer> createRepeated() =>
-      $pb.PbList<SwitchScalabilityLayer>();
-  @$core.pragma('dart2js:noInline')
-  static SwitchScalabilityLayer getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<SwitchScalabilityLayer>(create);
-  static SwitchScalabilityLayer? _defaultInstance;
-
-  @$pb.TagNumber(1)
   $core.String get trackId => $_getSZ(0);
-  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
   set trackId($core.String v) {
     $_setString(0, v);
   }
 
-  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
   $core.bool hasTrackId() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearTrackId() => clearField(1);
-
   @$pb.TagNumber(2)
-  $core.int get spatialLayer => $_getIZ(1);
-  @$pb.TagNumber(2)
-  set spatialLayer($core.int v) {
-    $_setUnsignedInt32(1, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasSpatialLayer() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearSpatialLayer() => clearField(2);
+  void clearTrackId() => clearField(2);
 
   @$pb.TagNumber(3)
-  $core.int get temporalLayer => $_getIZ(2);
+  $core.bool get mute => $_getBF(1);
   @$pb.TagNumber(3)
-  set temporalLayer($core.int v) {
-    $_setUnsignedInt32(2, v);
+  set mute($core.bool v) {
+    $_setBool(1, v);
   }
 
   @$pb.TagNumber(3)
-  $core.bool hasTemporalLayer() => $_has(2);
+  $core.bool hasMute() => $_has(1);
   @$pb.TagNumber(3)
-  void clearTemporalLayer() => clearField(3);
+  void clearMute() => clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.bool get subscribe => $_getBF(2);
+  @$pb.TagNumber(4)
+  set subscribe($core.bool v) {
+    $_setBool(2, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasSubscribe() => $_has(2);
+  @$pb.TagNumber(4)
+  void clearSubscribe() => clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.String get layer => $_getSZ(3);
+  @$pb.TagNumber(5)
+  set layer($core.String v) {
+    $_setString(3, v);
+  }
+
+  @$pb.TagNumber(5)
+  $core.bool hasLayer() => $_has(3);
+  @$pb.TagNumber(5)
+  void clearLayer() => clearField(5);
 }
 
-enum UpdateSettings_Command { subscription, switchLayer, muteTrack, notSet }
-
-class UpdateSettings extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, UpdateSettings_Command>
-      _UpdateSettings_CommandByTag = {
-    1: UpdateSettings_Command.subscription,
-    2: UpdateSettings_Command.switchLayer,
-    3: UpdateSettings_Command.muteTrack,
-    0: UpdateSettings_Command.notSet
-  };
+class SubscriptionRequest extends $pb.GeneratedMessage {
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       const $core.bool.fromEnvironment('protobuf.omit_message_names')
           ? ''
-          : 'UpdateSettings',
+          : 'SubscriptionRequest',
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
               : 'rtc'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3])
-    ..aOM<Subscription>(
-        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscription',
+    ..pc<Subscription>(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'subscriptions',
+        $pb.PbFieldType.PM,
         subBuilder: Subscription.create)
-    ..aOM<SwitchScalabilityLayer>(
-        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'switchLayer',
-        protoName: 'switchLayer', subBuilder: SwitchScalabilityLayer.create)
-    ..aOM<MuteTrack>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'muteTrack',
-        protoName: 'muteTrack', subBuilder: MuteTrack.create)
     ..hasRequiredFields = false;
 
-  UpdateSettings._() : super();
-  factory UpdateSettings({
-    Subscription? subscription,
-    SwitchScalabilityLayer? switchLayer,
-    MuteTrack? muteTrack,
+  SubscriptionRequest._() : super();
+  factory SubscriptionRequest({
+    $core.Iterable<Subscription>? subscriptions,
   }) {
     final _result = create();
-    if (subscription != null) {
-      _result.subscription = subscription;
-    }
-    if (switchLayer != null) {
-      _result.switchLayer = switchLayer;
-    }
-    if (muteTrack != null) {
-      _result.muteTrack = muteTrack;
+    if (subscriptions != null) {
+      _result.subscriptions.addAll(subscriptions);
     }
     return _result;
   }
-  factory UpdateSettings.fromBuffer($core.List<$core.int> i,
+  factory SubscriptionRequest.fromBuffer($core.List<$core.int> i,
           [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(i, r);
-  factory UpdateSettings.fromJson($core.String i,
+  factory SubscriptionRequest.fromJson($core.String i,
           [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(i, r);
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
       'Will be removed in next major version')
-  UpdateSettings clone() => UpdateSettings()..mergeFromMessage(this);
+  SubscriptionRequest clone() => SubscriptionRequest()..mergeFromMessage(this);
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
-  UpdateSettings copyWith(void Function(UpdateSettings) updates) =>
-      super.copyWith((message) => updates(message as UpdateSettings))
-          as UpdateSettings; // ignore: deprecated_member_use
+  SubscriptionRequest copyWith(void Function(SubscriptionRequest) updates) =>
+      super.copyWith((message) => updates(message as SubscriptionRequest))
+          as SubscriptionRequest; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static UpdateSettings create() => UpdateSettings._();
-  UpdateSettings createEmptyInstance() => create();
-  static $pb.PbList<UpdateSettings> createRepeated() =>
-      $pb.PbList<UpdateSettings>();
+  static SubscriptionRequest create() => SubscriptionRequest._();
+  SubscriptionRequest createEmptyInstance() => create();
+  static $pb.PbList<SubscriptionRequest> createRepeated() =>
+      $pb.PbList<SubscriptionRequest>();
   @$core.pragma('dart2js:noInline')
-  static UpdateSettings getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<UpdateSettings>(create);
-  static UpdateSettings? _defaultInstance;
-
-  UpdateSettings_Command whichCommand() =>
-      _UpdateSettings_CommandByTag[$_whichOneof(0)]!;
-  void clearCommand() => clearField($_whichOneof(0));
+  static SubscriptionRequest getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SubscriptionRequest>(create);
+  static SubscriptionRequest? _defaultInstance;
 
   @$pb.TagNumber(1)
-  Subscription get subscription => $_getN(0);
-  @$pb.TagNumber(1)
-  set subscription(Subscription v) {
-    setField(1, v);
-  }
-
-  @$pb.TagNumber(1)
-  $core.bool hasSubscription() => $_has(0);
-  @$pb.TagNumber(1)
-  void clearSubscription() => clearField(1);
-  @$pb.TagNumber(1)
-  Subscription ensureSubscription() => $_ensure(0);
-
-  @$pb.TagNumber(2)
-  SwitchScalabilityLayer get switchLayer => $_getN(1);
-  @$pb.TagNumber(2)
-  set switchLayer(SwitchScalabilityLayer v) {
-    setField(2, v);
-  }
-
-  @$pb.TagNumber(2)
-  $core.bool hasSwitchLayer() => $_has(1);
-  @$pb.TagNumber(2)
-  void clearSwitchLayer() => clearField(2);
-  @$pb.TagNumber(2)
-  SwitchScalabilityLayer ensureSwitchLayer() => $_ensure(1);
-
-  @$pb.TagNumber(3)
-  MuteTrack get muteTrack => $_getN(2);
-  @$pb.TagNumber(3)
-  set muteTrack(MuteTrack v) {
-    setField(3, v);
-  }
-
-  @$pb.TagNumber(3)
-  $core.bool hasMuteTrack() => $_has(2);
-  @$pb.TagNumber(3)
-  void clearMuteTrack() => clearField(3);
-  @$pb.TagNumber(3)
-  MuteTrack ensureMuteTrack() => $_ensure(2);
+  $core.List<Subscription> get subscriptions => $_getList(0);
 }
 
-enum Signalling_Payload {
-  join,
-  reply,
-  error,
-  description,
-  trickle,
-  updateSettings,
-  trackEvent,
-  notSet
-}
-
-class Signalling extends $pb.GeneratedMessage {
-  static const $core.Map<$core.int, Signalling_Payload>
-      _Signalling_PayloadByTag = {
-    1: Signalling_Payload.join,
-    2: Signalling_Payload.reply,
-    3: Signalling_Payload.error,
-    4: Signalling_Payload.description,
-    5: Signalling_Payload.trickle,
-    6: Signalling_Payload.updateSettings,
-    7: Signalling_Payload.trackEvent,
-    0: Signalling_Payload.notSet
-  };
-  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Signalling',
+class SubscriptionReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'SubscriptionReply',
       package: const $pb.PackageName(
           const $core.bool.fromEnvironment('protobuf.omit_message_names')
               ? ''
               : 'rtc'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 4, 5, 6, 7])
+    ..aOB(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'success')
+    ..aOM<Error>(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'error',
+        subBuilder: Error.create)
+    ..hasRequiredFields = false;
+
+  SubscriptionReply._() : super();
+  factory SubscriptionReply({
+    $core.bool? success,
+    Error? error,
+  }) {
+    final _result = create();
+    if (success != null) {
+      _result.success = success;
+    }
+    if (error != null) {
+      _result.error = error;
+    }
+    return _result;
+  }
+  factory SubscriptionReply.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory SubscriptionReply.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  SubscriptionReply clone() => SubscriptionReply()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  SubscriptionReply copyWith(void Function(SubscriptionReply) updates) =>
+      super.copyWith((message) => updates(message as SubscriptionReply))
+          as SubscriptionReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static SubscriptionReply create() => SubscriptionReply._();
+  SubscriptionReply createEmptyInstance() => create();
+  static $pb.PbList<SubscriptionReply> createRepeated() =>
+      $pb.PbList<SubscriptionReply>();
+  @$core.pragma('dart2js:noInline')
+  static SubscriptionReply getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<SubscriptionReply>(create);
+  static SubscriptionReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool v) {
+    $_setBool(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => clearField(1);
+
+  @$pb.TagNumber(2)
+  Error get error => $_getN(1);
+  @$pb.TagNumber(2)
+  set error(Error v) {
+    setField(2, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearError() => clearField(2);
+  @$pb.TagNumber(2)
+  Error ensureError() => $_ensure(1);
+}
+
+class UpdateTrackReply extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'UpdateTrackReply',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'rtc'),
+      createEmptyInstance: create)
+    ..aOB(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'success')
+    ..aOM<Error>(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'error',
+        subBuilder: Error.create)
+    ..hasRequiredFields = false;
+
+  UpdateTrackReply._() : super();
+  factory UpdateTrackReply({
+    $core.bool? success,
+    Error? error,
+  }) {
+    final _result = create();
+    if (success != null) {
+      _result.success = success;
+    }
+    if (error != null) {
+      _result.error = error;
+    }
+    return _result;
+  }
+  factory UpdateTrackReply.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory UpdateTrackReply.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  UpdateTrackReply clone() => UpdateTrackReply()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  UpdateTrackReply copyWith(void Function(UpdateTrackReply) updates) =>
+      super.copyWith((message) => updates(message as UpdateTrackReply))
+          as UpdateTrackReply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static UpdateTrackReply create() => UpdateTrackReply._();
+  UpdateTrackReply createEmptyInstance() => create();
+  static $pb.PbList<UpdateTrackReply> createRepeated() =>
+      $pb.PbList<UpdateTrackReply>();
+  @$core.pragma('dart2js:noInline')
+  static UpdateTrackReply getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<UpdateTrackReply>(create);
+  static UpdateTrackReply? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get success => $_getBF(0);
+  @$pb.TagNumber(1)
+  set success($core.bool v) {
+    $_setBool(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasSuccess() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSuccess() => clearField(1);
+
+  @$pb.TagNumber(2)
+  Error get error => $_getN(1);
+  @$pb.TagNumber(2)
+  set error(Error v) {
+    setField(2, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasError() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearError() => clearField(2);
+  @$pb.TagNumber(2)
+  Error ensureError() => $_ensure(1);
+}
+
+class ActiveSpeaker extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'ActiveSpeaker',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'rtc'),
+      createEmptyInstance: create)
+    ..pc<AudioLevelSpeaker>(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'speakers',
+        $pb.PbFieldType.PM,
+        subBuilder: AudioLevelSpeaker.create)
+    ..hasRequiredFields = false;
+
+  ActiveSpeaker._() : super();
+  factory ActiveSpeaker({
+    $core.Iterable<AudioLevelSpeaker>? speakers,
+  }) {
+    final _result = create();
+    if (speakers != null) {
+      _result.speakers.addAll(speakers);
+    }
+    return _result;
+  }
+  factory ActiveSpeaker.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory ActiveSpeaker.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  ActiveSpeaker clone() => ActiveSpeaker()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  ActiveSpeaker copyWith(void Function(ActiveSpeaker) updates) =>
+      super.copyWith((message) => updates(message as ActiveSpeaker))
+          as ActiveSpeaker; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static ActiveSpeaker create() => ActiveSpeaker._();
+  ActiveSpeaker createEmptyInstance() => create();
+  static $pb.PbList<ActiveSpeaker> createRepeated() =>
+      $pb.PbList<ActiveSpeaker>();
+  @$core.pragma('dart2js:noInline')
+  static ActiveSpeaker getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<ActiveSpeaker>(create);
+  static ActiveSpeaker? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.List<AudioLevelSpeaker> get speakers => $_getList(0);
+}
+
+class AudioLevelSpeaker extends $pb.GeneratedMessage {
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'AudioLevelSpeaker',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'rtc'),
+      createEmptyInstance: create)
+    ..aOS(
+        1,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'sid')
+    ..a<$core.double>(
+        2,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'level',
+        $pb.PbFieldType.OF)
+    ..aOB(
+        3,
+        const $core.bool.fromEnvironment('protobuf.omit_field_names')
+            ? ''
+            : 'active')
+    ..hasRequiredFields = false;
+
+  AudioLevelSpeaker._() : super();
+  factory AudioLevelSpeaker({
+    $core.String? sid,
+    $core.double? level,
+    $core.bool? active,
+  }) {
+    final _result = create();
+    if (sid != null) {
+      _result.sid = sid;
+    }
+    if (level != null) {
+      _result.level = level;
+    }
+    if (active != null) {
+      _result.active = active;
+    }
+    return _result;
+  }
+  factory AudioLevelSpeaker.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory AudioLevelSpeaker.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  AudioLevelSpeaker clone() => AudioLevelSpeaker()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  AudioLevelSpeaker copyWith(void Function(AudioLevelSpeaker) updates) =>
+      super.copyWith((message) => updates(message as AudioLevelSpeaker))
+          as AudioLevelSpeaker; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static AudioLevelSpeaker create() => AudioLevelSpeaker._();
+  AudioLevelSpeaker createEmptyInstance() => create();
+  static $pb.PbList<AudioLevelSpeaker> createRepeated() =>
+      $pb.PbList<AudioLevelSpeaker>();
+  @$core.pragma('dart2js:noInline')
+  static AudioLevelSpeaker getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AudioLevelSpeaker>(create);
+  static AudioLevelSpeaker? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.String get sid => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set sid($core.String v) {
+    $_setString(0, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasSid() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSid() => clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.double get level => $_getN(1);
+  @$pb.TagNumber(2)
+  set level($core.double v) {
+    $_setFloat(1, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasLevel() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLevel() => clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.bool get active => $_getBF(2);
+  @$pb.TagNumber(3)
+  set active($core.bool v) {
+    $_setBool(2, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasActive() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearActive() => clearField(3);
+}
+
+enum Request_Payload { join, description, trickle, subscription, notSet }
+
+class Request extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, Request_Payload> _Request_PayloadByTag = {
+    1: Request_Payload.join,
+    2: Request_Payload.description,
+    3: Request_Payload.trickle,
+    4: Request_Payload.subscription,
+    0: Request_Payload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Request',
+      package: const $pb.PackageName(
+          const $core.bool.fromEnvironment('protobuf.omit_message_names')
+              ? ''
+              : 'rtc'),
+      createEmptyInstance: create)
+    ..oo(0, [1, 2, 3, 4])
     ..aOM<JoinRequest>(
         1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'join',
         subBuilder: JoinRequest.create)
-    ..aOM<JoinReply>(
-        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'reply',
-        subBuilder: JoinReply.create)
-    ..aOM<Error>(
-        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error',
-        subBuilder: Error.create)
     ..aOM<SessionDescription>(
-        4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description',
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description',
         subBuilder: SessionDescription.create)
-    ..aOM<Trickle>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trickle', subBuilder: Trickle.create)
-    ..aOM<UpdateSettings>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'updateSettings', protoName: 'updateSettings', subBuilder: UpdateSettings.create)
-    ..aOM<TrackEvent>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackEvent', protoName: 'trackEvent', subBuilder: TrackEvent.create)
+    ..aOM<Trickle>(
+        3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trickle',
+        subBuilder: Trickle.create)
+    ..aOM<SubscriptionRequest>(
+        4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscription',
+        subBuilder: SubscriptionRequest.create)
     ..hasRequiredFields = false;
 
-  Signalling._() : super();
-  factory Signalling({
+  Request._() : super();
+  factory Request({
     JoinRequest? join,
-    JoinReply? reply,
-    Error? error,
     SessionDescription? description,
     Trickle? trickle,
-    UpdateSettings? updateSettings,
-    TrackEvent? trackEvent,
+    SubscriptionRequest? subscription,
   }) {
     final _result = create();
     if (join != null) {
       _result.join = join;
-    }
-    if (reply != null) {
-      _result.reply = reply;
-    }
-    if (error != null) {
-      _result.error = error;
     }
     if (description != null) {
       _result.description = description;
@@ -1336,42 +1440,38 @@ class Signalling extends $pb.GeneratedMessage {
     if (trickle != null) {
       _result.trickle = trickle;
     }
-    if (updateSettings != null) {
-      _result.updateSettings = updateSettings;
-    }
-    if (trackEvent != null) {
-      _result.trackEvent = trackEvent;
+    if (subscription != null) {
+      _result.subscription = subscription;
     }
     return _result;
   }
-  factory Signalling.fromBuffer($core.List<$core.int> i,
+  factory Request.fromBuffer($core.List<$core.int> i,
           [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromBuffer(i, r);
-  factory Signalling.fromJson($core.String i,
+  factory Request.fromJson($core.String i,
           [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
       create()..mergeFromJson(i, r);
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
       'Will be removed in next major version')
-  Signalling clone() => Signalling()..mergeFromMessage(this);
+  Request clone() => Request()..mergeFromMessage(this);
   @$core.Deprecated('Using this can add significant overhead to your binary. '
       'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
       'Will be removed in next major version')
-  Signalling copyWith(void Function(Signalling) updates) =>
-      super.copyWith((message) => updates(message as Signalling))
-          as Signalling; // ignore: deprecated_member_use
+  Request copyWith(void Function(Request) updates) =>
+      super.copyWith((message) => updates(message as Request))
+          as Request; // ignore: deprecated_member_use
   $pb.BuilderInfo get info_ => _i;
   @$core.pragma('dart2js:noInline')
-  static Signalling create() => Signalling._();
-  Signalling createEmptyInstance() => create();
-  static $pb.PbList<Signalling> createRepeated() => $pb.PbList<Signalling>();
+  static Request create() => Request._();
+  Request createEmptyInstance() => create();
+  static $pb.PbList<Request> createRepeated() => $pb.PbList<Request>();
   @$core.pragma('dart2js:noInline')
-  static Signalling getDefault() => _defaultInstance ??=
-      $pb.GeneratedMessage.$_defaultFor<Signalling>(create);
-  static Signalling? _defaultInstance;
+  static Request getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Request>(create);
+  static Request? _defaultInstance;
 
-  Signalling_Payload whichPayload() =>
-      _Signalling_PayloadByTag[$_whichOneof(0)]!;
+  Request_Payload whichPayload() => _Request_PayloadByTag[$_whichOneof(0)]!;
   void clearPayload() => clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -1389,86 +1489,229 @@ class Signalling extends $pb.GeneratedMessage {
   JoinRequest ensureJoin() => $_ensure(0);
 
   @$pb.TagNumber(2)
-  JoinReply get reply => $_getN(1);
+  SessionDescription get description => $_getN(1);
   @$pb.TagNumber(2)
-  set reply(JoinReply v) {
+  set description(SessionDescription v) {
     setField(2, v);
   }
 
   @$pb.TagNumber(2)
-  $core.bool hasReply() => $_has(1);
+  $core.bool hasDescription() => $_has(1);
   @$pb.TagNumber(2)
-  void clearReply() => clearField(2);
+  void clearDescription() => clearField(2);
   @$pb.TagNumber(2)
-  JoinReply ensureReply() => $_ensure(1);
+  SessionDescription ensureDescription() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  Error get error => $_getN(2);
+  Trickle get trickle => $_getN(2);
   @$pb.TagNumber(3)
-  set error(Error v) {
+  set trickle(Trickle v) {
     setField(3, v);
   }
 
   @$pb.TagNumber(3)
-  $core.bool hasError() => $_has(2);
+  $core.bool hasTrickle() => $_has(2);
   @$pb.TagNumber(3)
-  void clearError() => clearField(3);
+  void clearTrickle() => clearField(3);
   @$pb.TagNumber(3)
-  Error ensureError() => $_ensure(2);
+  Trickle ensureTrickle() => $_ensure(2);
 
   @$pb.TagNumber(4)
-  SessionDescription get description => $_getN(3);
+  SubscriptionRequest get subscription => $_getN(3);
   @$pb.TagNumber(4)
-  set description(SessionDescription v) {
+  set subscription(SubscriptionRequest v) {
     setField(4, v);
   }
 
   @$pb.TagNumber(4)
-  $core.bool hasDescription() => $_has(3);
+  $core.bool hasSubscription() => $_has(3);
   @$pb.TagNumber(4)
-  void clearDescription() => clearField(4);
+  void clearSubscription() => clearField(4);
   @$pb.TagNumber(4)
-  SessionDescription ensureDescription() => $_ensure(3);
+  SubscriptionRequest ensureSubscription() => $_ensure(3);
+}
+
+enum Reply_Payload {
+  join,
+  description,
+  trickle,
+  trackEvent,
+  subscription,
+  error,
+  notSet
+}
+
+class Reply extends $pb.GeneratedMessage {
+  static const $core.Map<$core.int, Reply_Payload> _Reply_PayloadByTag = {
+    1: Reply_Payload.join,
+    2: Reply_Payload.description,
+    3: Reply_Payload.trickle,
+    4: Reply_Payload.trackEvent,
+    5: Reply_Payload.subscription,
+    7: Reply_Payload.error,
+    0: Reply_Payload.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(const $core.bool.fromEnvironment('protobuf.omit_message_names') ? '' : 'Reply',
+      package: const $pb.PackageName(const $core.bool.fromEnvironment('protobuf.omit_message_names')
+          ? ''
+          : 'rtc'),
+      createEmptyInstance: create)
+    ..oo(0, [1, 2, 3, 4, 5, 7])
+    ..aOM<JoinReply>(1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'join',
+        subBuilder: JoinReply.create)
+    ..aOM<SessionDescription>(
+        2, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'description',
+        subBuilder: SessionDescription.create)
+    ..aOM<Trickle>(3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trickle',
+        subBuilder: Trickle.create)
+    ..aOM<TrackEvent>(4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'trackEvent',
+        protoName: 'trackEvent', subBuilder: TrackEvent.create)
+    ..aOM<SubscriptionReply>(
+        5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'subscription',
+        subBuilder: SubscriptionReply.create)
+    ..aOM<Error>(7, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'error', subBuilder: Error.create)
+    ..hasRequiredFields = false;
+
+  Reply._() : super();
+  factory Reply({
+    JoinReply? join,
+    SessionDescription? description,
+    Trickle? trickle,
+    TrackEvent? trackEvent,
+    SubscriptionReply? subscription,
+    Error? error,
+  }) {
+    final _result = create();
+    if (join != null) {
+      _result.join = join;
+    }
+    if (description != null) {
+      _result.description = description;
+    }
+    if (trickle != null) {
+      _result.trickle = trickle;
+    }
+    if (trackEvent != null) {
+      _result.trackEvent = trackEvent;
+    }
+    if (subscription != null) {
+      _result.subscription = subscription;
+    }
+    if (error != null) {
+      _result.error = error;
+    }
+    return _result;
+  }
+  factory Reply.fromBuffer($core.List<$core.int> i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(i, r);
+  factory Reply.fromJson($core.String i,
+          [$pb.ExtensionRegistry r = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(i, r);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.deepCopy] instead. '
+      'Will be removed in next major version')
+  Reply clone() => Reply()..mergeFromMessage(this);
+  @$core.Deprecated('Using this can add significant overhead to your binary. '
+      'Use [GeneratedMessageGenericExtensions.rebuild] instead. '
+      'Will be removed in next major version')
+  Reply copyWith(void Function(Reply) updates) =>
+      super.copyWith((message) => updates(message as Reply))
+          as Reply; // ignore: deprecated_member_use
+  $pb.BuilderInfo get info_ => _i;
+  @$core.pragma('dart2js:noInline')
+  static Reply create() => Reply._();
+  Reply createEmptyInstance() => create();
+  static $pb.PbList<Reply> createRepeated() => $pb.PbList<Reply>();
+  @$core.pragma('dart2js:noInline')
+  static Reply getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Reply>(create);
+  static Reply? _defaultInstance;
+
+  Reply_Payload whichPayload() => _Reply_PayloadByTag[$_whichOneof(0)]!;
+  void clearPayload() => clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  JoinReply get join => $_getN(0);
+  @$pb.TagNumber(1)
+  set join(JoinReply v) {
+    setField(1, v);
+  }
+
+  @$pb.TagNumber(1)
+  $core.bool hasJoin() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearJoin() => clearField(1);
+  @$pb.TagNumber(1)
+  JoinReply ensureJoin() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  SessionDescription get description => $_getN(1);
+  @$pb.TagNumber(2)
+  set description(SessionDescription v) {
+    setField(2, v);
+  }
+
+  @$pb.TagNumber(2)
+  $core.bool hasDescription() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDescription() => clearField(2);
+  @$pb.TagNumber(2)
+  SessionDescription ensureDescription() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  Trickle get trickle => $_getN(2);
+  @$pb.TagNumber(3)
+  set trickle(Trickle v) {
+    setField(3, v);
+  }
+
+  @$pb.TagNumber(3)
+  $core.bool hasTrickle() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearTrickle() => clearField(3);
+  @$pb.TagNumber(3)
+  Trickle ensureTrickle() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  TrackEvent get trackEvent => $_getN(3);
+  @$pb.TagNumber(4)
+  set trackEvent(TrackEvent v) {
+    setField(4, v);
+  }
+
+  @$pb.TagNumber(4)
+  $core.bool hasTrackEvent() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearTrackEvent() => clearField(4);
+  @$pb.TagNumber(4)
+  TrackEvent ensureTrackEvent() => $_ensure(3);
 
   @$pb.TagNumber(5)
-  Trickle get trickle => $_getN(4);
+  SubscriptionReply get subscription => $_getN(4);
   @$pb.TagNumber(5)
-  set trickle(Trickle v) {
+  set subscription(SubscriptionReply v) {
     setField(5, v);
   }
 
   @$pb.TagNumber(5)
-  $core.bool hasTrickle() => $_has(4);
+  $core.bool hasSubscription() => $_has(4);
   @$pb.TagNumber(5)
-  void clearTrickle() => clearField(5);
+  void clearSubscription() => clearField(5);
   @$pb.TagNumber(5)
-  Trickle ensureTrickle() => $_ensure(4);
-
-  @$pb.TagNumber(6)
-  UpdateSettings get updateSettings => $_getN(5);
-  @$pb.TagNumber(6)
-  set updateSettings(UpdateSettings v) {
-    setField(6, v);
-  }
-
-  @$pb.TagNumber(6)
-  $core.bool hasUpdateSettings() => $_has(5);
-  @$pb.TagNumber(6)
-  void clearUpdateSettings() => clearField(6);
-  @$pb.TagNumber(6)
-  UpdateSettings ensureUpdateSettings() => $_ensure(5);
+  SubscriptionReply ensureSubscription() => $_ensure(4);
 
   @$pb.TagNumber(7)
-  TrackEvent get trackEvent => $_getN(6);
+  Error get error => $_getN(5);
   @$pb.TagNumber(7)
-  set trackEvent(TrackEvent v) {
+  set error(Error v) {
     setField(7, v);
   }
 
   @$pb.TagNumber(7)
-  $core.bool hasTrackEvent() => $_has(6);
+  $core.bool hasError() => $_has(5);
   @$pb.TagNumber(7)
-  void clearTrackEvent() => clearField(7);
+  void clearError() => clearField(7);
   @$pb.TagNumber(7)
-  TrackEvent ensureTrackEvent() => $_ensure(6);
+  Error ensureError() => $_ensure(5);
 }
