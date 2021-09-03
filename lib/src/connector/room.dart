@@ -95,10 +95,10 @@ class Disconnect {
   late String reason;
 }
 
-class IonAppRoom extends IonService {
+class IonAppRoom extends Service {
   @override
   String name = 'room';
-  IonBaseConnector connector;
+  Connector connector;
   _IonAppRoomGRPCClient? _sig;
   Function(Error err)? onError;
   Function(JoinResult result)? onJoin;
@@ -143,8 +143,8 @@ class IonAppRoom extends IonService {
 }
 
 class _IonAppRoomGRPCClient extends EventEmitter {
-  IonService service;
-  IonBaseConnector connector;
+  Service service;
+  Connector connector;
   _IonAppRoomGRPCClient(this.connector, this.service) {
     _client = room.RoomSignalClient(connector.grpcClientChannel(),
         options: connector.callOptions());

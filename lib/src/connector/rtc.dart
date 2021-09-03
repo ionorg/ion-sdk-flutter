@@ -79,11 +79,11 @@ class Subscription {
       required this.layer});
 }
 
-class IonSDKRTC extends IonService {
+class RTC extends Service {
   @override
   String name = 'rtc';
   Map<String, dynamic> config = Client.defaultConfig;
-  IonBaseConnector connector;
+  Connector connector;
   _IonSFUGRPCSignal? _sig;
   late Client _client;
 
@@ -92,7 +92,7 @@ class IonSDKRTC extends IonService {
   Function(RTCDataChannel channel)? ondatachannel;
   Function(Map<String, dynamic> list)? onspeaker;
 
-  IonSDKRTC(this.connector, {Map<String, dynamic>? cfg}) {
+  RTC(this.connector, {Map<String, dynamic>? cfg}) {
     if (cfg != null) {
       config.addAll(cfg);
     }
@@ -163,8 +163,8 @@ class IonSDKRTC extends IonService {
 }
 
 class _IonSFUGRPCSignal extends Signal {
-  IonService service;
-  IonBaseConnector connector;
+  Service service;
+  Connector connector;
   final JsonDecoder _jsonDecoder = JsonDecoder();
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final EventEmitter _emitter = EventEmitter();

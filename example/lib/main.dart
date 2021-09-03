@@ -12,8 +12,8 @@ class MyApp extends StatefulWidget {
 class _GetMyAppState extends State<MyApp> {
   final _localRenderer = RTCVideoRenderer();
   final List<RTCVideoRenderer> _remoteRenderers = <RTCVideoRenderer>[];
-  final IonBaseConnector _connector = IonBaseConnector('http://localhost:5551');
-  late IonSDKRTC _rtc;
+  final Connector _connector = Connector('http://localhost:5551');
+  late RTC _rtc;
   @override
   void initState() {
     super.initState();
@@ -21,7 +21,7 @@ class _GetMyAppState extends State<MyApp> {
   }
 
   void connect() async {
-    _rtc = IonSDKRTC(_connector);
+    _rtc = RTC(_connector);
     _rtc.onspeaker = (Map<String, dynamic> list) {
       print('onspeaker: $list');
     };

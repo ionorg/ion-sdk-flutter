@@ -5,7 +5,7 @@ import 'package:test/test.dart';
 import 'package:uuid/uuid.dart';
 
 void main() async {
-  var connector = ion.IonBaseConnector('http://127.0.0.1:5551');
+  var connector = ion.Connector('http://127.0.0.1:5551');
   var biz = ion.IonAppRoom(connector);
 
   await biz.connect();
