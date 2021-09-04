@@ -50,10 +50,10 @@ class Transport {
               RTCIceConnectionState.RTCIceConnectionStateDisconnected)
             {
               /* TODO: implement pc.restartIce for flutter_webrtc.
-        if (pc.restartIce) {
-          // this will trigger onNegotiationNeeded
-          pc.restartIce();
-        }*/
+              if (pc.restartIce) {
+                // this will trigger onNegotiationNeeded
+                pc.restartIce();
+              }*/
             }
         };
 
@@ -124,7 +124,6 @@ class Client {
 
   Future<void> publish(LocalStream stream) async {
     await stream.publish(transports[RolePub]!.pc!);
-    await onnegotiationneeded();
   }
 
   void close() {
@@ -163,7 +162,10 @@ class Client {
             var answer = await signal.join(sid, uid, offer);
             await pc.setRemoteDescription(answer);
             transports[RolePub]!.hasRemoteDescription = true;
-            transports[RolePub]!.candidates.forEach((c) => pc.addCandidate(c));
+            transports[RolePub]!
+                .candidates
+                .forEach((c) async => await pc.addCandidate(c));
+            pc.onRenegotiationNeeded = onnegotiationneeded;
           }));
         } catch (e) {
           completer.completeError(e);

@@ -49,8 +49,6 @@ class IonSDKSFU extends IonService {
       }
     };
 
-    _sfu.transports[RolePub]!.pc!.onRenegotiationNeeded =
-        () => _sfu.onnegotiationneeded();
     _sfu.ontrack = (MediaStreamTrack track, RemoteStream stream) =>
         ontrack?.call(track, stream);
     _sfu.ondatachannel =
