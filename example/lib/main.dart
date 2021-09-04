@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:flutter_ion/flutter_ion.dart';
+import 'package:uuid/uuid.dart';
 
 void main() => runApp(MyApp());
 
@@ -12,7 +13,9 @@ class MyApp extends StatefulWidget {
 class _GetMyAppState extends State<MyApp> {
   final _localRenderer = RTCVideoRenderer();
   final List<RTCVideoRenderer> _remoteRenderers = <RTCVideoRenderer>[];
-  final Connector _connector = Connector('http://localhost:5551');
+  final Connector _connector = Connector('http://127.0.0.1:5551');
+  final _room = 'ion';
+  final _uid = Uuid().v4();
   late RTC _rtc;
   @override
   void initState() {
@@ -50,7 +53,7 @@ class _GetMyAppState extends State<MyApp> {
     };
 
     await _rtc.connect();
-    await _rtc.join('test room', 'test uid', JoinConfig());
+    await _rtc.join(_room, _uid, JoinConfig());
 
     await _localRenderer.initialize();
     // publish LocalStream

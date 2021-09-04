@@ -46,8 +46,8 @@ class TrackInfo {
 }
 
 enum TrackState {
-  NONE,
   ADD,
+  UPDATE,
   REMOVE,
 }
 
@@ -119,9 +119,6 @@ class RTC extends Service {
         _client.initialized = true;
       }
     };
-
-    _client.transports[RolePub]!.pc!.onRenegotiationNeeded =
-        () => _client.onnegotiationneeded();
     _client.ontrack = (MediaStreamTrack track, RemoteStream stream) =>
         ontrack?.call(track, stream);
     _client.ondatachannel =
@@ -203,10 +200,13 @@ class _IonSFUGRPCSignal extends Signal {
         ontrickle?.call(Trickle.fromMap(map));
         break;
       case pb.Reply_Payload.trackEvent:
-        var state = TrackState.NONE;
+        var state = TrackState.ADD;
         switch (reply.trackEvent.state) {
           case pb.TrackEvent_State.ADD:
             state = TrackState.ADD;
+            break;
+          case pb.TrackEvent_State.UPDATE:
+            state = TrackState.UPDATE;
             break;
           case pb.TrackEvent_State.REMOVE:
             state = TrackState.REMOVE;
@@ -391,8 +391,8 @@ class _IonSFUGRPCSignal extends Signal {
         ..id = track.id!
         ..kind = track.kind!
         ..muted = track.muted!
-        ..muted = !track.enabled!
-        ..streamId = stream.id!);
+        ..muted = !track.enabled
+        ..streamId = stream.id);
     }
     _tracksInfos = trackInfos;
   }
