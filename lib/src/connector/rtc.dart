@@ -255,10 +255,8 @@ class _IonSFUGRPCSignal extends Signal {
         break;
       case pb.Reply_Payload.subscription:
         RtcError? err;
-        if (reply.subscription.error != null) {
-          err = RtcError(
-              reply.subscription.error.code, reply.subscription.error.reason);
-        }
+        err = RtcError(
+            reply.subscription.error.code, reply.subscription.error.reason);
         _emitter.emit('subscription', Result(reply.subscription.success, err));
         break;
       case pb.Reply_Payload.error:

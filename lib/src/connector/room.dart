@@ -227,11 +227,9 @@ class _IonAppRoomGRPCClient extends EventEmitter {
     switch (reply.whichPayload()) {
       case pb.Reply_Payload.join:
         RoomError? err;
-        if (reply.join.error != null) {
-          err = RoomError()
-            ..code = ErrorType.values[reply.join.error.code.value]
-            ..reason = reply.join.error.reason;
-        }
+        err = RoomError()
+          ..code = ErrorType.values[reply.join.error.code.value]
+          ..reason = reply.join.error.reason;
         var room = RoomInfo()
           ..sid = reply.join.room.sid
           ..name = reply.join.room.name
