@@ -147,7 +147,7 @@ class _IonSFUGRPCSignal extends Signal {
           .then((trailers) => connector.onTrailers(service, trailers));
       connector.onError(service, e);
     });
-    _replyStream.headers
+    await _replyStream.headers
         .then((headers) => connector.onHeaders(service, headers));
     onready?.call();
   }

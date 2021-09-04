@@ -21,17 +21,17 @@ class Home extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          RaisedButton(
+          ElevatedButton(
               onPressed: () {
                 Get.to(EchoTestView(), transition: Transition.rightToLeft);
               },
               child: Text('Echo Test (ion-sfu)')),
-          RaisedButton(
+          ElevatedButton(
               onPressed: () {
                 Get.to(PubSubTestView(), transition: Transition.rightToLeft);
               },
               child: Text('Pub/Sub (ion-sfu)')),
-          RaisedButton(
+          ElevatedButton(
               onPressed: () {
                 Get.to(IonClusterView(), transition: Transition.rightToLeft);
               },

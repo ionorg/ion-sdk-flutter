@@ -104,9 +104,7 @@ class WebSocketTransportStream implements GrpcTransportStream {
 
   @override
   Future<void> terminate() async {
-    if (_channel != null) {
-      _channel.sink.add(finishSendFrame);
-    }
+    _channel.sink.add(finishSendFrame);
     _close();
   }
 }

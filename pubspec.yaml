@@ -9,13 +9,13 @@ dependencies:
   events2: ^1.0.0
   flutter_webrtc: ^0.6.5
   grpc: ^3.0.0
-  pedantic: ^1.9.0
   protobuf: ^2.0.0
   sdp_transform: ^0.3.0
-  uuid: ^3.0.3 
-  web_socket_channel: ^2.0.0
+  uuid: ^3.0.4
+  web_socket_channel: ^2.1.0
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  test: ^1.6.7
+  pedantic: ^1.11.1
+  test: ^1.16.8

@@ -94,7 +94,7 @@ class Client {
       }
     };
 
-    client.signal.connect();
+    await client.signal.connect();
     return client;
   }
 
