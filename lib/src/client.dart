@@ -157,7 +157,7 @@ class Client {
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
         try {
-          unawaited(pc.createOffer().then((offer) async {
+          unawaited(pc.createOffer({}).then((offer) async {
             await pc.setLocalDescription(offer);
             var answer = await signal.join(sid, uid, offer);
             await pc.setRemoteDescription(answer);
@@ -213,7 +213,7 @@ class Client {
     try {
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
-        var offer = await pc.createOffer();
+        var offer = await pc.createOffer({});
         setPreferredCodec(offer);
         await pc.setLocalDescription(offer);
         var answer = await signal.offer(offer);
