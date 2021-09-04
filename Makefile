@@ -6,7 +6,6 @@ proto-gen-from-docker:
 
 proto:
 	mkdir -p lib/src/_library
-	protoc ./ion/proto/ion/ion.proto -I./ion --dart_out=grpc:./lib/src/_library
 	protoc ./ion/proto/rtc/rtc.proto -I./ion --dart_out=grpc:./lib/src/_library
 	protoc ./ion/apps/room/proto/room.proto -I./ion --dart_out=grpc:./lib/src/_library
 
