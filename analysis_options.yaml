@@ -30,6 +30,7 @@ linter:
     - void_checks
   
 analyzer:
+  exclude: [example/**/*.dart]
   errors:
     # treat missing required parameters as a warning (not a hint)
     missing_required_param: warning
