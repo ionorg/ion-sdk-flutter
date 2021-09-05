@@ -141,7 +141,7 @@ class Client {
         ontrack?.call(ev.track, remote);
       };
       transports[RoleSub]!.pc!.onDataChannel = (RTCDataChannel channel) {
-        if (true /* TODO(implement RTCDataChannel.label): channel.label == API_CHANNEL*/) {
+        if (channel.label == API_CHANNEL) {
           transports[RoleSub]!.api = channel;
           transports[RoleSub]!.onapiopen?.call();
           final json = JsonDecoder();
@@ -190,17 +190,11 @@ class Client {
     try {
       var pc = transports[RoleSub]!.pc;
       if (pc != null) {
-        if (WebRTC.platformIsWeb || WebRTC.platformIsAndroid) {
-          //description.sdp = description.sdp?.replaceAll('640c1f', '42e01f');
-        }
         await pc.setRemoteDescription(description);
         transports[RoleSub]!.candidates.forEach((c) => pc.addCandidate(c));
         transports[RoleSub]!.candidates = [];
         var answer = await pc.createAnswer({});
         await pc.setLocalDescription(answer);
-        if (WebRTC.platformIsWeb || WebRTC.platformIsAndroid) {
-          //answer.sdp = answer.sdp?.replaceAll('42e01f', '640c1f');
-        }
         signal.answer(answer);
       }
     } catch (err) {

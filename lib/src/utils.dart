@@ -70,10 +70,10 @@ class CodecCapabilitySelector {
     if (mline == null) {
       return null;
     }
-    var rtcpFb = mline['rtcpFb'] as List<dynamic>;
-    var fmtp = mline['fmtp'] as List<dynamic>;
+    var rtcpFb = mline['rtcpFb'] ?? <dynamic>[];
+    var fmtp = mline['fmtp'] ?? <dynamic>[];
     var payloads = (mline['payloads'] as String).split(' ');
-    var codecs = mline['rtp'] as List<dynamic>;
+    var codecs = mline['rtp'] ?? <dynamic>[];
     return CodecCapability(kind, payloads, codecs, fmtp, rtcpFb);
   }
 
