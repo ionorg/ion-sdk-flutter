@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart' as grpc;
+import 'package:pedantic/pedantic.dart';
 import 'package:uuid/uuid.dart';
 
 import '../_library/proto/sfu/sfu.pbgrpc.dart' as pb;
@@ -145,8 +146,8 @@ class _IonSFUGRPCSignal extends Signal {
           .then((trailers) => connector.onTrailers(service, trailers));
       connector.onError(service, e);
     });
-    await _replyStream.headers
-        .then((headers) => connector.onHeaders(service, headers));
+    unawaited(_replyStream.headers
+        .then((headers) => connector.onHeaders(service, headers)));
     onready?.call();
   }
 
@@ -169,13 +170,11 @@ class _IonSFUGRPCSignal extends Signal {
         ..uid = uid);
     _requestStream.add(request);
 
-    Function(String, dynamic) handler;
-    handler = (respid, desc) {
-      if (respid == id) {
-        completer.complete(desc);
-      }
+    Function(RTCSessionDescription) handler;
+    handler = (desc) {
+      completer.complete(desc);
     };
-    _emitter.once('description', handler);
+    _emitter.once('join-reply', handler);
     return completer.future as Future<RTCSessionDescription>;
   }
 

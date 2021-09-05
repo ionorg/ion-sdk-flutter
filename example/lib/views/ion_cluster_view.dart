@@ -40,10 +40,9 @@ class PubSubController extends GetxController {
     };
 
     _biz?.onJoin = (bool success, String reason) async {
-      print('onJoin success = $success, reason = $reason');
+      print('biz onJoin success = $success, reason = $reason');
 
       if (success) {
-        await _sfu?.connect();
         await _sfu?.join(_room, _uuid);
 
         var localStream = await ion.LocalStream.getUserMedia(
@@ -96,6 +95,7 @@ class PubSubController extends GetxController {
     };
 
     await _biz?.connect();
+    await _sfu?.connect();
 
     _biz?.join(sid: _room, uid: _uuid, info: _info);
 

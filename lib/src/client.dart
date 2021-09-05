@@ -93,8 +93,7 @@ class Client {
         client.initialized = true;
       }
     };
-
-    await client.signal.connect();
+    unawaited(client.signal.connect());
     return client;
   }
 
