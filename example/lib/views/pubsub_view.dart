@@ -9,42 +9,41 @@ import 'common.dart';
 
 class PubSubController extends GetxController {
   List<Participant> participants = <Participant>[].obs;
+  late ion.IonBaseConnector _connector;
+  ion.IonSDKSFU? _rtc;
+  final String _uid = Uuid().v4();
 
   @override
   @mustCallSuper
   void onInit() {
     super.onInit();
+    _connector = ion.IonBaseConnector(Config.ion_sfu_url);
   }
 
-  ion.Signal? _signal;
-  ion.Client? _client;
-  final String _uuid = Uuid().v4();
-
   void pubsub() async {
-    if (_client == null) {
-      _signal ??= ion.GRPCWebSignal(Config.ion_sfu_url);
-      _client = await ion.Client.create(
-          sid: 'test session', uid: _uuid, signal: _signal!);
-      _client?.ontrack = (track, ion.RemoteStream remoteStream) async {
+    if (_rtc == null) {
+      _rtc = new ion.IonSDKSFU(_connector);
+      _rtc!.ontrack = (track, ion.RemoteStream remoteStream) async {
         if (track.kind == 'video') {
           print('ontrack: remote stream => ${remoteStream.id}');
           participants.add(Participant(remoteStream, true)..initialize());
         }
       };
+      await _rtc!.connect();
+      await _rtc!.join('test session', _uid);
       var localStream = await ion.LocalStream.getUserMedia(
           constraints: Config.defaultConstraints);
-      await _client?.publish(localStream);
+      await _rtc!.publish(localStream);
       participants.add(Participant(localStream, false)..initialize());
     } else {
-      _client?.close();
+      _rtc?.close();
 
       participants.forEach((element) {
         element.dispose();
       });
 
       participants.clear();
-      _client = null;
-      _signal = null;
+      _rtc = null;
     }
   }
 }

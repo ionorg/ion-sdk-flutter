@@ -140,7 +140,7 @@ class Client {
         ontrack?.call(ev.track, remote);
       };
       transports[RoleSub]!.pc!.onDataChannel = (RTCDataChannel channel) {
-        if (true /* TODO(implement RTCDataChannel.label): channel.label == API_CHANNEL*/) {
+        if (channel.label == API_CHANNEL) {
           transports[RoleSub]!.api = channel;
           transports[RoleSub]!.onapiopen?.call();
           final json = JsonDecoder();

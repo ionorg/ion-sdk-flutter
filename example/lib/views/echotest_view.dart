@@ -12,11 +12,9 @@ class EchoTestController extends GetxController {
   Rx<RTCVideoRenderer> localRenderer = RTCVideoRenderer().obs;
   Rx<RTCVideoRenderer> remoteRenderer = RTCVideoRenderer().obs;
   RxInt subBitrate = 0.obs;
-
-  ion.Signal? _signalLocal;
-  ion.Signal? _signalRemote;
-  ion.Client? _clientPub;
-  ion.Client? _clientSub;
+  late ion.IonBaseConnector _baseConnector;
+  ion.IonSDKSFU? _pub;
+  ion.IonSDKSFU? _sub;
   ion.LocalStream? _localStream;
   ion.RemoteStream? _remoteStream;
   Timer? _timer;
@@ -35,18 +33,18 @@ class EchoTestController extends GetxController {
     localRenderer.value.onResize = () => localRenderer.refresh();
     remoteRenderer.value.initialize();
     remoteRenderer.value.onResize = () => remoteRenderer.refresh();
+    _baseConnector = ion.IonBaseConnector(Config.ion_sfu_url);
   }
 
   Future<void> echotest() async {
     try {
-      if (_clientPub == null) {
-        _signalLocal ??= ion.GRPCWebSignal(Config.ion_sfu_url);
-        _clientPub = await ion.Client.create(
-            sid: _sid, uid: _uid1, signal: _signalLocal!);
+      if (_pub == null) {
+        _pub = ion.IonSDKSFU(_baseConnector);
+        await _pub?.connect();
+        await _pub?.join(_sid, _uid1);
         _localStream = await ion.LocalStream.getUserMedia(
             constraints: Config.defaultConstraints);
-        await _clientPub?.publish(_localStream!);
-
+        await _pub?.publish(_localStream!);
         localSrcObject = _localStream!.stream;
       } else {
         await _localStream!.unpublish();
@@ -55,16 +53,14 @@ class EchoTestController extends GetxController {
         });
         await _localStream!.stream.dispose();
         _localStream = null;
-        _clientPub!.close();
-        _clientPub = null;
+        _pub!.close();
+        _pub = null;
         localSrcObject = null;
       }
 
-      if (_clientSub == null) {
-        _signalRemote ??= ion.GRPCWebSignal(Config.ion_sfu_url);
-        _clientSub = await ion.Client.create(
-            sid: _sid, uid: _uid2, signal: _signalRemote!);
-        _clientSub?.ontrack = (track, ion.RemoteStream stream) {
+      if (_sub == null) {
+        _sub = ion.IonSDKSFU(_baseConnector);
+        _sub?.ontrack = (track, ion.RemoteStream stream) {
           if (track.kind == 'video') {
             print('ontrack: stream => ${stream.id}');
             remoteSrcObject = stream.stream;
@@ -72,12 +68,15 @@ class EchoTestController extends GetxController {
             getStats(track);
           }
         };
-        _clientSub?.onspeaker = (Map<String, dynamic> speakers) {
+        _sub?.onspeaker = (Map<String, dynamic> speakers) {
           print('onspeaker: $speakers');
         };
+
+        await _sub?.connect();
+        await _sub?.join(_sid, _uid2);
       } else {
-        _clientSub?.close();
-        _clientSub = null;
+        _sub?.close();
+        _sub = null;
         remoteSrcObject = null;
         _timer?.cancel();
       }
@@ -100,7 +99,7 @@ class EchoTestController extends GetxController {
     var bytesPrev;
     var timestampPrev;
     _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-      var results = await _clientSub?.getSubStats(track);
+      var results = await _sub?.getSubStats(track);
       results!.forEach((report) {
         var now = report.timestamp;
         var bitrate;
