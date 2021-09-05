@@ -1,6 +1,13 @@
 # Changelog
 
 --------------------------------------------
+[0.5.4] - 2020.09.05
+
+* Fix bug in `onnegotiationneeded` event.
+* Fixes analysis error and updates dependencies (#46)
+* Fixes analysis errors
+* Updates all dependencies to latest version
+
 [0.5.3] - 2020.08.14
 
 * Fix pubsub test; some update
