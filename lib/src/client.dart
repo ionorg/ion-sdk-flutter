@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:pedantic/pedantic.dart';
 
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
@@ -93,7 +92,7 @@ class Client {
         client.initialized = true;
       }
     };
-    unawaited(client.signal.connect());
+    unAwaited(client.signal.connect());
     return client;
   }
 
@@ -156,7 +155,7 @@ class Client {
       var pc = transports[RolePub]!.pc;
       if (pc != null) {
         try {
-          unawaited(pc.createOffer({}).then((offer) async {
+          unAwaited(pc.createOffer({}).then((offer) async {
             await pc.setLocalDescription(offer);
             var answer = await signal.join(sid, uid, offer);
             await pc.setRemoteDescription(answer);

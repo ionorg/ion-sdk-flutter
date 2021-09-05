@@ -98,3 +98,5 @@ class CodecCapabilitySelector {
         orElse: () => null);
   }
 }
+
+void unAwaited(Future<void>? future) {}

@@ -4,13 +4,13 @@ import 'dart:convert';
 import 'package:events2/events2.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart' as grpc;
-import 'package:pedantic/pedantic.dart';
 import 'package:uuid/uuid.dart';
 
 import '../_library/proto/sfu/sfu.pbgrpc.dart' as pb;
 import '../client.dart';
 import '../signal/signal.dart';
 import '../stream.dart';
+import '../utils.dart';
 import 'ion.dart';
 
 class IonSDKSFU extends IonService {
@@ -146,7 +146,7 @@ class _IonSFUGRPCSignal extends Signal {
           .then((trailers) => connector.onTrailers(service, trailers));
       connector.onError(service, e);
     });
-    unawaited(_replyStream.headers
+    unAwaited(_replyStream.headers
         .then((headers) => connector.onHeaders(service, headers)));
     onready?.call();
   }
