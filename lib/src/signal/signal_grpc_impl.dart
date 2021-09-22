@@ -13,9 +13,11 @@ import 'grpc-web/_channel.dart'
 import 'signal.dart';
 
 class GRPCWebSignal extends Signal {
-  GRPCWebSignal(this._uri) {
+  GRPCWebSignal(this._uri,
+      {List<int>? certificates, String? authority, String? password}) {
     var uri = Uri.parse(_uri);
-    var channel = createChannel(uri.host, uri.port, uri.scheme == 'https');
+    var channel = createChannel(uri.host, uri.port, uri.scheme == 'https',
+        certificates: certificates, authority: authority, password: password);
     _client = pb.SFUClient(channel);
     _requestStream = StreamController<pb.SignalRequest>();
   }
