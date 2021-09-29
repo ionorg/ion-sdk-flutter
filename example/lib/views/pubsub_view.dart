@@ -36,13 +36,11 @@ class PubSubController extends GetxController {
       await _rtc!.publish(localStream);
       participants.add(Participant(localStream, false)..initialize());
     } else {
-      _rtc?.close();
-
       participants.forEach((element) {
         element.dispose();
       });
-
       participants.clear();
+      _rtc?.close();
       _rtc = null;
     }
   }
