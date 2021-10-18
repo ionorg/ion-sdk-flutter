@@ -259,7 +259,7 @@ class Reply extends $pb.GeneratedMessage {
         3, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'sendMessage',
         protoName: 'sendMessage', subBuilder: SendMessageReply.create)
     ..aOM<PeerEvent>(
-        4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Peer',
+        4, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peer',
         protoName: 'Peer', subBuilder: PeerEvent.create)
     ..aOM<Message>(5, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'message', subBuilder: Message.create)
     ..aOM<Disconnect>(6, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'disconnect', subBuilder: Disconnect.create)
@@ -1778,7 +1778,7 @@ class GetPeersReply extends $pb.GeneratedMessage {
         subBuilder: Error.create)
     ..pc<Peer>(
         3,
-        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Peers',
+        const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peers',
         $pb.PbFieldType.PM,
         protoName: 'Peers',
         subBuilder: Peer.create)
@@ -2267,7 +2267,7 @@ class PeerEvent extends $pb.GeneratedMessage {
               : 'room'),
       createEmptyInstance: create)
     ..aOM<Peer>(
-        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'Peer',
+        1, const $core.bool.fromEnvironment('protobuf.omit_field_names') ? '' : 'peer',
         protoName: 'Peer', subBuilder: Peer.create)
     ..e<PeerState>(
         2,

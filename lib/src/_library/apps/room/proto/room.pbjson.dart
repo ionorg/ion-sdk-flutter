@@ -167,7 +167,7 @@ const Reply$json = const {
       '5': 11,
       '6': '.room.PeerEvent',
       '9': 0,
-      '10': 'Peer'
+      '10': 'peer'
     },
     const {
       '1': 'message',
@@ -204,7 +204,7 @@ const Reply$json = const {
 
 /// Descriptor for `Reply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List replyDescriptor = $convert.base64Decode(
-    'CgVSZXBseRIlCgRqb2luGAEgASgLMg8ucm9vbS5Kb2luUmVwbHlIAFIEam9pbhIoCgVsZWF2ZRgCIAEoCzIQLnJvb20uTGVhdmVSZXBseUgAUgVsZWF2ZRI6CgtzZW5kTWVzc2FnZRgDIAEoCzIWLnJvb20uU2VuZE1lc3NhZ2VSZXBseUgAUgtzZW5kTWVzc2FnZRIlCgRQZWVyGAQgASgLMg8ucm9vbS5QZWVyRXZlbnRIAFIEUGVlchIpCgdtZXNzYWdlGAUgASgLMg0ucm9vbS5NZXNzYWdlSABSB21lc3NhZ2USMgoKZGlzY29ubmVjdBgGIAEoCzIQLnJvb20uRGlzY29ubmVjdEgAUgpkaXNjb25uZWN0EiAKBHJvb20YByABKAsyCi5yb29tLlJvb21IAFIEcm9vbUIJCgdwYXlsb2Fk');
+    'CgVSZXBseRIlCgRqb2luGAEgASgLMg8ucm9vbS5Kb2luUmVwbHlIAFIEam9pbhIoCgVsZWF2ZRgCIAEoCzIQLnJvb20uTGVhdmVSZXBseUgAUgVsZWF2ZRI6CgtzZW5kTWVzc2FnZRgDIAEoCzIWLnJvb20uU2VuZE1lc3NhZ2VSZXBseUgAUgtzZW5kTWVzc2FnZRIlCgRQZWVyGAQgASgLMg8ucm9vbS5QZWVyRXZlbnRIAFIEcGVlchIpCgdtZXNzYWdlGAUgASgLMg0ucm9vbS5NZXNzYWdlSABSB21lc3NhZ2USMgoKZGlzY29ubmVjdBgGIAEoCzIQLnJvb20uRGlzY29ubmVjdEgAUgpkaXNjb25uZWN0EiAKBHJvb20YByABKAsyCi5yb29tLlJvb21IAFIEcm9vbUIJCgdwYXlsb2Fk');
 @$core.Deprecated('Use createRoomRequestDescriptor instead')
 const CreateRoomRequest$json = const {
   '1': 'CreateRoomRequest',
@@ -492,14 +492,14 @@ const GetPeersReply$json = const {
       '4': 3,
       '5': 11,
       '6': '.room.Peer',
-      '10': 'Peers'
+      '10': 'peers'
     },
   ],
 };
 
 /// Descriptor for `GetPeersReply`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List getPeersReplyDescriptor = $convert.base64Decode(
-    'Cg1HZXRQZWVyc1JlcGx5EhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSIQoFZXJyb3IYAiABKAsyCy5yb29tLkVycm9yUgVlcnJvchIgCgVQZWVycxgDIAMoCzIKLnJvb20uUGVlclIFUGVlcnM=');
+    'Cg1HZXRQZWVyc1JlcGx5EhgKB3N1Y2Nlc3MYASABKAhSB3N1Y2Nlc3MSIQoFZXJyb3IYAiABKAsyCy5yb29tLkVycm9yUgVlcnJvchIgCgVQZWVycxgDIAMoCzIKLnJvb20uUGVlclIFcGVlcnM=');
 @$core.Deprecated('Use messageDescriptor instead')
 const Message$json = const {
   '1': 'Message',
@@ -574,7 +574,7 @@ const PeerEvent$json = const {
       '4': 1,
       '5': 11,
       '6': '.room.Peer',
-      '10': 'Peer'
+      '10': 'peer'
     },
     const {
       '1': 'state',
@@ -589,7 +589,7 @@ const PeerEvent$json = const {
 
 /// Descriptor for `PeerEvent`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List peerEventDescriptor = $convert.base64Decode(
-    'CglQZWVyRXZlbnQSHgoEUGVlchgBIAEoCzIKLnJvb20uUGVlclIEUGVlchIlCgVzdGF0ZRgCIAEoDjIPLnJvb20uUGVlclN0YXRlUgVzdGF0ZQ==');
+    'CglQZWVyRXZlbnQSHgoEUGVlchgBIAEoCzIKLnJvb20uUGVlclIEcGVlchIlCgVzdGF0ZRgCIAEoDjIPLnJvb20uUGVlclN0YXRlUgVzdGF0ZQ==');
 @$core.Deprecated('Use updateRoomRequestDescriptor instead')
 const UpdateRoomRequest$json = const {
   '1': 'UpdateRoomRequest',
