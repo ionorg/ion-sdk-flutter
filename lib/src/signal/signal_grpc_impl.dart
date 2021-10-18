@@ -6,7 +6,7 @@ import 'package:flutter_webrtc/flutter_webrtc.dart';
 import 'package:grpc/grpc.dart';
 import 'package:uuid/uuid.dart';
 
-import '../_library/proto/sfu/sfu.pbgrpc.dart' as pb;
+import '../_library/proto/rtc/rtc.pbgrpc.dart' as pb;
 
 import 'grpc-web/_channel.dart'
     if (dart.library.html) 'grpc-web/_channel_html.dart';
@@ -16,8 +16,8 @@ class GRPCWebSignal extends Signal {
   GRPCWebSignal(this._uri) {
     var uri = Uri.parse(_uri);
     var channel = createChannel(uri.host, uri.port, uri.scheme == 'https');
-    _client = pb.SFUClient(channel);
-    _requestStream = StreamController<pb.SignalRequest>();
+    _client = pb.RTCClient(channel);
+    _requestStream = StreamController<pb.Request>();
   }
 
   final String _uri;
@@ -25,19 +25,19 @@ class GRPCWebSignal extends Signal {
   final JsonEncoder _jsonEncoder = JsonEncoder();
   final Uuid _uuid = Uuid();
   final EventEmitter _emitter = EventEmitter();
-  late pb.SFUClient _client;
-  late StreamController<pb.SignalRequest> _requestStream;
-  late ResponseStream<pb.SignalReply> _replyStream;
+  late pb.RTCClient _client;
+  late StreamController<pb.Request> _requestStream;
+  late ResponseStream<pb.Reply> _replyStream;
 
-  void _onSignalReply(pb.SignalReply reply) {
+  void _onSignalReply(pb.Reply reply) {
     switch (reply.whichPayload()) {
-      case pb.SignalReply_Payload.join:
+      case pb.Reply_Payload.join:
         var map =
             _jsonDecoder.convert(String.fromCharCodes(reply.join.description));
         var desc = RTCSessionDescription(map['sdp'], map['type']);
         _emitter.emit('join-reply', desc);
         break;
-      case pb.SignalReply_Payload.description:
+      case pb.Reply_Payload.description:
         var map = _jsonDecoder.convert(String.fromCharCodes(reply.description));
         var desc = RTCSessionDescription(map['sdp'], map['type']);
         if (desc.type == 'offer') {
@@ -46,16 +46,16 @@ class GRPCWebSignal extends Signal {
           _emitter.emit('description', reply.id, desc);
         }
         break;
-      case pb.SignalReply_Payload.trickle:
+      case pb.Reply_Payload.trickle:
         var map = {
           'target': reply.trickle.target.value,
           'candidate': _jsonDecoder.convert(reply.trickle.init)
         };
         ontrickle?.call(Trickle.fromMap(map));
         break;
-      case pb.SignalReply_Payload.iceConnectionState:
-      case pb.SignalReply_Payload.error:
-      case pb.SignalReply_Payload.notSet:
+      // case pb.Reply_Payload.iceConnectionState:
+      case pb.Reply_Payload.error:
+      case pb.Reply_Payload.notSet:
         break;
     }
   }
@@ -80,8 +80,8 @@ class GRPCWebSignal extends Signal {
       String sid, String uid, RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
     var id = _uuid.v4();
-    var request = pb.SignalRequest()
-      ..id = id
+    var request = pb.Request()
+      // ..id = id
       ..join = (pb.JoinRequest()
         ..description = utf8.encode(_jsonEncoder.convert(offer.toMap()))
         ..sid = sid
@@ -102,8 +102,8 @@ class GRPCWebSignal extends Signal {
   Future<RTCSessionDescription> offer(RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
     var id = _uuid.v4();
-    var request = pb.SignalRequest()
-      ..id = id
+    var request = pb.Request()
+      // ..id = id
       ..description = utf8.encode(_jsonEncoder.convert(offer.toMap()));
     _requestStream.add(request);
     Function(String, dynamic) handler;
@@ -118,16 +118,16 @@ class GRPCWebSignal extends Signal {
 
   @override
   void answer(RTCSessionDescription answer) {
-    var reply = pb.SignalRequest()
+    var reply = pb.Request()
       ..description = utf8.encode(_jsonEncoder.convert(answer.toMap()));
     _requestStream.add(reply);
   }
 
   @override
   void trickle(Trickle trickle) {
-    var reply = pb.SignalRequest()
+    var reply = pb.Request()
       ..trickle = (pb.Trickle()
-        ..target = pb.Trickle_Target.valueOf(trickle.target)!
+        ..target = pb.Target.valueOf(trickle.target)!
         ..init = _jsonEncoder.convert(trickle.candidate.toMap()));
     _requestStream.add(reply);
   }
