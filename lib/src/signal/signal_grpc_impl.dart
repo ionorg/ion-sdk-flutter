@@ -32,18 +32,15 @@ class GRPCWebSignal extends Signal {
   void _onSignalReply(pb.Reply reply) {
     switch (reply.whichPayload()) {
       case pb.Reply_Payload.join:
-        var map =
-            _jsonDecoder.convert(String.fromCharCodes(reply.join.description));
-        var desc = RTCSessionDescription(map['sdp'], map['type']);
-        _emitter.emit('join-reply', desc);
+        _emitter.emit('join-reply', reply.join.description);
         break;
       case pb.Reply_Payload.description:
-        var map = _jsonDecoder.convert(String.fromCharCodes(reply.description));
-        var desc = RTCSessionDescription(map['sdp'], map['type']);
-        if (desc.type == 'offer') {
+        var desc = RTCSessionDescription(
+            reply.description.sdp, reply.description.type);
+        if (reply.description.type == 'offer') {
           onnegotiate?.call(desc);
         } else {
-          _emitter.emit('description', reply.id, desc);
+          _emitter.emit('description', reply, reply.description);
         }
         break;
       case pb.Reply_Payload.trickle:
@@ -81,9 +78,8 @@ class GRPCWebSignal extends Signal {
     Completer completer = Completer<RTCSessionDescription>();
     var id = _uuid.v4();
     var request = pb.Request()
-      // ..id = id
       ..join = (pb.JoinRequest()
-        ..description = utf8.encode(_jsonEncoder.convert(offer.toMap()))
+        ..description = offer.toMap()
         ..sid = sid
         ..uid = uid);
     _requestStream.add(request);
@@ -102,9 +98,7 @@ class GRPCWebSignal extends Signal {
   Future<RTCSessionDescription> offer(RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
     var id = _uuid.v4();
-    var request = pb.Request()
-      // ..id = id
-      ..description = utf8.encode(_jsonEncoder.convert(offer.toMap()));
+    var request = pb.Request()..description = offer.toMap();
     _requestStream.add(request);
     Function(String, dynamic) handler;
     handler = (respid, desc) {
@@ -118,8 +112,7 @@ class GRPCWebSignal extends Signal {
 
   @override
   void answer(RTCSessionDescription answer) {
-    var reply = pb.Request()
-      ..description = utf8.encode(_jsonEncoder.convert(answer.toMap()));
+    var reply = pb.Request()..description = answer.toMap();
     _requestStream.add(reply);
   }
 
