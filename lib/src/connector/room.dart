@@ -95,11 +95,11 @@ class Disconnect {
   late String reason;
 }
 
-class IonAppRoom extends Service {
+class Room extends Service {
   @override
   String name = 'room';
   Connector connector;
-  _IonAppRoomGRPCClient? _sig;
+  _RoomGRPCClient? _sig;
   Function(Error err)? onError;
   Function(JoinResult result)? onJoin;
   Function(String reason)? onLeave;
@@ -108,14 +108,14 @@ class IonAppRoom extends Service {
   Function(RoomInfo info)? onRoomInfo;
   Function(Disconnect discon)? onDisconnect;
 
-  IonAppRoom(this.connector) {
+  Room(this.connector) {
     connector.registerService(this);
   }
 
   @override
   Future<void> connect() async {
     if (_sig == null) {
-      var sig = _IonAppRoomGRPCClient(connector, this);
+      var sig = _RoomGRPCClient(connector, this);
       sig.on('join-reply', (JoinResult result) => onJoin?.call(result));
       sig.on('leave-reply', (String reason) => onLeave?.call(reason));
       sig.on('peer-event', (PeerEvent event) => onPeerEvent?.call(event));
@@ -142,10 +142,10 @@ class IonAppRoom extends Service {
   }
 }
 
-class _IonAppRoomGRPCClient extends EventEmitter {
+class _RoomGRPCClient extends EventEmitter {
   Service service;
   Connector connector;
-  _IonAppRoomGRPCClient(this.connector, this.service) {
+  _RoomGRPCClient(this.connector, this.service) {
     _client = room.RoomSignalClient(connector.grpcClientChannel(),
         options: connector.callOptions());
     _requestStream = StreamController<pb.Request>();
