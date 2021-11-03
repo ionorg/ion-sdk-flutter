@@ -94,7 +94,9 @@ class CodecCapabilitySelector {
 
   Map<String, dynamic>? _mline(String kind) {
     var mlist = _session['media'] as List<dynamic>;
-    return mlist.singleWhere((element) => element['type'] == kind,
+    return mlist.firstWhere((element) => element['type'] == kind,
         orElse: () => null);
   }
 }
+
+void unAwaited(Future<void>? future) {}

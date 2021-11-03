@@ -13,7 +13,8 @@ import 'grpc-web/_channel.dart'
 import 'signal.dart';
 
 class GRPCWebSignal extends Signal {
-  GRPCWebSignal(this._uri) {
+  GRPCWebSignal(this._uri,
+      {List<int>? certificates, String? authority, String? password}) {
     var uri = Uri.parse(_uri);
     var channel = createChannel(uri.host, uri.port, uri.scheme == 'https');
     _client = pb.RTCClient(channel);
@@ -84,13 +85,11 @@ class GRPCWebSignal extends Signal {
         ..uid = uid);
     _requestStream.add(request);
 
-    Function(String, dynamic) handler;
-    handler = (respid, desc) {
-      if (respid == id) {
-        completer.complete(desc);
-      }
+    Function(RTCSessionDescription) handler;
+    handler = (desc) {
+      completer.complete(desc);
     };
-    _emitter.once('description', handler);
+    _emitter.once('join-reply', handler);
     return completer.future as Future<RTCSessionDescription>;
   }
 
