@@ -3,22 +3,22 @@ import 'package:grpc/grpc.dart' as grpc;
 import '../signal/grpc-web/_channel.dart'
     if (dart.library.html) '../signal/grpc-web/_channel_html.dart';
 
-abstract class IonService {
+abstract class Service {
   late String name;
   Future<void> connect();
   bool connected = false;
   void close();
 }
 
-class IonBaseConnector {
+class Connector {
   final String _uri;
   Map<String, String> metadata = <String, String>{};
   Map<String, String> trailers = <String, String>{};
-  Map<String, IonService> services = <String, IonService>{};
-  void Function(IonService service)? onopen;
-  void Function(IonService service, grpc.GrpcError? err)? onclose;
+  Map<String, Service> services = <String, Service>{};
+  void Function(Service service)? onopen;
+  void Function(Service service, grpc.GrpcError? err)? onclose;
 
-  IonBaseConnector(this._uri, {String? token}) {
+  Connector(this._uri, {String? token}) {
     if (token != null) {
       metadata['authorization'] = token;
     }
@@ -36,14 +36,14 @@ class IonBaseConnector {
   }
 
   void close() {
-    services.forEach((String name, IonService service) {
+    services.forEach((String name, Service service) {
       if (service.connected) {
         service.close();
       }
     });
   }
 
-  void onHeaders(IonService service, Map<String, String> headers) {
+  void onHeaders(Service service, Map<String, String> headers) {
     print('Received header for ${service.name}  metadata: $headers');
     // Merge metadata.
     headers.forEach((key, value) {
@@ -56,7 +56,7 @@ class IonBaseConnector {
     onopen?.call(service);
   }
 
-  void onTrailers(IonService service, Map<String, String> trailers) {
+  void onTrailers(Service service, Map<String, String> trailers) {
     print('Received trailer for ${service.name} metadata: $trailers');
     // Merge trailers.
     trailers.forEach((key, value) {
@@ -64,17 +64,17 @@ class IonBaseConnector {
     });
   }
 
-  void onClosed(IonService service) {
+  void onClosed(Service service) {
     service.connected = false;
     onclose?.call(service, null);
   }
 
-  void onError(IonService service, grpc.GrpcError err) {
+  void onError(Service service, grpc.GrpcError err) {
     service.connected = false;
     onclose?.call(service, err);
   }
 
-  void registerService(IonService service) {
+  void registerService(Service service) {
     services[service.name] = service;
   }
 }

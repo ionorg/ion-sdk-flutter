@@ -92,7 +92,7 @@ class Client {
         client.initialized = true;
       }
     };
-    unAwaited(client.signal.connect());
+    unawaited(client.signal.connect());
     return client;
   }
 
@@ -189,20 +189,12 @@ class Client {
     try {
       var pc = transports[RoleSub]!.pc;
       if (pc != null) {
-        if (WebRTC.platformIsWeb || WebRTC.platformIsAndroid) {
-          //description.sdp = description.sdp?.replaceAll('640c1f', '42e01f');
-        }
-        print('sub offer ${description.sdp}');
         await pc.setRemoteDescription(description);
         transports[RoleSub]!.candidates.forEach((c) => pc.addCandidate(c));
         transports[RoleSub]!.candidates = [];
         var answer = await pc.createAnswer({});
         await pc.setLocalDescription(answer);
-        if (WebRTC.platformIsWeb || WebRTC.platformIsAndroid) {
-          //answer.sdp = answer.sdp?.replaceAll('42e01f', '640c1f');
-        }
         signal.answer(answer);
-        print('sub answer ${answer.sdp}');
       }
     } catch (err) {
       log.error('negotiate: e => ${err.toString()}');
@@ -215,10 +207,8 @@ class Client {
       if (pc != null) {
         var offer = await pc.createOffer({});
         setPreferredCodec(offer);
-        print('pub offer ${offer.sdp}');
         await pc.setLocalDescription(offer);
         var answer = await signal.offer(offer);
-        print('pub answer ${answer.sdp}');
         await pc.setRemoteDescription(answer);
       }
     } catch (err, st) {

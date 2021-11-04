@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:flutter_ion/flutter_ion.dart';
 import 'package:flutter_webrtc/flutter_webrtc.dart';
 
 import 'client.dart';
