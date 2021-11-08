@@ -1,5 +1,5 @@
 name: flutter_ion
-version: 0.5.4
+version: 1.0.0
 description: Ion SDK for flutter, For live broadcast, video conference, etc., support mobile/deskop/web.
 homepage: https://github.com/pion/ion-sdk-flutter
 environment:

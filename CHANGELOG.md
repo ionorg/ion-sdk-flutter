@@ -1,6 +1,11 @@
 # Changelog
 
 --------------------------------------------
+[1.0.0] - 2021.11.08
+* Support ion 2.0.1
+* Update flutter webrtc v0.7.0
+* Many fix
+
 [0.5.4] - 2020.09.05
 
 * Fix bug in `onnegotiationneeded` event.
