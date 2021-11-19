@@ -54,6 +54,8 @@ class GRPCWebSignal extends Signal {
       // case pb.Reply_Payload.iceConnectionState:
       case pb.Reply_Payload.error:
       case pb.Reply_Payload.notSet:
+      case pb.Reply_Payload.subscription:
+      case pb.Reply_Payload.trackEvent:
         break;
     }
   }
@@ -77,7 +79,6 @@ class GRPCWebSignal extends Signal {
   Future<RTCSessionDescription> join(
       String sid, String uid, RTCSessionDescription offer) {
     Completer completer = Completer<RTCSessionDescription>();
-    var id = _uuid.v4();
     var request = pb.Request()
       ..join = (pb.JoinRequest()
         ..description = offer.toMap()

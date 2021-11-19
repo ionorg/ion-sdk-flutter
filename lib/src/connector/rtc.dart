@@ -131,11 +131,11 @@ class RTC extends Service {
     return _client.join(sid, uid);
   }
 
-  Future<List<StatsReport>>? getPubStats(MediaStreamTrack selector) {
+  Future<List<StatsReport>>? getPubStats(MediaStreamTrack? selector) {
     return _client.getPubStats(selector);
   }
 
-  Future<List<StatsReport>>? getSubStats(MediaStreamTrack selector) {
+  Future<List<StatsReport>>? getSubStats(MediaStreamTrack? selector) {
     return _client.getSubStats(selector);
   }
 

@@ -112,11 +112,11 @@ class Client {
   Signal signal;
   Map<int, Transport> transports = {};
 
-  Future<List<StatsReport>> getPubStats(MediaStreamTrack selector) {
+  Future<List<StatsReport>> getPubStats(MediaStreamTrack? selector) {
     return transports[RolePub]!.pc!.getStats(selector);
   }
 
-  Future<List<StatsReport>> getSubStats(MediaStreamTrack selector) {
+  Future<List<StatsReport>> getSubStats(MediaStreamTrack? selector) {
     return transports[RoleSub]!.pc!.getStats(selector);
   }
 
