@@ -89,6 +89,8 @@ class RTC extends Service {
 
   Function(TrackEvent event)? ontrackevent;
   Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
+  Function(MediaStreamTrack track, RemoteStream stream)? onAddTrack;
+  Function(MediaStreamTrack track, RemoteStream stream)? onRemoveTrack;
   Function(RTCDataChannel channel)? ondatachannel;
   Function(Map<String, dynamic> list)? onspeaker;
 
@@ -119,6 +121,10 @@ class RTC extends Service {
         _client.initialized = true;
       }
     };
+    _client.onAddTrack = (MediaStreamTrack track, RemoteStream stream) =>
+        onAddTrack?.call(track, stream);
+    _client.onRemoveTrack = (MediaStreamTrack track, RemoteStream stream) =>
+        onRemoveTrack?.call(track, stream);
     _client.ontrack = (MediaStreamTrack track, RemoteStream stream) =>
         ontrack?.call(track, stream);
     _client.ondatachannel =

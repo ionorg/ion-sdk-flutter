@@ -98,6 +98,8 @@ class Client {
 
   Map<String, dynamic> config;
   Function(MediaStreamTrack track, RemoteStream stream)? ontrack;
+  Function(MediaStreamTrack track, RemoteStream stream)? onAddTrack;
+  Function(MediaStreamTrack track, RemoteStream stream)? onRemoveTrack;
   Function(RTCDataChannel channel)? ondatachannel;
   Function(Map<String, dynamic> speakers)? onspeaker;
 
@@ -138,6 +140,16 @@ class Client {
       transports[RoleSub]!.pc!.onTrack = (RTCTrackEvent ev) {
         var remote = makeRemote(ev.streams[0], transports[RoleSub]!);
         ontrack?.call(ev.track, remote);
+      };
+      transports[RoleSub]!.pc!.onAddTrack =
+          (MediaStream stream, MediaStreamTrack track) {
+        var remote = makeRemote(stream, transports[RoleSub]!);
+        onAddTrack?.call(track, remote);
+      };
+      transports[RoleSub]!.pc!.onRemoveTrack =
+          (MediaStream stream, MediaStreamTrack track) {
+        var remote = makeRemote(stream, transports[RoleSub]!);
+        onRemoveTrack?.call(track, remote);
       };
       transports[RoleSub]!.pc!.onDataChannel = (RTCDataChannel channel) {
         if (channel.label == API_CHANNEL) {
