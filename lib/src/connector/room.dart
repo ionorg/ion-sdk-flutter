@@ -136,6 +136,8 @@ class Room extends Service {
 
   void message(Message message) => _sig?.sendMessage(message);
 
+  void updatePeer(Peer peer) => _sig?.updatePeer(peer);
+
   @override
   void close() {
     _sig?.close();
@@ -149,9 +151,12 @@ class _RoomGRPCClient extends EventEmitter {
     _client = room.RoomSignalClient(connector.grpcClientChannel(),
         options: connector.callOptions());
     _requestStream = StreamController<pb.Request>();
+    _serviceClient = room.RoomServiceClient(connector.grpcClientChannel(),
+        options: connector.callOptions());
   }
 
   late room.RoomSignalClient _client;
+  late room.RoomServiceClient _serviceClient;
   late StreamController<pb.Request> _requestStream;
   late grpc.ResponseStream<pb.Reply> _replyStream;
 
@@ -221,6 +226,22 @@ class _RoomGRPCClient extends EventEmitter {
         payload: msg.payload,
       ));
     _requestStream.add(request);
+  }
+
+  void updatePeer(Peer peer) async {
+    var resp = await _serviceClient.updatePeer(pb.UpdatePeerRequest(
+      peer: pb.Peer()
+        ..uid = peer.uid
+        ..sid = peer.sid
+        ..displayName = peer.displayname
+        ..extraInfo = peer.extrainfo
+        ..role = pb.Role.values[peer.role.index]
+        ..protocol = pb.Protocol.values[peer.protocol.index]
+        ..avatar = peer.avatar
+        ..vendor = peer.vendor
+        ..direction = pb.Peer_Direction.values[peer.direction.index],
+    ));
+    print('pion updatepeer: ${resp.error}');
   }
 
   void _onSignalReply(pb.Reply reply) {
