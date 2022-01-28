@@ -229,7 +229,7 @@ class _RoomGRPCClient extends EventEmitter {
   }
 
   void updatePeer(Peer peer) async {
-    var resp = await _serviceClient.updatePeer(pb.UpdatePeerRequest(
+    await _serviceClient.updatePeer(pb.UpdatePeerRequest(
       peer: pb.Peer()
         ..uid = peer.uid
         ..sid = peer.sid
@@ -241,7 +241,6 @@ class _RoomGRPCClient extends EventEmitter {
         ..vendor = peer.vendor
         ..direction = pb.Peer_Direction.values[peer.direction.index],
     ));
-    print('pion updatepeer: ${resp.error}');
   }
 
   void _onSignalReply(pb.Reply reply) {
