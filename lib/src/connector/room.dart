@@ -134,7 +134,7 @@ class Room extends Service {
 
   void leave(String uid) => _sig?.leave(uid);
 
-  void message(Message message) => _sig?.sendMessage(message);
+  void message(String sid, Message message) => _sig?.sendMessage(sid, message);
 
   void updatePeer(Peer peer) => _sig?.updatePeer(peer);
 
@@ -216,15 +216,16 @@ class _RoomGRPCClient extends EventEmitter {
     once('leave-reply', handler);
   }
 
-  void sendMessage(Message msg) async {
+  void sendMessage(String sid, Message msg) async {
     var request = pb.Request()
       ..sendMessage = pb.SendMessageRequest(
+          sid: sid,
           message: pb.Message(
-        from: msg.from,
-        to: msg.to,
-        type: msg.type,
-        payload: msg.payload,
-      ));
+            from: msg.from,
+            to: msg.to,
+            type: msg.type,
+            payload: msg.payload,
+          ));
     _requestStream.add(request);
   }
 
