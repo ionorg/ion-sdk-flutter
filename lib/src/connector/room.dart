@@ -129,7 +129,7 @@ class Room extends Service {
   }
 
   Future<JoinResult>? join({required Peer peer, String? password}) {
-    _sig?.join(peer: peer, password: password);
+    return _sig?.join(peer: peer, password: password);
   }
 
   void leave(String uid) => _sig?.leave(uid);
