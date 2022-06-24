@@ -7,12 +7,12 @@ environment:
 
 dependencies:
   events2: ^1.0.0
-  flutter_webrtc: ^0.7.0
-  grpc: ^3.0.0
-  protobuf: ^2.0.0
+  flutter_webrtc: ^0.8.9
+  grpc: ^3.0.2
+  protobuf: ^2.1.0
   sdp_transform: ^0.3.2
-  uuid: ^3.0.4
-  web_socket_channel: ^2.1.0
+  uuid: ^3.0.6
+  web_socket_channel: ^2.2.0
 
 dev_dependencies:
   flutter_test:
