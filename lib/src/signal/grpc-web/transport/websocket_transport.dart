@@ -3,11 +3,9 @@ import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:grpc/grpc.dart';
-import 'package:grpc/src/client/call.dart';
 import 'package:grpc/src/client/connection.dart';
 import 'package:grpc/src/client/transport/transport.dart';
 import 'package:grpc/src/client/transport/web_streams.dart';
-import 'package:grpc/src/shared/message.dart';
 import 'package:web_socket_channel/html.dart';
 
 class WebSocketTransportStream implements GrpcTransportStream {
