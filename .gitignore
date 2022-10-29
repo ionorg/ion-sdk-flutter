@@ -4,3 +4,5 @@
 pubspec.lock
 example/.flutter-plugins-dependencies
 .DS_Store
+.flutter-plugins
+.flutter-plugins-dependencies

@@ -129,12 +129,14 @@ class Room extends Service {
   }
 
   Future<JoinResult>? join({required Peer peer, String? password}) {
-    _sig?.join(peer: peer, password: password);
+    return _sig?.join(peer: peer, password: password);
   }
 
   void leave(String uid) => _sig?.leave(uid);
 
-  void message(Message message) => _sig?.sendMessage(message);
+  void message(String sid, Message message) => _sig?.sendMessage(sid, message);
+
+  void updatePeer(Peer peer) => _sig?.updatePeer(peer);
 
   @override
   void close() {
@@ -149,9 +151,12 @@ class _RoomGRPCClient extends EventEmitter {
     _client = room.RoomSignalClient(connector.grpcClientChannel(),
         options: connector.callOptions());
     _requestStream = StreamController<pb.Request>();
+    _serviceClient = room.RoomServiceClient(connector.grpcClientChannel(),
+        options: connector.callOptions());
   }
 
   late room.RoomSignalClient _client;
+  late room.RoomServiceClient _serviceClient;
   late StreamController<pb.Request> _requestStream;
   late grpc.ResponseStream<pb.Reply> _replyStream;
 
@@ -211,16 +216,32 @@ class _RoomGRPCClient extends EventEmitter {
     once('leave-reply', handler);
   }
 
-  void sendMessage(Message msg) async {
+  void sendMessage(String sid, Message msg) async {
     var request = pb.Request()
       ..sendMessage = pb.SendMessageRequest(
+          sid: sid,
           message: pb.Message(
-        from: msg.from,
-        to: msg.to,
-        type: msg.type,
-        payload: msg.payload,
-      ));
+            from: msg.from,
+            to: msg.to,
+            type: msg.type,
+            payload: msg.payload,
+          ));
     _requestStream.add(request);
+  }
+
+  void updatePeer(Peer peer) async {
+    await _serviceClient.updatePeer(pb.UpdatePeerRequest(
+      peer: pb.Peer()
+        ..uid = peer.uid
+        ..sid = peer.sid
+        ..displayName = peer.displayname
+        ..extraInfo = peer.extrainfo
+        ..role = pb.Role.values[peer.role.index]
+        ..protocol = pb.Protocol.values[peer.protocol.index]
+        ..avatar = peer.avatar
+        ..vendor = peer.vendor
+        ..direction = pb.Peer_Direction.values[peer.direction.index],
+    ));
   }
 
   void _onSignalReply(pb.Reply reply) {
