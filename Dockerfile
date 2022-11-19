@@ -1,4 +1,4 @@
-FROM debian:stretch
+FROM debian:bullseye
 
 ENV DART_VERSION=2.12.4
 
